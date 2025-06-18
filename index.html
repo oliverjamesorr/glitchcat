@@ -32,7 +32,7 @@
 
         .letter {
             font-weight: bold;
-            font-size: 24px;
+            font-size: 25px;
         }
     </style>
 </head>
@@ -46,9 +46,9 @@
 
     <script>
         function generateRandomNumber() {
-            const number = Math.floor(Math.random() * 999999) + 1;
+            const number = Math.floor(Math.random() * 9999999) + 1;
             let output = `Randomly selected number: ${number}\n`;
-            output += `Did you know that the number ${number} is a random choice from a list of numbers 1 to 1,000,000?\n`;
+            output += `Did you know that the number ${number} is a random choice from a list of numbers 1 to 10,000,000?\n`;
             output += "I hope you find this number interesting!\n";
             output += "I hope you find this game cool!\n";
             output += "I hope that you enjoyed this simulation of...\n";
@@ -59,6 +59,67 @@
             }
 
             document.getElementById("output").textContent = output;
+        }
+    </script>
+
+</body>
+
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Random Word Generator (Full Dictionary)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+        }
+
+        #word {
+            margin-top: 30px;
+            font-size: 2em;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Random Word Generator</h1>
+    <button onclick="generateWord()">Generate Word</button>
+    <div id="word">Loading dictionary...</div>
+
+    <script>
+        let words = [];
+
+        // Load words from GitHub
+        fetch('https://raw.githubusercontent.com/dwyl/english-words/master/words.txt')
+            .then(response => response.text())
+            .then(text => {
+                words = text.split('\n').filter(w => w.length > 0);
+                document.getElementById('word').textContent = "Click the button!";
+            })
+            .catch(error => {
+                document.getElementById('word').textContent = "Failed to load dictionary.";
+                console.error("Error loading dictionary:", error);
+            });
+
+        function generateWord() {
+            if (words.length === 0) {
+                document.getElementById('word').textContent = "Dictionary not loaded yet.";
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * words.length);
+            document.getElementById('word').textContent = words[randomIndex];
         }
     </script>
 
