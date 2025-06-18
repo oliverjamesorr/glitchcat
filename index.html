@@ -12,3 +12,56 @@
 </body>
 
 </html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Randomness Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #0099ff;
+        }
+
+        #output {
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+
+        .letter {
+            font-weight: bold;
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Random Number Generator:</h1>
+    <button onclick="generateRandomNumber()">Click to Generate</button>
+
+    <div id="output"></div>
+
+    <script>
+        function generateRandomNumber() {
+            const number = Math.floor(Math.random() * 999999) + 1;
+            let output = `Randomly selected number: ${number}\n`;
+            output += `Did you know that the number ${number} is a random choice from a list of numbers 1 to 1,000,000?\n`;
+            output += "I hope you find this number interesting!\n";
+            output += "I hope you find this game cool!\n";
+            output += "I hope that you enjoyed this simulation of...\n";
+
+            const word = "randomness";
+            for (let i = 0; i < word.length; i++) {
+                output += word[i] + "\n";
+            }
+
+            document.getElementById("output").textContent = output;
+        }
+    </script>
+
+</body>
+
+</html>
