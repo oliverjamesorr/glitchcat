@@ -3,212 +3,526 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Catch the Squares Advanced – Final Game</title>
+    <title>Gravity Flip Platformer</title>
     <style>
         body {
+            margin: 0;
             background: #111;
+            overflow: hidden;
+            font-family: sans-serif;
+            color: white;
+        }
+
+        canvas {
+            display: block;
+            background: var(--bg, #222);
+        }
+
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 6px;
+            z-index: 2;
+        }
+
+        select {
+            background: #444;
+            color: white;
+            border: 1px solid #666;
+            padding: 2px 5px;
+        }
+
+        #helpModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #helpContent {
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            width: 400px;
+            max-width: 90%;
+            font-family: monospace;
+            box-shadow: 0 0 10px #000;
+        }
+
+        #helpContent button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background: #555;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #levelIntro {
+            position: absolute;
+            top: 25%;
+            width: 100%;
+            text-align: center;
             color: white;
             font-family: sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        h1 {
-            margin: 20px;
-        }
-
-        #game-area {
-            width: 90vw;
-            max-width: 600px;
-            height: 400px;
-            background: #222;
-            margin: 10px auto;
-            border: 2px solid #444;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .square {
-            width: 50px;
-            height: 50px;
-            background: blue;
-            position: absolute;
-            transition: transform 0.2s ease, opacity 0.3s ease;
-            cursor: pointer;
-        }
-
-        button {
-            margin: 8px;
-            padding: 10px 18px;
-            font-size: 16px;
-        }
-
-        #scoreboard {
-            margin: 10px;
-            font-size: 18px;
-        }
-
-        #popup {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 1000;
-        }
-
-        #popup.show {
-            opacity: 1;
-        }
-
-        #achievementsScreen {
-            display: none;
-            background: #222;
-            margin: 20px auto;
-            padding: 20px;
-            width: 90%;
-            max-width: 600px;
-            border-radius: 10px;
-            text-align: left;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .achievement {
-            background: #333;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .achievement.locked {
-            opacity: 0.4;
-        }
-
-        .badge {
-            font-size: 24px;
-            margin-right: 10px;
-        }
-
-        .desc {
-            font-size: 16px;
-        }
-
-        .mastery {
-            text-align: center;
             font-size: 20px;
-            padding: 10px;
-            margin: 15px auto;
-            background: linear-gradient(to right, gold, orange);
-            color: black;
-            border-radius: 10px;
-            display: none;
+            text-shadow: 0 0 10px #000;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        .mastery.show {
-            display: block;
-            box-shadow: 0 0 10px gold;
+        #levelIntro.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #levelIntro h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        #levelIntro p {
+            margin: 5px 0 0;
+            font-size: 18px;
         }
     </style>
 </head>
 
 <body>
-    <h1>Catch the Squares Advanced</h1>
-    <div id="scoreboard">Score: 0</div>
-    <button onclick="startGame()">Start Game</button>
-    <button onclick="showAchievements()">View Achievements</button>
-    <div class="mastery" id="masteryBadge">🌟 Mastery Unlocked! All 50 achievements complete!</div>
-    <div id="game-area"></div>
-    <div id="achievementsScreen"></div>
-    <div id="popup"></div>
+    <div id="ui">
+        <div>Mode: <span id="modeName">PLAY</span></div>
+        <div>Editor Tool: <span id="toolName">Platform (1)</span></div>
 
+        <div>
+            <button onclick="toggleEditor()">Toggle Editor</button>
+            <button onclick="saveGame()">Save</button>
+            <button onclick="loadGame()">Load</button>
+            <button onclick="showHelp()">How to Create</button>
+            <button onclick="replayIntro()">Replay Intro</button>
+        </div>
+
+        <div style="margin-top:6px;">
+            Level:
+            <button onclick="prevLevel()">◀</button>
+            <span id="levelDisplay">1</span>
+            <button onclick="nextLevelManual()">▶</button>
+            <button onclick="addNewLevel()">+ Add</button>
+        </div>
+
+        <div style="margin-top:6px;">
+            <button onclick="exportLevels()">Export</button>
+            <button onclick="importLevels()">Import</button>
+        </div>
+
+        <div style="margin-top:6px;">
+            <label>Level Name:</label>
+            <input id="levelNameInput" onchange="renameLevel()" style="width:150px;">
+        </div>
+        <div style="margin-top:4px;">
+            <label>Description:</label>
+            <input id="levelDescInput" onchange="describeLevel()" style="width:150px;">
+        </div>
+
+        <div style="margin-top:6px;">
+            <label>Theme:</label>
+            <select id="themeSelector" onchange="setTheme(this.value)">
+                <option value="normal">🟦 Normal</option>
+                <option value="jungle">🌴 Jungle</option>
+                <option value="snowy">❄️ Snowy</option>
+                <option value="space">🛰 Space Station</option>
+                <option value="underwater">🐚 Underwater Ruins</option>
+            </select>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div id="helpModal" onclick="outsideClick(event)">
+        <div id="helpContent" onclick="event.stopPropagation()">
+            <h3>How to Create</h3>
+            <pre>
+ARROWS / WAD  → Move and Jump  
+SPACE         → Flip Gravity
+
+1 = Platform  
+2 = Spike  
+3 = Checkpoint  
+4 = Goal  
+
+Click on Canvas → Place object (in Editor Mode)
+
+Buttons:  
+• Toggle Editor — Switch between play/edit  
+• Save / Load    — Store your levels  
+• Export / Import — Share your creations  
+• How to Create — Show this guide
+    </pre>
+            <button onclick="closeHelp()">Close</button>
+        </div>
+    </div>
+
+    <div id="levelIntro"></div>
     <script>
-        const achievements = [];
-        for (let i = 1; i <= 50; i++) {
-            achievements.push({
-                id: "achv" + i,
-                name: "Achievement " + i,
-                desc: "Unlock condition for achievement " + i,
-                badge: "🏆"
-            });
-        }
-        let unlocked = JSON.parse(localStorage.getItem("achievements") || "[]");
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
 
-        function unlockAchievement(id) {
-            if (!unlocked.includes(id)) {
-                unlocked.push(id);
-                localStorage.setItem("achievements", JSON.stringify(unlocked));
-                const a = achievements.find(a => a.id === id);
-                if (a) showPopup("🏆 Achievement Unlocked: " + a.name);
-                renderAchievements();
+        let gravity = 0.5;
+        let jumpPower = 10;
+        let currentTool = "platform";
+        let editorMode = false;
+        let levelIndex = 0;
+        let checkpoint = null;
+        let levels = [];
+
+        const TOOL_NAMES = {
+            platform: "Platform (1)",
+            spike: "Spike (2)",
+            checkpoint: "Checkpoint (3)",
+            goal: "Goal (4)"
+        };
+
+        const player = {
+            x: 0, y: 0,
+            width: 30, height: 30,
+            dx: 0, dy: 0,
+            speed: 4,
+            flipped: false,
+            onGround: false,
+            color: "lime"
+        };
+
+        const themes = {
+            normal: {
+                "--bg": "#222",
+                platformColor: "#888",
+                enemyColor: "#ff4444"
+            },
+            jungle: {
+                "--bg": "#2b4028",
+                platformColor: "#5a3e1b",
+                enemyColor: "#d93"
+            },
+            snowy: {
+                "--bg": "#ddeeff",
+                platformColor: "#aaccee",
+                enemyColor: "#4444ff"
+            },
+            space: {
+                "--bg": "#000010",
+                platformColor: "#666666",
+                enemyColor: "#ff66cc"
+            },
+            underwater: {
+                "--bg": "#003344",
+                platformColor: "#227788",
+                enemyColor: "#00cccc"
             }
-        }
+        };
 
-        function renderAchievements() {
-            const div = document.getElementById("achievementsScreen");
-            div.innerHTML = "<h2>Achievements</h2>";
-            achievements.forEach(a => {
-                const el = document.createElement("div");
-                el.className = "achievement" + (unlocked.includes(a.id) ? "" : " locked");
-                el.innerHTML = `<div class="badge">${a.badge}</div><div class="desc"><strong>${a.name}</strong><br>${a.desc}</div>`;
-                div.appendChild(el);
+        function applyTheme(theme) {
+            const t = themes[theme];
+            if (!t) return;
+            Object.entries(t).forEach(([key, val]) => {
+                document.documentElement.style.setProperty(key, val);
             });
-            if (unlocked.length >= 50) {
-                document.getElementById("masteryBadge").classList.add("show");
-            }
+            localStorage.setItem("theme", theme);
         }
 
-        function showAchievements() {
-            const screen = document.getElementById("achievementsScreen");
-            screen.style.display = screen.style.display === "block" ? "none" : "block";
-            renderAchievements();
+        function setTheme(value) {
+            applyTheme(value);
         }
 
-        function showPopup(msg) {
-            const popup = document.getElementById("popup");
-            popup.textContent = msg;
-            popup.classList.add("show");
-            setTimeout(() => popup.classList.remove("show"), 2000);
-        }
-
-        // === Gameplay ===
-        let score = 0;
-        function startGame() {
-            const game = document.getElementById("game-area");
-            score = 0;
-            document.getElementById("scoreboard").textContent = "Score: 0";
-            game.innerHTML = "";
-            for (let i = 0; i < 3; i++) spawnSquare();
-        }
-
-        function spawnSquare() {
-            const game = document.getElementById("game-area");
-            const square = document.createElement("div");
-            square.className = "square";
-            square.style.left = Math.random() * (game.clientWidth - 50) + "px";
-            square.style.top = Math.random() * (game.clientHeight - 50) + "px";
-            square.onclick = () => {
-                score++;
-                document.getElementById("scoreboard").textContent = "Score: " + score;
-                if (score >= 1) unlockAchievement("achv1");
-                if (score >= 10) unlockAchievement("achv2");
-                if (score >= 50) unlockAchievement("achv3");
-                if (score >= 100) unlockAchievement("achv4");
-                if (score >= 500) unlockAchievement("achv5");
-                if (score >= 1000) unlockAchievement("achv6");
-                square.remove();
-                spawnSquare();
+        function createDefaultLevel() {
+            return {
+                name: "Untitled Level",
+                description: "No description.",
+                start: { x: 100, y: 500 },
+                platforms: [{ x: 0, y: 550, width: 800, height: 50 }],
+                spikes: [],
+                enemies: [{ x: 400, y: 520, width: 30, height: 30, dir: -1 }],
+                checkpoint: { x: 200, y: 500, width: 30, height: 30 },
+                goal: { x: 700, y: 100, width: 40, height: 50 }
             };
-            game.appendChild(square);
         }
+
+        function loadDefaultLevels() {
+            levels = [createDefaultLevel()];
+        }
+        function resetPlayer(toCheckpoint = true) {
+            const level = levels[levelIndex];
+            if (toCheckpoint && checkpoint) {
+                player.x = checkpoint.x;
+                player.y = checkpoint.y;
+                player.flipped = checkpoint.flipped;
+            } else {
+                player.x = level.start.x;
+                player.y = level.start.y;
+                player.flipped = false;
+            }
+            player.dy = 0;
+            showLevelIntro(level.name, level.description);
+            updateLevelDisplay();
+        }
+
+        function updateLevelDisplay() {
+            document.getElementById("levelDisplay").textContent = (levelIndex + 1);
+            document.getElementById("levelNameInput").value = levels[levelIndex].name || "";
+            document.getElementById("levelDescInput").value = levels[levelIndex].description || "";
+            document.getElementById("themeSelector").value = localStorage.getItem("theme") || "normal";
+        }
+
+        function update() {
+            if (editorMode) return;
+
+            const level = levels[levelIndex];
+            player.dx = 0;
+            if (keys["ArrowLeft"]) player.dx = -player.speed;
+            if (keys["ArrowRight"]) player.dx = player.speed;
+            player.x += player.dx;
+            player.dy += player.flipped ? -gravity : gravity;
+            player.y += player.dy;
+            player.onGround = false;
+
+            level.platforms.forEach(p => {
+                if (!player.flipped && player.dy >= 0 &&
+                    player.x + player.width > p.x &&
+                    player.x < p.x + p.width &&
+                    player.y + player.height > p.y &&
+                    player.y + player.height < p.y + 20) {
+                    player.y = p.y - player.height;
+                    player.dy = 0;
+                    player.onGround = true;
+                }
+                if (player.flipped && player.dy <= 0 &&
+                    player.x + player.width > p.x &&
+                    player.x < p.x + p.width &&
+                    player.y < p.y + p.height &&
+                    player.y > p.y - 20) {
+                    player.y = p.y + p.height;
+                    player.dy = 0;
+                    player.onGround = true;
+                }
+            });
+
+            level.spikes.forEach(s => {
+                if (player.x < s.x + s.width &&
+                    player.x + player.width > s.x &&
+                    player.y < s.y + s.height &&
+                    player.y + player.height > s.y) {
+                    resetPlayer(true);
+                }
+            });
+
+            level.enemies.forEach(e => {
+                e.x += e.dir * 1.5;
+                let hitWall = false;
+                level.platforms.forEach(p => {
+                    if (e.x < p.x || e.x + e.width > p.x + p.width) hitWall = true;
+                });
+                if (e.x < 0 || e.x + e.width > canvas.width || hitWall) {
+                    e.dir *= -1;
+                }
+                if (player.x < e.x + e.width &&
+                    player.x + player.width > e.x &&
+                    player.y < e.y + e.height &&
+                    player.y + player.height > e.y) {
+                    resetPlayer(true);
+                }
+            });
+
+            const c = level.checkpoint;
+            if (player.x < c.x + c.width &&
+                player.x + player.width > c.x &&
+                player.y < c.y + c.height &&
+                player.y + player.height > c.y) {
+                checkpoint = { x: player.x, y: player.y, flipped: player.flipped };
+            }
+
+            const g = level.goal;
+            if (player.x < g.x + g.width &&
+                player.x + player.width > g.x &&
+                player.y < g.y + g.height &&
+                player.y + player.height > g.y) {
+                levelIndex = (levelIndex + 1) % levels.length;
+                checkpoint = null;
+                resetPlayer(false);
+            }
+
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        }
+
+        function drawRect(obj, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+        }
+
+        function drawSpike(s) {
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y + s.height);
+            ctx.lineTo(s.x + s.width / 2, s.y);
+            ctx.lineTo(s.x + s.width, s.y + s.height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const level = levels[levelIndex];
+            drawRect(level.checkpoint, "cyan");
+            drawRect(level.goal, "gold");
+            level.platforms.forEach(p => drawRect(p, themes[localStorage.getItem("theme") || "normal"].platformColor));
+            level.spikes.forEach(drawSpike);
+            level.enemies.forEach(e => drawRect(e, themes[localStorage.getItem("theme") || "normal"].enemyColor));
+            drawRect(player, player.color);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        const keys = {};
+        document.addEventListener("keydown", e => {
+            keys[e.key] = true;
+            if (e.code === "Space" && !editorMode) {
+                player.flipped = !player.flipped;
+                player.dy = 0;
+            }
+            if ((e.key === "ArrowUp" || e.key === "w") && player.onGround) {
+                player.dy = player.flipped ? jumpPower : -jumpPower;
+            }
+            if (e.key === "1") setTool("platform");
+            if (e.key === "2") setTool("spike");
+            if (e.key === "3") setTool("checkpoint");
+            if (e.key === "4") setTool("goal");
+        });
+        document.addEventListener("keyup", e => keys[e.key] = false);
+
+        canvas.addEventListener("click", e => {
+            if (!editorMode) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / 10) * 10;
+            const y = Math.floor((e.clientY - rect.top) / 10) * 10;
+            const level = levels[levelIndex];
+
+            if (currentTool === "platform") level.platforms.push({ x, y, width: 100, height: 20 });
+            else if (currentTool === "spike") level.spikes.push({ x, y, width: 30, height: 30 });
+            else if (currentTool === "checkpoint") level.checkpoint = { x, y, width: 30, height: 30 };
+            else if (currentTool === "goal") level.goal = { x, y, width: 40, height: 50 };
+        });
+
+        function toggleEditor() {
+            editorMode = !editorMode;
+            document.getElementById("modeName").textContent = editorMode ? "EDITOR" : "PLAY";
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.getElementById("toolName").textContent = TOOL_NAMES[tool];
+        }
+
+        function showHelp() {
+            document.getElementById("helpModal").style.display = "flex";
+        }
+        function closeHelp() {
+            document.getElementById("helpModal").style.display = "none";
+        }
+        function outsideClick() { closeHelp(); }
+
+        function showLevelIntro(name, desc) {
+            const el = document.getElementById("levelIntro");
+            el.innerHTML = `<h2>${parseMarkdown(name)}</h2><p>${parseMarkdown(desc)}</p>`;
+            el.classList.add("show");
+            el.style.display = "block";
+            setTimeout(() => el.classList.remove("show"), 3000);
+        }
+        function replayIntro() {
+            const l = levels[levelIndex];
+            showLevelIntro(l.name, l.description);
+        }
+        function renameLevel() {
+            levels[levelIndex].name = document.getElementById("levelNameInput").value;
+        }
+        function describeLevel() {
+            levels[levelIndex].description = document.getElementById("levelDescInput").value;
+        }
+        function parseMarkdown(t) {
+            return (t || "")
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+        function prevLevel() {
+            if (levelIndex > 0) { levelIndex--; checkpoint = null; resetPlayer(false); }
+        }
+        function nextLevelManual() {
+            if (levelIndex < levels.length - 1) { levelIndex++; checkpoint = null; resetPlayer(false); }
+        }
+        function addNewLevel() {
+            levels.push(createDefaultLevel());
+            levelIndex = levels.length - 1;
+            checkpoint = null;
+            resetPlayer(false);
+        }
+        function saveGame() {
+            localStorage.setItem("gravityGameSave", JSON.stringify({ levels, checkpoint, levelIndex }));
+            alert("Game saved.");
+        }
+        function loadGame() {
+            const data = localStorage.getItem("gravityGameSave");
+            if (data) {
+                const parsed = JSON.parse(data);
+                levels = parsed.levels || levels;
+                checkpoint = parsed.checkpoint || null;
+                levelIndex = parsed.levelIndex || 0;
+                resetPlayer(false);
+                alert("Game loaded.");
+            } else alert("No save found.");
+        }
+        function exportLevels() {
+            const data = JSON.stringify(levels, null, 2);
+            navigator.clipboard.writeText(data).then(() => alert("Levels copied to clipboard!"));
+        }
+        function importLevels() {
+            const json = prompt("Paste exported level JSON here:");
+            if (!json) return;
+            try {
+                const parsed = JSON.parse(json);
+                if (Array.isArray(parsed)) {
+                    levels = parsed;
+                    levelIndex = 0;
+                    checkpoint = null;
+                    resetPlayer(false);
+                    alert("Levels imported!");
+                } else alert("Invalid level data.");
+            } catch {
+                alert("Invalid JSON.");
+            }
+        }
+
+        loadDefaultLevels();
+        applyTheme(localStorage.getItem("theme") || "normal");
+        resetPlayer(false);
+        gameLoop();
     </script>
 </body>
 
