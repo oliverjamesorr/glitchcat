@@ -156,6 +156,9 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Catch the Squares Advanced</title>
@@ -279,7 +282,6 @@
 </head>
 
 <body>
-
     <h1>🎯 Catch the Squares!</h1>
     <div id="scoreboard">Score: 0 | Time Left: 30s</div>
     <div id="game-area"></div>
@@ -298,21 +300,23 @@
         </label>
 
         <br>
-        <button onclick="startGame()">Start Game</button>
+        <button id="start-btn">Start Game</button>
     </div>
 
     <div id="unlock-buttons"></div>
+
     <script>
         const gameArea = document.getElementById('game-area');
         const scoreboard = document.getElementById('scoreboard');
         const playerStyleSelect = document.getElementById('player-style');
         const difficultySelect = document.getElementById('difficulty');
         const unlockButtonsDiv = document.getElementById('unlock-buttons');
+        const startBtn = document.getElementById('start-btn');
 
         let score = 0, totalPoints = 0, roundPoints = 0, timeLeft = 30, interval, squareCount = 0;
         const maxSquares = 5;
         let squareSpeed = 1, squareLife = 3000;
-        let powerUpTimer;
+        let powerUpTimer, badBlockTimer;
 
         const characters = [
             { name: "Red Square", value: "player-style-basic", cost: 0 },
@@ -350,7 +354,7 @@
                     btn.className = "unlock-btn";
                     btn.textContent = `Unlock ${char.name} (${char.cost})`;
                     btn.disabled = totalPoints < char.cost;
-                    btn.onclick = () => unlockCharacter(char.value);
+                    btn.addEventListener("click", () => unlockCharacter(char.value));
                     unlockButtonsDiv.appendChild(btn);
                 }
 
@@ -374,9 +378,9 @@
 
         function updateScoreboard() {
             scoreboard.innerHTML = `
-      Score: ${score} | Time Left: ${timeLeft}s <br>
-      Round Points: ${roundPoints} | Total Points: ${totalPoints} | High Score: ${highScore}
-    `;
+        Score: ${score} | Time Left: ${timeLeft}s <br>
+        Round Points: ${roundPoints} | Total Points: ${totalPoints} | High Score: ${highScore}
+      `;
         }
 
         function setDifficulty(level) {
@@ -401,10 +405,7 @@
 
         function animateSquare(square) {
             const moveInterval = setInterval(() => {
-                if (!square.parentNode) {
-                    clearInterval(moveInterval);
-                    return;
-                }
+                if (!square.parentNode) return clearInterval(moveInterval);
                 moveSquare(square);
             }, 1000 / squareSpeed);
         }
@@ -427,7 +428,6 @@
 
             const square = document.createElement('div');
             square.classList.add('square');
-
             const { x, y } = getRandomPosition();
             square.style.left = `${x}px`;
             square.style.top = `${y}px`;
@@ -486,7 +486,7 @@
 
             const onPickup = () => {
                 if (type === "time") timeLeft += 5;
-                if (type === "points") {
+                else {
                     score += 5;
                     roundPoints = Math.floor(score / 2);
                     if (score > highScore) highScore = score;
@@ -498,43 +498,9 @@
 
             powerup.addEventListener("click", onPickup);
             powerup.addEventListener("touchstart", onPickup);
-
             setTimeout(() => powerup.remove(), 5000);
         }
 
-        function startGame() {
-            score = 0;
-            roundPoints = 0;
-            timeLeft = 30;
-            squareCount = 0;
-            gameArea.innerHTML = '';
-            clearInterval(interval);
-            clearInterval(powerUpTimer);
-
-            setDifficulty(difficultySelect.value);
-            updateCharacterOptions();
-
-            for (let i = 0; i < maxSquares; i++) spawnSquare();
-            interval = setInterval(() => {
-                timeLeft--;
-                updateScoreboard();
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    clearInterval(powerUpTimer);
-                    totalPoints += roundPoints;
-                    saveProgress();
-                    alert(`🕹 Game Over! Score: ${score}, Points Earned: ${roundPoints}`);
-                    updateCharacterOptions();
-                    gameArea.innerHTML = '';
-                }
-            }, 1000);
-
-            powerUpTimer = setInterval(spawnPowerUp, 8000); // powerup every 8s
-            updateScoreboard();
-        }
-
-        updateCharacterOptions();
-        updateScoreboard();
         function spawnBadBlock() {
             const bad = document.createElement("div");
             bad.className = "square";
@@ -554,7 +520,7 @@
             const endGame = () => {
                 clearInterval(interval);
                 clearInterval(powerUpTimer);
-                clearInterval(badBlockTimer); // Stop more spawning
+                clearInterval(badBlockTimer);
                 bad.remove();
                 alert("💥 You clicked a trap! Game over.");
                 gameArea.innerHTML = "";
@@ -566,3 +532,46 @@
             bad.addEventListener("click", endGame);
             bad.addEventListener("touchstart", endGame);
         }
+
+        function startGame() {
+            score = 0;
+            roundPoints = 0;
+            timeLeft = 30;
+            squareCount = 0;
+            gameArea.innerHTML = '';
+            clearInterval(interval);
+            clearInterval(powerUpTimer);
+            clearInterval(badBlockTimer);
+
+            setDifficulty(difficultySelect.value);
+            updateCharacterOptions();
+
+            for (let i = 0; i < maxSquares; i++) spawnSquare();
+            interval = setInterval(() => {
+                timeLeft--;
+                updateScoreboard();
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    clearInterval(powerUpTimer);
+                    clearInterval(badBlockTimer);
+                    totalPoints += roundPoints;
+                    saveProgress();
+                    alert(`🕹 Game Over! Score: ${score}, Points Earned: ${roundPoints}`);
+                    updateCharacterOptions();
+                    gameArea.innerHTML = '';
+                }
+            }, 1000);
+
+            powerUpTimer = setInterval(spawnPowerUp, 8000);
+            badBlockTimer = setInterval(spawnBadBlock, 6000);
+            updateScoreboard();
+        }
+
+        // Initial setup
+        updateCharacterOptions();
+        updateScoreboard();
+        startBtn.addEventListener("click", startGame);
+    </script>
+</body>
+
+</html>
