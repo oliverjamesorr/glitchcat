@@ -1,0 +1,431 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Catch the Squares Advanced - Everything Included</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #111; color: white; margin: 0; padding: 0; text-align: center; }
+    h1 { margin-top: 20px; }
+    button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    #achievementsScreen {
+      display: none;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 600px;
+      max-height: 60vh;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .achievement {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #333;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .achievement.locked {
+      opacity: 0.4;
+    }
+    .badge {
+      font-size: 24px;
+      margin-right: 12px;
+    }
+    .desc {
+      font-size: 16px;
+    }
+    #popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    #popup.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Catch the Squares Advanced</h1>
+  <button onclick="showAchievements()">View Achievements</button>
+  <div id="achievementsScreen"></div>
+  <div id="popup"></div>
+
+<script>
+// === Full List of Achievements ===
+const achievements = [
+{
+  id: "achv1",
+  name: "Collector of Basic Pack 1",
+  desc: "Unlock all characters in Basic Pack 1",
+  badge: "🏆"
+},
+{
+  id: "achv2",
+  name: "Collector of Basic Pack 2",
+  desc: "Unlock all characters in Basic Pack 2",
+  badge: "🏆"
+},
+{
+  id: "achv3",
+  name: "Collector of Basic Pack 3",
+  desc: "Unlock all characters in Basic Pack 3",
+  badge: "🏆"
+},
+{
+  id: "achv4",
+  name: "Collector of Basic Pack 4",
+  desc: "Unlock all characters in Basic Pack 4",
+  badge: "🏆"
+},
+{
+  id: "achv5",
+  name: "Collector of Basic Pack 5",
+  desc: "Unlock all characters in Basic Pack 5",
+  badge: "🏆"
+},
+{
+  id: "achv6",
+  name: "Collector of Basic Pack 6",
+  desc: "Unlock all characters in Basic Pack 6",
+  badge: "🏆"
+},
+{
+  id: "achv7",
+  name: "Collector of Basic Pack 7",
+  desc: "Unlock all characters in Basic Pack 7",
+  badge: "🏆"
+},
+{
+  id: "achv8",
+  name: "Collector of Basic Pack 8",
+  desc: "Unlock all characters in Basic Pack 8",
+  badge: "🏆"
+},
+{
+  id: "achv9",
+  name: "Collector of Basic Pack 9",
+  desc: "Unlock all characters in Basic Pack 9",
+  badge: "🏆"
+},
+{
+  id: "achv10",
+  name: "Collector of Basic Pack 10",
+  desc: "Unlock all characters in Basic Pack 10",
+  badge: "🏆"
+},
+{
+  id: "achv11",
+  name: "Collector of Jungle Pack",
+  desc: "Unlock all characters in Jungle Pack",
+  badge: "🏆"
+},
+{
+  id: "achv12",
+  name: "Collector of Ocean Pack",
+  desc: "Unlock all characters in Ocean Pack",
+  badge: "🏆"
+},
+{
+  id: "achv13",
+  name: "Collector of Spooky Pack",
+  desc: "Unlock all characters in Spooky Pack",
+  badge: "🏆"
+},
+{
+  id: "achv14",
+  name: "Collector of Sky Pack",
+  desc: "Unlock all characters in Sky Pack",
+  badge: "🏆"
+},
+{
+  id: "achv15",
+  name: "Collector of Fantasy Pack",
+  desc: "Unlock all characters in Fantasy Pack",
+  badge: "🏆"
+},
+{
+  id: "achv16",
+  name: "First Click!",
+  desc: "Score your first point",
+  badge: "🏆"
+},
+{
+  id: "achv17",
+  name: "Getting Warmed Up",
+  desc: "Score 10 points in one round",
+  badge: "🏆"
+},
+{
+  id: "achv18",
+  name: "Half Century",
+  desc: "Score 50 points in one round",
+  badge: "🏆"
+},
+{
+  id: "achv19",
+  name: "Century Club",
+  desc: "Score 100 points in one round",
+  badge: "🏆"
+},
+{
+  id: "achv20",
+  name: "Click Machine",
+  desc: "Click 100 times total",
+  badge: "🏆"
+},
+{
+  id: "achv21",
+  name: "Touch Master",
+  desc: "Play on mobile 5 times",
+  badge: "🏆"
+},
+{
+  id: "achv22",
+  name: "Shopaholic",
+  desc: "Unlock 10 different characters",
+  badge: "🏆"
+},
+{
+  id: "achv23",
+  name: "Rare Hunter",
+  desc: "Unlock a rare character",
+  badge: "🏆"
+},
+{
+  id: "achv24",
+  name: "Epic Win",
+  desc: "Unlock an epic character",
+  badge: "🏆"
+},
+{
+  id: "achv25",
+  name: "Legendary!",
+  desc: "Unlock a legendary character",
+  badge: "🏆"
+},
+{
+  id: "achv26",
+  name: "Double Trouble",
+  desc: "Catch 2 squares in under 2 seconds",
+  badge: "🏆"
+},
+{
+  id: "achv27",
+  name: "Power Collector",
+  desc: "Collect 10 power-ups total",
+  badge: "🏆"
+},
+{
+  id: "achv28",
+  name: "Time Lord",
+  desc: "Collect 5 time power-ups",
+  badge: "🏆"
+},
+{
+  id: "achv29",
+  name: "Point Magnet",
+  desc: "Collect 5 point power-ups",
+  badge: "🏆"
+},
+{
+  id: "achv30",
+  name: "No Misses",
+  desc: "Play a round without missing a single square",
+  badge: "🏆"
+},
+{
+  id: "achv31",
+  name: "Fast Hands",
+  desc: "Catch 10 squares in one game",
+  badge: "🏆"
+},
+{
+  id: "achv32",
+  name: "Super Saver",
+  desc: "Sell a character",
+  badge: "🏆"
+},
+{
+  id: "achv33",
+  name: "Economist",
+  desc: "Sell 5 characters",
+  badge: "🏆"
+},
+{
+  id: "achv34",
+  name: "Big Earner",
+  desc: "Earn 500 total points",
+  badge: "🏆"
+},
+{
+  id: "achv35",
+  name: "Tycoon",
+  desc: "Earn 1000 total points",
+  badge: "🏆"
+},
+{
+  id: "achv36",
+  name: "Glitchverse Code",
+  desc: "Find and enter the Glitch Cat code",
+  badge: "🏆"
+},
+{
+  id: "achv37",
+  name: "Secret Pull",
+  desc: "Unlock a secret rarity character",
+  badge: "🏆"
+},
+{
+  id: "achv38",
+  name: "All Styles",
+  desc: "Unlock at least one of each character style",
+  badge: "🏆"
+},
+{
+  id: "achv39",
+  name: "Transcendent!",
+  desc: "Unlock a transcendent character",
+  badge: "🏆"
+},
+{
+  id: "achv40",
+  name: "Perfect Round",
+  desc: "Score 0 misses and earn at least 50 points",
+  badge: "🏆"
+},
+{
+  id: "achv41",
+  name: "Rarity Master",
+  desc: "Own 1 of each rarity",
+  badge: "🏆"
+},
+{
+  id: "achv42",
+  name: "Pack Fan",
+  desc: "Open 20 packs",
+  badge: "🏆"
+},
+{
+  id: "achv43",
+  name: "Spin It",
+  desc: "Use the pull wheel 10 times",
+  badge: "🏆"
+},
+{
+  id: "achv44",
+  name: "Customizer",
+  desc: "Change your character style 10 times",
+  badge: "🏆"
+},
+{
+  id: "achv45",
+  name: "High Score!",
+  desc: "Beat your previous high score",
+  badge: "🏆"
+},
+{
+  id: "achv46",
+  name: "Unstoppable",
+  desc: "Play 10 games without quitting early",
+  badge: "🏆"
+},
+{
+  id: "achv47",
+  name: "Lucky Pull",
+  desc: "Pull a legendary or higher character",
+  badge: "🏆"
+},
+{
+  id: "achv48",
+  name: "Emoji Army",
+  desc: "Own 25 emoji-style characters",
+  badge: "🏆"
+},
+{
+  id: "achv49",
+  name: "Speed Run",
+  desc: "Finish a round in under 10 seconds (via powerups)",
+  badge: "🏆"
+},
+{
+  id: "achv50",
+  name: "Style Switcher",
+  desc: "Change characters 3 times in one game",
+  badge: "🏆"
+}
+];
+
+let unlockedAchievements = JSON.parse(localStorage.getItem("achievements") || "[]");
+
+function unlockAchievement(id) {
+  if (!unlockedAchievements.includes(id)) {
+    unlockedAchievements.push(id);
+    localStorage.setItem("achievements", JSON.stringify(unlockedAchievements));
+    const a = achievements.find(a => a.id === id);
+    if (a) showPopup("🏆 Achievement Unlocked: " + a.name);
+    renderAchievements();
+  }
+}
+
+function renderAchievements() {
+  const div = document.getElementById("achievementsScreen");
+  div.innerHTML = "<h2>Achievements</h2>";
+  achievements.forEach(a => {
+    const el = document.createElement("div");
+    el.className = "achievement" + (unlockedAchievements.includes(a.id) ? "" : " locked");
+    el.innerHTML = `<div class="badge">${a.badge}</div><div class="desc"><strong>${a.name}</strong><br>${a.desc}</div>`;
+    div.appendChild(el);
+  });
+}
+
+function showPopup(msg) {
+  const popup = document.getElementById("popup");
+  popup.textContent = msg;
+  popup.classList.add("show");
+  setTimeout(() => popup.classList.remove("show"), 2000);
+}
+
+function showAchievements() {
+  const screen = document.getElementById("achievementsScreen");
+  screen.style.display = screen.style.display === "block" ? "none" : "block";
+  renderAchievements();
+}
+
+// === Hookup Triggers Example ===
+function checkScoreAchievements(score, totalPoints) {
+  if (score >= 10) unlockAchievement("achv2");
+  if (score >= 50) unlockAchievement("achv3");
+  if (score >= 100) unlockAchievement("achv4");
+  if (totalPoints >= 500) unlockAchievement("achv19");
+  if (totalPoints >= 1000) unlockAchievement("achv20");
+}
+function checkCharacterUnlockAchievements(char) {
+  if (char.rarity === "rare") unlockAchievement("achv8");
+  if (char.rarity === "epic") unlockAchievement("achv9");
+  if (char.rarity === "legendary") unlockAchievement("achv10");
+  if (char.rarity === "transcendent") unlockAchievement("achv24");
+}
+function handleSecretCodeEntry(code) {
+  if (code === "The Glitch Cat") {
+    unlockAchievement("achv21");
+  }
+}
+
+// Demo: Unlock one for testing
+setTimeout(() => unlockAchievement("achv1"), 1500);
+</script>
+</body>
+</html>

@@ -153,424 +153,458 @@
         The Best Youtube Channel EVER!
     </a>
 </body>
-<!DOCTYPE html>
-<html lang="en">
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Catch the Squares Advanced</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catch the Squares Advanced - Everything Included</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #111;
             color: white;
-            text-align: center;
             margin: 0;
             padding: 0;
+            text-align: center;
         }
 
         h1 {
             margin-top: 20px;
         }
 
-        #game-area {
-            position: relative;
-            margin: 20px auto;
-            width: 600px;
-            height: 400px;
-            background: #222;
-            border: 2px solid #555;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-
-        .square,
-        .powerup {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            transition: transform 0.1s linear;
-            z-index: 2;
-        }
-
-        .square {
-            background: blue;
-        }
-
-        .powerup {
-            background: green;
-        }
-
-        .player-style-basic {
-            background: red;
-        }
-
-        .player-style-circle {
-            border-radius: 50%;
-            background: red;
-        }
-
-        .player-style-emoji,
-        .player-style-unlocked {
-            background: none;
-            font-size: 40px;
-            line-height: 50px;
-        }
-
-        #scoreboard {
-            margin: 10px;
-            font-size: 18px;
-        }
-
         button {
-            margin: 10px;
             padding: 10px 20px;
+            margin: 10px;
             font-size: 16px;
-            cursor: pointer;
         }
 
-        select,
-        option {
+        #achievementsScreen {
+            display: none;
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            max-height: 60vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .achievement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #333;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .achievement.locked {
+            opacity: 0.4;
+        }
+
+        .badge {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        .desc {
             font-size: 16px;
-            padding: 5px;
         }
 
-        #options {
-            margin: 20px;
-        }
-
-        .locked {
-            color: #888;
-        }
-
-        .unlock-btn {
-            background-color: #444;
+        #popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
             color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin: 2px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
         }
 
-        .unlock-btn:disabled {
-            background-color: #222;
-            color: #777;
-            cursor: default;
-        }
-
-        .particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: yellow;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: explode 0.6s ease-out forwards;
-        }
-
-        @keyframes explode {
-            to {
-                transform: translate(var(--dx), var(--dy)) scale(0.1);
-                opacity: 0;
-            }
+        #popup.show {
+            opacity: 1;
         }
     </style>
 </head>
 
 <body>
-    <h1>🎯 Catch the Squares!</h1>
-    <div id="scoreboard">Score: 0 | Time Left: 30s</div>
-    <div id="game-area"></div>
-
-    <div id="options">
-        <label>Choose Character:
-            <select id="player-style"></select>
-        </label>
-
-        <label>Choose Difficulty:
-            <select id="difficulty">
-                <option value="easy">Easy</option>
-                <option value="medium" selected>Medium</option>
-                <option value="hard">Hard</option>
-            </select>
-        </label>
-
-        <br>
-        <button id="start-btn">Start Game</button>
-    </div>
-
-    <div id="unlock-buttons"></div>
+    <h1>Catch the Squares Advanced</h1>
+    <button onclick="showAchievements()">View Achievements</button>
+    <div id="achievementsScreen"></div>
+    <div id="popup"></div>
 
     <script>
-        const gameArea = document.getElementById('game-area');
-        const scoreboard = document.getElementById('scoreboard');
-        const playerStyleSelect = document.getElementById('player-style');
-        const difficultySelect = document.getElementById('difficulty');
-        const unlockButtonsDiv = document.getElementById('unlock-buttons');
-        const startBtn = document.getElementById('start-btn');
-
-        let score = 0, totalPoints = 0, roundPoints = 0, timeLeft = 30, interval, squareCount = 0;
-        const maxSquares = 5;
-        let squareSpeed = 1, squareLife = 3000;
-        let powerUpTimer, badBlockTimer;
-
-        const characters = [
-            { name: "Red Square", value: "player-style-basic", cost: 0 },
-            { name: "Red Circle", value: "player-style-circle", cost: 10 },
-            { name: "🐱 Cat Emoji", value: "player-style-emoji", emoji: "🐱", cost: 20 },
-            { name: "🦊 Fox Emoji", value: "player-style-unlocked", emoji: "🦊", cost: 40 }
+        // === Full List of Achievements ===
+        const achievements = [
+            {
+                id: "achv1",
+                name: "Collector of Basic Pack 1",
+                desc: "Unlock all characters in Basic Pack 1",
+                badge: "🏆"
+            },
+            {
+                id: "achv2",
+                name: "Collector of Basic Pack 2",
+                desc: "Unlock all characters in Basic Pack 2",
+                badge: "🏆"
+            },
+            {
+                id: "achv3",
+                name: "Collector of Basic Pack 3",
+                desc: "Unlock all characters in Basic Pack 3",
+                badge: "🏆"
+            },
+            {
+                id: "achv4",
+                name: "Collector of Basic Pack 4",
+                desc: "Unlock all characters in Basic Pack 4",
+                badge: "🏆"
+            },
+            {
+                id: "achv5",
+                name: "Collector of Basic Pack 5",
+                desc: "Unlock all characters in Basic Pack 5",
+                badge: "🏆"
+            },
+            {
+                id: "achv6",
+                name: "Collector of Basic Pack 6",
+                desc: "Unlock all characters in Basic Pack 6",
+                badge: "🏆"
+            },
+            {
+                id: "achv7",
+                name: "Collector of Basic Pack 7",
+                desc: "Unlock all characters in Basic Pack 7",
+                badge: "🏆"
+            },
+            {
+                id: "achv8",
+                name: "Collector of Basic Pack 8",
+                desc: "Unlock all characters in Basic Pack 8",
+                badge: "🏆"
+            },
+            {
+                id: "achv9",
+                name: "Collector of Basic Pack 9",
+                desc: "Unlock all characters in Basic Pack 9",
+                badge: "🏆"
+            },
+            {
+                id: "achv10",
+                name: "Collector of Basic Pack 10",
+                desc: "Unlock all characters in Basic Pack 10",
+                badge: "🏆"
+            },
+            {
+                id: "achv11",
+                name: "Collector of Jungle Pack",
+                desc: "Unlock all characters in Jungle Pack",
+                badge: "🏆"
+            },
+            {
+                id: "achv12",
+                name: "Collector of Ocean Pack",
+                desc: "Unlock all characters in Ocean Pack",
+                badge: "🏆"
+            },
+            {
+                id: "achv13",
+                name: "Collector of Spooky Pack",
+                desc: "Unlock all characters in Spooky Pack",
+                badge: "🏆"
+            },
+            {
+                id: "achv14",
+                name: "Collector of Sky Pack",
+                desc: "Unlock all characters in Sky Pack",
+                badge: "🏆"
+            },
+            {
+                id: "achv15",
+                name: "Collector of Fantasy Pack",
+                desc: "Unlock all characters in Fantasy Pack",
+                badge: "🏆"
+            },
+            {
+                id: "achv16",
+                name: "First Click!",
+                desc: "Score your first point",
+                badge: "🏆"
+            },
+            {
+                id: "achv17",
+                name: "Getting Warmed Up",
+                desc: "Score 10 points in one round",
+                badge: "🏆"
+            },
+            {
+                id: "achv18",
+                name: "Half Century",
+                desc: "Score 50 points in one round",
+                badge: "🏆"
+            },
+            {
+                id: "achv19",
+                name: "Century Club",
+                desc: "Score 100 points in one round",
+                badge: "🏆"
+            },
+            {
+                id: "achv20",
+                name: "Click Machine",
+                desc: "Click 100 times total",
+                badge: "🏆"
+            },
+            {
+                id: "achv21",
+                name: "Touch Master",
+                desc: "Play on mobile 5 times",
+                badge: "🏆"
+            },
+            {
+                id: "achv22",
+                name: "Shopaholic",
+                desc: "Unlock 10 different characters",
+                badge: "🏆"
+            },
+            {
+                id: "achv23",
+                name: "Rare Hunter",
+                desc: "Unlock a rare character",
+                badge: "🏆"
+            },
+            {
+                id: "achv24",
+                name: "Epic Win",
+                desc: "Unlock an epic character",
+                badge: "🏆"
+            },
+            {
+                id: "achv25",
+                name: "Legendary!",
+                desc: "Unlock a legendary character",
+                badge: "🏆"
+            },
+            {
+                id: "achv26",
+                name: "Double Trouble",
+                desc: "Catch 2 squares in under 2 seconds",
+                badge: "🏆"
+            },
+            {
+                id: "achv27",
+                name: "Power Collector",
+                desc: "Collect 10 power-ups total",
+                badge: "🏆"
+            },
+            {
+                id: "achv28",
+                name: "Time Lord",
+                desc: "Collect 5 time power-ups",
+                badge: "🏆"
+            },
+            {
+                id: "achv29",
+                name: "Point Magnet",
+                desc: "Collect 5 point power-ups",
+                badge: "🏆"
+            },
+            {
+                id: "achv30",
+                name: "No Misses",
+                desc: "Play a round without missing a single square",
+                badge: "🏆"
+            },
+            {
+                id: "achv31",
+                name: "Fast Hands",
+                desc: "Catch 10 squares in one game",
+                badge: "🏆"
+            },
+            {
+                id: "achv32",
+                name: "Super Saver",
+                desc: "Sell a character",
+                badge: "🏆"
+            },
+            {
+                id: "achv33",
+                name: "Economist",
+                desc: "Sell 5 characters",
+                badge: "🏆"
+            },
+            {
+                id: "achv34",
+                name: "Big Earner",
+                desc: "Earn 500 total points",
+                badge: "🏆"
+            },
+            {
+                id: "achv35",
+                name: "Tycoon",
+                desc: "Earn 1000 total points",
+                badge: "🏆"
+            },
+            {
+                id: "achv36",
+                name: "Glitchverse Code",
+                desc: "Find and enter the Glitch Cat code",
+                badge: "🏆"
+            },
+            {
+                id: "achv37",
+                name: "Secret Pull",
+                desc: "Unlock a secret rarity character",
+                badge: "🏆"
+            },
+            {
+                id: "achv38",
+                name: "All Styles",
+                desc: "Unlock at least one of each character style",
+                badge: "🏆"
+            },
+            {
+                id: "achv39",
+                name: "Transcendent!",
+                desc: "Unlock a transcendent character",
+                badge: "🏆"
+            },
+            {
+                id: "achv40",
+                name: "Perfect Round",
+                desc: "Score 0 misses and earn at least 50 points",
+                badge: "🏆"
+            },
+            {
+                id: "achv41",
+                name: "Rarity Master",
+                desc: "Own 1 of each rarity",
+                badge: "🏆"
+            },
+            {
+                id: "achv42",
+                name: "Pack Fan",
+                desc: "Open 20 packs",
+                badge: "🏆"
+            },
+            {
+                id: "achv43",
+                name: "Spin It",
+                desc: "Use the pull wheel 10 times",
+                badge: "🏆"
+            },
+            {
+                id: "achv44",
+                name: "Customizer",
+                desc: "Change your character style 10 times",
+                badge: "🏆"
+            },
+            {
+                id: "achv45",
+                name: "High Score!",
+                desc: "Beat your previous high score",
+                badge: "🏆"
+            },
+            {
+                id: "achv46",
+                name: "Unstoppable",
+                desc: "Play 10 games without quitting early",
+                badge: "🏆"
+            },
+            {
+                id: "achv47",
+                name: "Lucky Pull",
+                desc: "Pull a legendary or higher character",
+                badge: "🏆"
+            },
+            {
+                id: "achv48",
+                name: "Emoji Army",
+                desc: "Own 25 emoji-style characters",
+                badge: "🏆"
+            },
+            {
+                id: "achv49",
+                name: "Speed Run",
+                desc: "Finish a round in under 10 seconds (via powerups)",
+                badge: "🏆"
+            },
+            {
+                id: "achv50",
+                name: "Style Switcher",
+                desc: "Change characters 3 times in one game",
+                badge: "🏆"
+            }
         ];
 
-        let highScore = parseInt(localStorage.getItem("highScore") || "0");
-        totalPoints = parseInt(localStorage.getItem("totalPoints") || "0");
-        let unlockedCharacters = JSON.parse(localStorage.getItem("unlockedCharacters") || '["player-style-basic"]');
+        let unlockedAchievements = JSON.parse(localStorage.getItem("achievements") || "[]");
 
-        function saveProgress() {
-            localStorage.setItem("highScore", highScore);
-            localStorage.setItem("totalPoints", totalPoints);
-            localStorage.setItem("unlockedCharacters", JSON.stringify(unlockedCharacters));
+        function unlockAchievement(id) {
+            if (!unlockedAchievements.includes(id)) {
+                unlockedAchievements.push(id);
+                localStorage.setItem("achievements", JSON.stringify(unlockedAchievements));
+                const a = achievements.find(a => a.id === id);
+                if (a) showPopup("🏆 Achievement Unlocked: " + a.name);
+                renderAchievements();
+            }
         }
 
-        function updateCharacterOptions() {
-            playerStyleSelect.innerHTML = "";
-            unlockButtonsDiv.innerHTML = "<h3>🔓 Unlock Characters</h3>";
-
-            characters.forEach(char => {
-                const option = document.createElement("option");
-                option.value = char.value;
-
-                if (unlockedCharacters.includes(char.value)) {
-                    option.textContent = char.name;
-                } else {
-                    option.textContent = `${char.name} - Locked (${char.cost} pts)`;
-                    option.disabled = true;
-                    option.classList.add("locked");
-
-                    const btn = document.createElement("button");
-                    btn.className = "unlock-btn";
-                    btn.textContent = `Unlock ${char.name} (${char.cost})`;
-                    btn.disabled = totalPoints < char.cost;
-                    btn.addEventListener("click", () => unlockCharacter(char.value));
-                    unlockButtonsDiv.appendChild(btn);
-                }
-
-                playerStyleSelect.appendChild(option);
+        function renderAchievements() {
+            const div = document.getElementById("achievementsScreen");
+            div.innerHTML = "<h2>Achievements</h2>";
+            achievements.forEach(a => {
+                const el = document.createElement("div");
+                el.className = "achievement" + (unlockedAchievements.includes(a.id) ? "" : " locked");
+                el.innerHTML = `<div class="badge">${a.badge}</div><div class="desc"><strong>${a.name}</strong><br>${a.desc}</div>`;
+                div.appendChild(el);
             });
         }
 
-        function unlockCharacter(value) {
-            const char = characters.find(c => c.value === value);
-            if (!char || unlockedCharacters.includes(value)) return;
-            if (totalPoints >= char.cost) {
-                totalPoints -= char.cost;
-                unlockedCharacters.push(value);
-                saveProgress();
-                updateCharacterOptions();
-                alert(`✅ You unlocked: ${char.name}`);
-            } else {
-                alert("Not enough points!");
+        function showPopup(msg) {
+            const popup = document.getElementById("popup");
+            popup.textContent = msg;
+            popup.classList.add("show");
+            setTimeout(() => popup.classList.remove("show"), 2000);
+        }
+
+        function showAchievements() {
+            const screen = document.getElementById("achievementsScreen");
+            screen.style.display = screen.style.display === "block" ? "none" : "block";
+            renderAchievements();
+        }
+
+        // === Hookup Triggers Example ===
+        function checkScoreAchievements(score, totalPoints) {
+            if (score >= 10) unlockAchievement("achv2");
+            if (score >= 50) unlockAchievement("achv3");
+            if (score >= 100) unlockAchievement("achv4");
+            if (totalPoints >= 500) unlockAchievement("achv19");
+            if (totalPoints >= 1000) unlockAchievement("achv20");
+        }
+        function checkCharacterUnlockAchievements(char) {
+            if (char.rarity === "rare") unlockAchievement("achv8");
+            if (char.rarity === "epic") unlockAchievement("achv9");
+            if (char.rarity === "legendary") unlockAchievement("achv10");
+            if (char.rarity === "transcendent") unlockAchievement("achv24");
+        }
+        function handleSecretCodeEntry(code) {
+            if (code === "The Glitch Cat") {
+                unlockAchievement("achv21");
             }
         }
 
-        function updateScoreboard() {
-            scoreboard.innerHTML = `
-        Score: ${score} | Time Left: ${timeLeft}s <br>
-        Round Points: ${roundPoints} | Total Points: ${totalPoints} | High Score: ${highScore}
-      `;
-        }
-
-        function setDifficulty(level) {
-            switch (level) {
-                case 'easy': squareSpeed = 0.5; squareLife = 4000; break;
-                case 'medium': squareSpeed = 1; squareLife = 3000; break;
-                case 'hard': squareSpeed = 2; squareLife = 2000; break;
-            }
-        }
-
-        function getRandomPosition() {
-            const x = Math.random() * (gameArea.clientWidth - 50);
-            const y = Math.random() * (gameArea.clientHeight - 50);
-            return { x, y };
-        }
-
-        function moveSquare(square) {
-            const { x, y } = getRandomPosition();
-            square.style.left = `${x}px`;
-            square.style.top = `${y}px`;
-        }
-
-        function animateSquare(square) {
-            const moveInterval = setInterval(() => {
-                if (!square.parentNode) return clearInterval(moveInterval);
-                moveSquare(square);
-            }, 1000 / squareSpeed);
-        }
-
-        function createParticles(x, y) {
-            for (let i = 0; i < 8; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = `${x}px`;
-                p.style.top = `${y}px`;
-                p.style.setProperty('--dx', `${Math.random() * 100 - 50}px`);
-                p.style.setProperty('--dy', `${Math.random() * 100 - 50}px`);
-                gameArea.appendChild(p);
-                setTimeout(() => p.remove(), 600);
-            }
-        }
-
-        function spawnSquare() {
-            if (squareCount >= maxSquares) return;
-
-            const square = document.createElement('div');
-            square.classList.add('square');
-            const { x, y } = getRandomPosition();
-            square.style.left = `${x}px`;
-            square.style.top = `${y}px`;
-
-            const player = document.createElement('div');
-            const selected = playerStyleSelect.value;
-            const charData = characters.find(c => c.value === selected);
-
-            player.className = selected;
-            player.style.width = "100%";
-            player.style.height = "100%";
-            player.style.display = "flex";
-            player.style.justifyContent = "center";
-            player.style.alignItems = "center";
-            if (charData?.emoji) player.textContent = charData.emoji;
-
-            square.appendChild(player);
-            gameArea.appendChild(square);
-            squareCount++;
-
-            animateSquare(square);
-
-            const removeTimeout = setTimeout(() => {
-                if (square.parentNode) {
-                    square.remove();
-                    squareCount--;
-                    spawnSquare();
-                }
-            }, squareLife);
-
-            const handleClick = (e) => {
-                score++;
-                roundPoints = Math.floor(score / 2);
-                if (score > highScore) highScore = score;
-                updateScoreboard();
-                clearTimeout(removeTimeout);
-                createParticles(e.clientX - gameArea.offsetLeft, e.clientY - gameArea.offsetTop);
-                square.remove();
-                squareCount--;
-                spawnSquare();
-            };
-
-            square.addEventListener("click", handleClick);
-            square.addEventListener("touchstart", handleClick);
-        }
-
-        function spawnPowerUp() {
-            const type = Math.random() > 0.5 ? "time" : "points";
-            const powerup = document.createElement("div");
-            powerup.className = "powerup";
-            powerup.title = type === "time" ? "+5s" : "+5 pts";
-            const { x, y } = getRandomPosition();
-            powerup.style.left = `${x}px`;
-            powerup.style.top = `${y}px`;
-            gameArea.appendChild(powerup);
-
-            const onPickup = () => {
-                if (type === "time") timeLeft += 5;
-                else {
-                    score += 5;
-                    roundPoints = Math.floor(score / 2);
-                    if (score > highScore) highScore = score;
-                }
-                updateScoreboard();
-                createParticles(x + 25, y + 25);
-                powerup.remove();
-            };
-
-            powerup.addEventListener("click", onPickup);
-            powerup.addEventListener("touchstart", onPickup);
-            setTimeout(() => powerup.remove(), 5000);
-        }
-
-        function spawnBadBlock() {
-            const bad = document.createElement("div");
-            bad.className = "square";
-            bad.style.background = "darkred";
-
-            const { x, y } = getRandomPosition();
-            bad.style.left = `${x}px`;
-            bad.style.top = `${y}px`;
-            gameArea.appendChild(bad);
-
-            animateSquare(bad);
-
-            setTimeout(() => {
-                if (bad.parentNode) bad.remove();
-            }, 4000);
-
-            const endGame = () => {
-                clearInterval(interval);
-                clearInterval(powerUpTimer);
-                clearInterval(badBlockTimer);
-                bad.remove();
-                alert("💥 You clicked a trap! Game over.");
-                gameArea.innerHTML = "";
-                totalPoints += roundPoints;
-                saveProgress();
-                updateCharacterOptions();
-            };
-
-            bad.addEventListener("click", endGame);
-            bad.addEventListener("touchstart", endGame);
-        }
-
-        function startGame() {
-            score = 0;
-            roundPoints = 0;
-            timeLeft = 30;
-            squareCount = 0;
-            gameArea.innerHTML = '';
-            clearInterval(interval);
-            clearInterval(powerUpTimer);
-            clearInterval(badBlockTimer);
-
-            setDifficulty(difficultySelect.value);
-            updateCharacterOptions();
-
-            for (let i = 0; i < maxSquares; i++) spawnSquare();
-            interval = setInterval(() => {
-                timeLeft--;
-                updateScoreboard();
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    clearInterval(powerUpTimer);
-                    clearInterval(badBlockTimer);
-                    totalPoints += roundPoints;
-                    saveProgress();
-                    alert(`🕹 Game Over! Score: ${score}, Points Earned: ${roundPoints}`);
-                    updateCharacterOptions();
-                    gameArea.innerHTML = '';
-                }
-            }, 1000);
-
-            powerUpTimer = setInterval(spawnPowerUp, 8000);
-            badBlockTimer = setInterval(spawnBadBlock, 6000);
-            updateScoreboard();
-        }
-
-        // Initial setup
-        updateCharacterOptions();
-        updateScoreboard();
-        startBtn.addEventListener("click", startGame);
+        // Demo: Unlock one for testing
+        setTimeout(() => unlockAchievement("achv1"), 1500);
     </script>
 </body>
 
