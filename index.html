@@ -535,87 +535,34 @@
 
         updateCharacterOptions();
         updateScoreboard();
-    </script>
-    function spawnBadBlock() {
-    const bad = document.createElement("div");
-    bad.className = "square";
-    bad.style.background = "darkred"; // distinguish from blue
+        function spawnBadBlock() {
+            const bad = document.createElement("div");
+            bad.className = "square";
+            bad.style.background = "darkred";
 
-    const { x, y } = getRandomPosition();
-    bad.style.left = `${x}px`;
-    bad.style.top = `${y}px`;
+            const { x, y } = getRandomPosition();
+            bad.style.left = `${x}px`;
+            bad.style.top = `${y}px`;
+            gameArea.appendChild(bad);
 
-    gameArea.appendChild(bad);
+            animateSquare(bad);
 
-    animateSquare(bad);
+            setTimeout(() => {
+                if (bad.parentNode) bad.remove();
+            }, 4000);
 
-    const removeTimeout = setTimeout(() => {
-    if (bad.parentNode) bad.remove();
-    }, 4000); // lasts 4 seconds
+            const endGame = () => {
+                clearInterval(interval);
+                clearInterval(powerUpTimer);
+                clearInterval(badBlockTimer); // Stop more spawning
+                bad.remove();
+                alert("💥 You clicked a trap! Game over.");
+                gameArea.innerHTML = "";
+                totalPoints += roundPoints;
+                saveProgress();
+                updateCharacterOptions();
+            };
 
-    const endGame = () => {
-    clearInterval(interval);
-    clearInterval(powerUpTimer);
-    bad.remove();
-    alert("💥 You clicked a trap! Game over.");
-    gameArea.innerHTML = "";
-    totalPoints += roundPoints;
-    saveProgress();
-    updateCharacterOptions();
-    };
-
-    bad.addEventListener("click", endGame);
-    bad.addEventListener("touchstart", endGame);
-    }
-    badBlockTimer = setInterval(spawnBadBlock, 6000); // every 6s
-    clearInterval(badBlockTimer);
-    {
-    "rules": {
-    ".read": true,
-    ".write": true
-    }
-    }
-    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-database-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-    </script>
-    function submitScore(name, score) {
-    const entry = {
-    name: name || "Anonymous",
-    score: score,
-    timestamp: Date.now()
-    };
-    db.ref("leaderboard").push(entry);
-    }
-
-    function showLeaderboard() {
-    db.ref("leaderboard")
-    .orderByChild("score")
-    .limitToLast(5)
-    .once("value", snapshot => {
-    const data = snapshot.val();
-    const list = Object.values(data || {}).sort((a, b) => b.score - a.score);
-    let html = "<h3>🌍 Top 5 Scores</h3>
-    <ol>";
-        list.forEach(entry => {
-        html += `<li>${entry.name}: ${entry.score}</li>`;
-        });
-        html += "</ol>";
-    document.getElementById("unlock-buttons").innerHTML += html;
-    });
-    }
-    let name = prompt("Enter your name for leaderboard:");
-    submitScore(name, score);
-    showLeaderboard();
+            bad.addEventListener("click", endGame);
+            bad.addEventListener("touchstart", endGame);
+        }
