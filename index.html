@@ -435,96 +435,23 @@
         document.addEventListener("keydown", e => keys[e.key] = true);
         document.addEventListener("keyup", e => keys[e.key] = false);
 
+        // Touch controls
         let swipeStart = null;
         document.addEventListener("touchstart", e => {
             swipeStart = e.touches[0].clientY;
         });
         document.addEventListener("touchend", e => {
             const dy = e.changedTouches[0].clientY - swipeStart;
-            if (Math.abs(dy) > 50) {
-                if (dy < 0) flipGravity();
-            }
+            if (Math.abs(dy) > 40 && dy < 0) flipGravity();
         });
 
+        // --- Controls ---
         function flipGravity() {
             player.flipped = !player.flipped;
             vibrate(30);
         }
 
-        function showModeMenu() {
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("modeMenu").style.display = "flex";
-        }
-        function showSettings() {
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("settingsMenu").style.display = "flex";
-            document.getElementById("vibrateToggle").checked = vibrationEnabled;
-        }
-        function hideSettings() {
-            document.getElementById("settingsMenu").style.display = "none";
-            document.getElementById("menu").style.display = "flex";
-        }
-        function returnToMenu() {
-            cancelAnimationFrame(loopId);
-            document.getElementById("levelMenu").style.display = "none";
-            document.getElementById("modeMenu").style.display = "none";
-            document.getElementById("menu").style.display = "flex";
-        }
-
-        function enterStoryMode() {
-            gameMode = 'story';
-            document.getElementById("modeMenu").style.display = "none";
-            document.getElementById("levelMenu").style.display = "flex";
-            generateLevelButtons();
-        }
-        function generateLevelButtons() {
-            const container = document.getElementById("levelButtons");
-            container.innerHTML = '';
-            storyLevels.forEach((lvl, i) => {
-                const btn = document.createElement("button");
-                btn.textContent = lvl.name;
-                btn.className = "menu-btn";
-                btn.disabled = i > storyProgress;
-                btn.onclick = () => startLevel(i);
-                container.appendChild(btn);
-            });
-        }
-
-        function enterOnlyUpMode() {
-            gameMode = 'up';
-            document.getElementById("modeMenu").style.display = "none";
-            startOnlyUp();
-        }
-
-        function startLevel(index) {
-            currentLevel = index;
-            loadLevel(storyLevels[index]);
-        }
-
-        function loadLevel(data) {
-            player.x = 100;
-            player.y = 500;
-            player.dx = player.dy = 0;
-            player.flipped = false;
-            player.climbing = false;
-            cameraY = 0;
-            platforms = data.platforms || [];
-            spikes = data.spikes || [];
-            enemies = (data.enemies || []).map(e => ({ ...e }));
-            ladders = data.ladders || [];
-            goal = data.goal || {};
-            particles = [];
-            lava.y = 10000;
-            applyTheme(data.theme || "normal");
-            document.getElementById("levelMenu").style.display = "none";
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("modeMenu").style.display = "none";
-            document.getElementById("levelIntro").textContent = data.name;
-            document.getElementById("levelIntro").classList.add("show");
-            setTimeout(() => document.getElementById("levelIntro").classList.remove("show"), 2000);
-            loop();
-        }
-
+        // --- Game Loop Start ---
         let loopId;
         function loop() {
             loopId = requestAnimationFrame(loop);
@@ -532,23 +459,20 @@
             draw();
         }
 
+        // --- Update game state ---
         function update() {
-            let inputLeft = keys["ArrowLeft"] || keys["a"] || touchLeft;
-            let inputRight = keys["ArrowRight"] || keys["d"] || touchRight;
-            let inputJump = keys["ArrowUp"] || keys["w"] || touchJump;
-            let inputFlip = keys[" "] || keys["f"] || touchFlip;
+            // --- Input flags ---
+            const inputLeft = keys["ArrowLeft"] || keys["a"] || touchLeft;
+            const inputRight = keys["ArrowRight"] || keys["d"] || touchRight;
+            const inputJump = keys["ArrowUp"] || keys["w"] || touchJump;
+            const inputDown = keys["ArrowDown"] || keys["s"];
 
-            if (inputFlip) {
-                flipGravity();
-                keys[" "] = touchFlip = false;
-            }
-
-            // Horizontal movement
+            // --- Gravity and input ---
             if (inputLeft) player.dx -= 0.5;
             if (inputRight) player.dx += 0.5;
             player.dx *= 0.85;
 
-            // Gravity + climbing
+            // Ladder check
             player.climbing = ladders.some(l =>
                 player.x + player.w > l.x &&
                 player.x < l.x + l.w &&
@@ -558,7 +482,7 @@
 
             if (player.climbing) {
                 if (inputJump) player.dy = -2;
-                else if (keys["ArrowDown"] || keys["s"]) player.dy = 2;
+                else if (inputDown) player.dy = 2;
                 else player.dy = 0;
             } else {
                 player.dy += player.flipped ? -gravity : gravity;
@@ -567,7 +491,7 @@
             player.x += player.dx;
             player.y += player.dy;
 
-            // Platform collision
+            // --- Collision: Platforms ---
             player.onGround = false;
             for (let p of platforms) {
                 let dir = collide(player, p);
@@ -586,24 +510,28 @@
                 }
             }
 
-            // Jumping
+            // --- Jump ---
             if (inputJump && player.onGround && !player.climbing) {
                 player.dy = player.flipped ? -10 : 10;
                 vibrate(30);
                 player.onGround = false;
             }
 
-            // Enemy logic + stomp
+            // --- Enemies ---
             for (let e of enemies) {
                 if (!e.alive) continue;
                 e.x += e.dx;
-                let groundBelow = platforms.some(p =>
-                    e.x + e.w > p.x && e.x < p.x + p.w &&
-                    e.y + e.h <= p.y && e.y + e.h + 2 > p.y
-                );
-                if (!groundBelow) e.dx *= -1;
 
-                let hit = collide(player, e);
+                // Turn around at edge
+                const edge = !platforms.some(p =>
+                    e.x + e.w > p.x &&
+                    e.x < p.x + p.w &&
+                    e.y + e.h <= p.y &&
+                    e.y + e.h + 1 >= p.y
+                );
+                if (edge) e.dx *= -1;
+
+                const hit = collide(player, e);
                 if (hit && ((player.dy > 0 && !player.flipped) || (player.dy < 0 && player.flipped))) {
                     e.alive = false;
                     player.dy = player.flipped ? -6 : 6;
@@ -614,19 +542,19 @@
                 }
             }
 
-            // Spike collision
+            // --- Spikes ---
             for (let s of spikes) {
                 if (collide(player, s)) {
                     death();
                 }
             }
 
-            // Lava death
-            if (player.y > lava.y) {
+            // --- Lava Death ---
+            if (player.y > lava.y || player.y < -5000) {
                 death();
             }
 
-            // Goal reach
+            // --- Goal check ---
             if (collide(player, goal)) {
                 vibrate(100);
                 if (gameMode === 'story' && currentLevel === storyProgress) {
@@ -636,19 +564,23 @@
                 returnToMenu();
             }
 
-            // Camera
+            // Camera follow
             cameraY = player.y - canvas.height / 2;
         }
+    </script>
+    <script>
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Background parallax
+            // Background
             ctx.fillStyle = themes[selectedTheme]["--bg"] || "#222";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#ffffff04";
-            for (let i = 0; i < 30; i++) {
+
+            // Parallax
+            ctx.fillStyle = "#ffffff08";
+            for (let i = 0; i < 40; i++) {
                 ctx.beginPath();
-                ctx.arc((i * 73) % canvas.width, ((i * 121) % canvas.height) - cameraY * 0.2, 30, 0, Math.PI * 2);
+                ctx.arc((i * 87) % canvas.width, ((i * 71) % canvas.height) - cameraY * 0.3, 40, 0, Math.PI * 2);
                 ctx.fill();
             }
 
@@ -695,12 +627,12 @@
                 ctx.fill();
             }
 
-            // Goal
+            // Goal animation
             ctx.save();
             ctx.translate(goal.x + goal.w / 2, goal.y + goal.h / 2 - cameraY);
-            const time = Date.now() * 0.005;
-            ctx.rotate(Math.sin(time) * 0.1);
-            ctx.scale(1 + Math.sin(time * 2) * 0.05, 1 + Math.cos(time * 2) * 0.05);
+            const t = Date.now() * 0.005;
+            ctx.rotate(Math.sin(t) * 0.1);
+            ctx.scale(1 + Math.sin(t * 2) * 0.05, 1 + Math.cos(t * 2) * 0.05);
             ctx.fillStyle = "#ff0";
             ctx.fillRect(-goal.w / 2, -goal.h / 2, goal.w, goal.h);
             ctx.restore();
@@ -724,6 +656,7 @@
             ctx.fillRect(player.x - 2, player.y - cameraY + 2, player.w + 4, player.h - 4);
         }
 
+        // --- Particle FX ---
         function spawnParticles(x, y) {
             for (let i = 0; i < 10; i++) {
                 particles.push({
@@ -735,17 +668,18 @@
             }
         }
 
+        // --- Death logic ---
         function death() {
             vibrate(100);
-            // Flash or fade animation
+            cancelAnimationFrame(loopId);
             ctx.fillStyle = "#f00";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            cancelAnimationFrame(loopId);
             setTimeout(() => {
                 loadLevel(storyLevels[currentLevel]);
             }, 500);
         }
 
+        // --- AABB Collision ---
         function collide(a, b) {
             if (
                 a.x < b.x + b.w &&
