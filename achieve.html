@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Catch the Squares Advanced</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #111; color: white; margin: 0; padding: 0; text-align: center; }
+  h1 { margin-top: 20px; }
+  button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+  #achievementsScreen {
+    display: none;
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 600px;
+    max-height: 60vh;
+    overflow-y: auto;
+    text-align: left;
+  }
+  .achievement {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #333;
+    border-radius: 8px;
+    transition: background 0.3s;
+  }
+  .achievement.locked {
+    opacity: 0.4;
+  }
+  .badge {
+    font-size: 24px;
+    margin-right: 12px;
+  }
+  .desc {
+    font-size: 16px;
+  }
+  #popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+  }
+  #popup.show {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+<h1>Catch the Squares Advanced</h1>
+<button onclick="showAchievements()">View Achievements</button>
+<div id="achievementsScreen"></div>
+<div id="popup"></div>
+
+<script>
+  const achievements = [
+    { id: "score10", name: "Getting Warmed Up", desc: "Score 10 points in one round", badge: "🔥" },
+    { id: "score50", name: "Half Century", desc: "Score 50 points in one round", badge: "🎯" },
+    { id: "collectorBasic1", name: "Collector of Basic Pack 1", desc: "Unlock all characters in Basic Pack 1", badge: "📦" },
+    { id: "unlockRare", name: "Rare Hunter", desc: "Unlock a rare character", badge: "💎" },
+    { id: "glitchverse", name: "Glitchverse Code", desc: "Find and enter the Glitch Cat code", badge: "🐱‍💻" }
+  ];
+
+  let unlockedAchievements = JSON.parse(localStorage.getItem("achievements") || "[]");
+
+  function unlockAchievement(id) {
+    if (!unlockedAchievements.includes(id)) {
+      unlockedAchievements.push(id);
+      localStorage.setItem("achievements", JSON.stringify(unlockedAchievements));
+      const a = achievements.find(a => a.id === id);
+      if (a) showPopup("🏆 Achievement Unlocked: " + a.name);
+      renderAchievements();
+    }
+  }
+
+  function renderAchievements() {
+    const div = document.getElementById("achievementsScreen");
+    div.innerHTML = "<h2>Achievements</h2>";
+    achievements.forEach(a => {
+      const el = document.createElement("div");
+      el.className = "achievement" + (unlockedAchievements.includes(a.id) ? "" : " locked");
+      el.innerHTML = `<div class="badge">${a.badge}</div><div class="desc"><strong>${a.name}</strong><br>${a.desc}</div>`;
+      div.appendChild(el);
+    });
+  }
+
+  function showPopup(msg) {
+    const popup = document.getElementById("popup");
+    popup.textContent = msg;
+    popup.classList.add("show");
+    setTimeout(() => popup.classList.remove("show"), 2000);
+  }
+
+  function showAchievements() {
+    const screen = document.getElementById("achievementsScreen");
+    screen.style.display = screen.style.display === "block" ? "none" : "block";
+    renderAchievements();
+  }
+
+  // Simulate unlocking one achievement for demo
+  setTimeout(() => unlockAchievement("score10"), 1000);
+</script>
+</body>
+</html>

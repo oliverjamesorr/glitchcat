@@ -2,388 +2,47 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
-</head>
-
-<body>
-    <h1>Hello, World!</h1>
-</body>
-
-</html>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Randomness Simulation</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #0099ff;
-        }
-
-        #output {
-            margin-top: 20px;
-            white-space: pre-line;
-        }
-
-        .letter {
-            font-weight: bold;
-            font-size: 25px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1>Random Number Generator:</h1>
-    <button onclick="generateRandomNumber()">Click to Generate</button>
-
-    <div id="output"></div>
-
-    <script>
-        function generateRandomNumber() {
-            const number = Math.floor(Math.random() * 9999999) + 1;
-            let output = `Randomly selected number: ${number}\n`;
-            output += `Did you know that the number ${number} is a random choice from a list of numbers 1 to 10,000,000?\n`;
-            output += "I hope you find this number interesting!\n";
-            output += "I hope you find this game cool!\n";
-            output += "I hope that you enjoyed this simulation of...\n";
-
-            const word = "randomness";
-            for (let i = 0; i < word.length; i++) {
-                output += word[i] + "\n";
-            }
-
-            document.getElementById("output").textContent = output;
-        }
-    </script>
-
-</body>
-
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Random Crazy Word Generator (Full Dictionary)</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 100px;
-        }
-
-        button {
-            font-size: 1.2em;
-            padding: 10px 20px;
-        }
-
-        #word {
-            margin-top: 30px;
-            font-size: 2em;
-            color: #333;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1>Random Crazy Word Generator</h1>
-    <button onclick="generateWord()">Generate Word</button>
-    <div id="word">Loading dictionary...</div>
-
-    <script>
-        let words = [];
-
-        // Load words from GitHub
-        fetch('https://raw.githubusercontent.com/dwyl/english-words/master/words.txt')
-            .then(response => response.text())
-            .then(text => {
-                words = text.split('\n').filter(w => w.length > 0);
-                document.getElementById('word').textContent = "Click the button!";
-            })
-            .catch(error => {
-                document.getElementById('word').textContent = "Failed to load dictionary.";
-                console.error("Error loading dictionary:", error);
-            });
-
-        function generateWord() {
-            if (words.length === 0) {
-                document.getElementById('word').textContent = "Dictionary not loaded yet.";
-                return;
-            }
-            const randomIndex = Math.floor(Math.random() * words.length);
-            document.getElementById('word').textContent = words[randomIndex];
-        }
-    </script>
-
-</body>
-
-</html>
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>GlitchCat Kitty Channel</title>
-    <style>
-        .youtube-button {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: white;
-            background-color: red;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .youtube-button:hover {
-            background-color: darkred;
-        }
-    </style>
-</head>
-
-<body>
-    <a class="youtube-button" href="https://www.youtube.com/@GlitchCat-Kitty" target="_blank">
-        The Best Youtube Channel EVER!
-    </a>
-</body>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Catch the Squares Advanced - Everything Included</title>
+    <title>Catch the Squares Advanced – Final Game</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             background: #111;
             color: white;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-
-        h1 {
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
-        }
-
-        #achievementsScreen {
-            display: none;
-            background: #222;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px auto;
-            width: 90%;
-            max-width: 600px;
-            max-height: 60vh;
-            overflow-y: auto;
-            text-align: left;
-        }
-
-        .achievement {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #333;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-
-        .achievement.locked {
-            opacity: 0.4;
-        }
-
-        .badge {
-            font-size: 24px;
-            margin-right: 12px;
-        }
-
-        .desc {
-            font-size: 16px;
-        }
-
-        #popup {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 1000;
-        }
-
-        #popup.show {
-            opacity: 1;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>Catch the Squares Advanced</h1>
-    <button onclick="showAchievements()">View Achievements</button>
-    <div id="achievementsScreen"></div>
-    <div id="popup"></div>
-
-    <script>
-        // === Full List of Achievements ===
-        const achievements = [
-            {
-                id: "achv1",
-                name: "Collector of Basic Pack 1",
-                desc: "Unlock all characters in Basic Pack 1",
-                badge: "🏆"
-            },
-            {
-                id: "achv2",
-                name: "Second Achievement",
-                desc: "How to unlock second",
-                badge: "🏆"
-            }
-        ];
-
-        let unlockedAchievements = JSON.parse(localStorage.getItem("achievements") || "[]");
-
-        function unlockAchievement(id) {
-            if (!unlockedAchievements.includes(id)) {
-                unlockedAchievements.push(id);
-                localStorage.setItem("achievements", JSON.stringify(unlockedAchievements));
-                const a = achievements.find(a => a.id === id);
-                if (a) showPopup("🏆 Achievement Unlocked: " + a.name);
-                renderAchievements();
-            }
-        }
-
-        function renderAchievements() {
-            const div = document.getElementById("achievementsScreen");
-            div.innerHTML = "<h2>Achievements</h2>";
-            achievements.forEach(a => {
-                const el = document.createElement("div");
-                el.className = "achievement" + (unlockedAchievements.includes(a.id) ? "" : " locked");
-                el.innerHTML = `<div class="badge">${a.badge}</div><div class="desc"><strong>${a.name}</strong><br>${a.desc}</div>`;
-                div.appendChild(el);
-            });
-        }
-
-        function showPopup(msg) {
-            const popup = document.getElementById("popup");
-            popup.textContent = msg;
-            popup.classList.add("show");
-            setTimeout(() => popup.classList.remove("show"), 2000);
-        }
-
-        function showAchievements() {
-            const screen = document.getElementById("achievementsScreen");
-            screen.style.display = screen.style.display === "block" ? "none" : "block";
-            renderAchievements();
-        }
-
-        // === Hookup Triggers Example ===
-        function checkScoreAchievements(score, totalPoints) {
-            if (score >= 10) unlockAchievement("achv2");
-            if (score >= 50) unlockAchievement("achv3");
-            if (score >= 100) unlockAchievement("achv4");
-            if (totalPoints >= 500) unlockAchievement("achv19");
-            if (totalPoints >= 1000) unlockAchievement("achv20");
-        }
-        function checkCharacterUnlockAchievements(char) {
-            if (char.rarity === "rare") unlockAchievement("achv8");
-            if (char.rarity === "epic") unlockAchievement("achv9");
-            if (char.rarity === "legendary") unlockAchievement("achv10");
-            if (char.rarity === "transcendent") unlockAchievement("achv24");
-        }
-        function handleSecretCodeEntry(code) {
-            if (code === "The Glitch Cat") {
-                unlockAchievement("achv21");
-            }
-        }
-
-        // Demo: Unlock one for testing
-        setTimeout(() => unlockAchievement("achv1"), 1500);
-    </script>
-</body>
-
-</html>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Catch the Squares Advanced</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
+            font-family: sans-serif;
             text-align: center;
             margin: 0;
             padding: 0;
         }
 
         h1 {
-            margin-top: 20px;
+            margin: 20px;
         }
 
         #game-area {
-            position: relative;
-            margin: 20px auto;
-            width: 600px;
+            width: 90vw;
+            max-width: 600px;
             height: 400px;
             background: #222;
-            border: 2px solid #555;
+            margin: 10px auto;
+            border: 2px solid #444;
+            position: relative;
             overflow: hidden;
-            touch-action: manipulation;
-        }
-
-        .square,
-        .powerup {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            transition: transform 0.1s linear;
-            z-index: 2;
         }
 
         .square {
+            width: 50px;
+            height: 50px;
             background: blue;
+            position: absolute;
+            transition: transform 0.2s ease, opacity 0.3s ease;
+            cursor: pointer;
         }
 
-        .powerup {
-            background: green;
-        }
-
-        .player-style-basic {
-            background: red;
-        }
-
-        .player-style-circle {
-            border-radius: 50%;
-            background: red;
-        }
-
-        .player-style-emoji,
-        .player-style-unlocked {
-            background: none;
-            font-size: 40px;
-            line-height: 50px;
+        button {
+            margin: 8px;
+            padding: 10px 18px;
+            font-size: 16px;
         }
 
         #scoreboard {
@@ -391,139 +50,6 @@
             font-size: 18px;
         }
 
-        #progressBarContainer {
-            width: 600px;
-            height: 20px;
-            background: #333;
-            margin: 10px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        #progressBar {
-            background: linear-gradient(90deg, #4caf50, #8bc34a);
-            height: 100%;
-            width: 100%;
-            transition: width 1s linear;
-        }
-
-        #progressNumber {
-            position: absolute;
-            right: 8px;
-            top: 0;
-            color: white;
-            font-weight: bold;
-            line-height: 20px;
-            user-select: none;
-        }
-
-        #pullAnimationContainer {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000c;
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            font-size: 2em;
-            font-weight: bold;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>🎯 Catch the Squares!</h1>
-    <div id="scoreboard">Score: 0 | Time Left: 30s</div>
-    <div id="progressBarContainer">
-        <div id="progressBar"></div>
-        <div id="progressNumber">30</div>
-    </div>
-    <div id="game-area"></div>
-    <div id="pullAnimationContainer"></div>
-
-    <script>
-        function showPullAnimation(character) {
-            const container = document.getElementById("pullAnimationContainer");
-            container.innerHTML = `<div style='font-size:3em;'>🎁 ${character.emoji || ''} ${character.name}</div><div style='margin-top:20px;font-size:1.2em;'>${character.rarity}</div>`;
-            container.style.display = "flex";
-            setTimeout(() => {
-                container.style.display = "none";
-            }, 3000);
-        }
-    </script>
-</body>
-
-</html># Final full HTML with all systems: achievements, triggers, transitions, character packs, popup messages
-final_combined_html = """
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Catch the Squares Advanced - Everything Included</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-
-        h1 {
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
-        }
-
-        #achievementsScreen {
-            display: none;
-            background: #222;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px auto;
-            width: 90%;
-            max-width: 600px;
-            max-height: 60vh;
-            overflow-y: auto;
-            text-align: left;
-        }
-
-        .achievement {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #333;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-
-        .achievement.locked {
-            opacity: 0.4;
-        }
-
-        .badge {
-            font-size: 24px;
-            margin-right: 12px;
-        }
-
-        .desc {
-            font-size: 16px;
-        }
-
         #popup {
             position: fixed;
             bottom: 20px;
@@ -540,38 +66,86 @@ final_combined_html = """
         #popup.show {
             opacity: 1;
         }
+
+        #achievementsScreen {
+            display: none;
+            background: #222;
+            margin: 20px auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            text-align: left;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .achievement {
+            background: #333;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .achievement.locked {
+            opacity: 0.4;
+        }
+
+        .badge {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .desc {
+            font-size: 16px;
+        }
+
+        .mastery {
+            text-align: center;
+            font-size: 20px;
+            padding: 10px;
+            margin: 15px auto;
+            background: linear-gradient(to right, gold, orange);
+            color: black;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .mastery.show {
+            display: block;
+            box-shadow: 0 0 10px gold;
+        }
     </style>
 </head>
 
 <body>
     <h1>Catch the Squares Advanced</h1>
+    <div id="scoreboard">Score: 0</div>
+    <button onclick="startGame()">Start Game</button>
     <button onclick="showAchievements()">View Achievements</button>
+    <div class="mastery" id="masteryBadge">🌟 Mastery Unlocked! All 50 achievements complete!</div>
+    <div id="game-area"></div>
     <div id="achievementsScreen"></div>
     <div id="popup"></div>
 
     <script>
-        // === Full List of Achievements ===
-        const achievements = [
-            {
-                id: "achv1",
-                name: "First Achievement",
-                desc: "How to unlock first",
+        const achievements = [];
+        for (let i = 1; i <= 50; i++) {
+            achievements.push({
+                id: "achv" + i,
+                name: "Achievement " + i,
+                desc: "Unlock condition for achievement " + i,
                 badge: "🏆"
-            },
-            {
-                id: "achv2",
-                name: "Second Achievement",
-                desc: "How to unlock second",
-                badge: "🏆"
-            }
-        ];
-
-        let unlockedAchievements = JSON.parse(localStorage.getItem("achievements")) || [];
+            });
+        }
+        let unlocked = JSON.parse(localStorage.getItem("achievements") || "[]");
 
         function unlockAchievement(id) {
-            if (!unlockedAchievements.includes(id)) {
-                unlockedAchievements.push(id);
-                localStorage.setItem("achievements", JSON.stringify(unlockedAchievements));
+            if (!unlocked.includes(id)) {
+                unlocked.push(id);
+                localStorage.setItem("achievements", JSON.stringify(unlocked));
                 const a = achievements.find(a => a.id === id);
                 if (a) showPopup("🏆 Achievement Unlocked: " + a.name);
                 renderAchievements();
@@ -583,10 +157,19 @@ final_combined_html = """
             div.innerHTML = "<h2>Achievements</h2>";
             achievements.forEach(a => {
                 const el = document.createElement("div");
-                el.className = "achievement" + (unlockedAchievements.includes(a.id) ? "" : " locked");
+                el.className = "achievement" + (unlocked.includes(a.id) ? "" : " locked");
                 el.innerHTML = `<div class="badge">${a.badge}</div><div class="desc"><strong>${a.name}</strong><br>${a.desc}</div>`;
                 div.appendChild(el);
             });
+            if (unlocked.length >= 50) {
+                document.getElementById("masteryBadge").classList.add("show");
+            }
+        }
+
+        function showAchievements() {
+            const screen = document.getElementById("achievementsScreen");
+            screen.style.display = screen.style.display === "block" ? "none" : "block";
+            renderAchievements();
         }
 
         function showPopup(msg) {
@@ -596,43 +179,37 @@ final_combined_html = """
             setTimeout(() => popup.classList.remove("show"), 2000);
         }
 
-        function showAchievements() {
-            const screen = document.getElementById("achievementsScreen");
-            screen.style.display = screen.style.display === "block" ? "none" : "block";
-            renderAchievements();
+        // === Gameplay ===
+        let score = 0;
+        function startGame() {
+            const game = document.getElementById("game-area");
+            score = 0;
+            document.getElementById("scoreboard").textContent = "Score: 0";
+            game.innerHTML = "";
+            for (let i = 0; i < 3; i++) spawnSquare();
         }
 
-        // === Hookup Triggers Example ===
-        function checkScoreAchievements(score, totalPoints) {
-            if (score >= 10) unlockAchievement("achv2");
-            if (score >= 50) unlockAchievement("achv3");
-            if (score >= 100) unlockAchievement("achv4");
-            if (totalPoints >= 500) unlockAchievement("achv19");
-            if (totalPoints >= 1000) unlockAchievement("achv20");
+        function spawnSquare() {
+            const game = document.getElementById("game-area");
+            const square = document.createElement("div");
+            square.className = "square";
+            square.style.left = Math.random() * (game.clientWidth - 50) + "px";
+            square.style.top = Math.random() * (game.clientHeight - 50) + "px";
+            square.onclick = () => {
+                score++;
+                document.getElementById("scoreboard").textContent = "Score: " + score;
+                if (score >= 1) unlockAchievement("achv1");
+                if (score >= 10) unlockAchievement("achv2");
+                if (score >= 50) unlockAchievement("achv3");
+                if (score >= 100) unlockAchievement("achv4");
+                if (score >= 500) unlockAchievement("achv5");
+                if (score >= 1000) unlockAchievement("achv6");
+                square.remove();
+                spawnSquare();
+            };
+            game.appendChild(square);
         }
-        function checkCharacterUnlockAchievements(char) {
-            if (char.rarity === "rare") unlockAchievement("achv8");
-            if (char.rarity === "epic") unlockAchievement("achv9");
-            if (char.rarity === "legendary") unlockAchievement("achv10");
-            if (char.rarity === "transcendent") unlockAchievement("achv24");
-        }
-        function handleSecretCodeEntry(code) {
-            if (code === "The Glitch Cat") {
-                unlockAchievement("achv21");
-            }
-        }
-
-        // Demo: Unlock one for testing
-        setTimeout(() => unlockAchievement("achv1"), 1500);
     </script>
 </body>
 
 </html>
-"""
-
-# Save the complete HTML file
-final_combined_file = "/mnt/data/CatchTheSquaresAdvanced_EVERYTHING.html"
-with open(final_combined_file, "w", encoding="utf-8") as f:
-f.write(final_combined_html)
-
-final_combined_file
