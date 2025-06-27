@@ -153,14 +153,12 @@
         The Best Youtube Channel EVER!
     </a>
 </body>
-
-</html>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Catch the Square</title>
+    <title>Catch the Squares Advanced</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -183,98 +181,441 @@
             background: #222;
             border: 2px solid #555;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
-        .square {
+        .square,
+        .powerup {
             position: absolute;
             width: 50px;
             height: 50px;
-            background: red;
             cursor: pointer;
+            transition: transform 0.1s linear;
+            z-index: 2;
+        }
+
+        .square {
+            background: blue;
+        }
+
+        .powerup {
+            background: green;
+        }
+
+        .player-style-basic {
+            background: red;
+        }
+
+        .player-style-circle {
+            border-radius: 50%;
+            background: red;
+        }
+
+        .player-style-emoji,
+        .player-style-unlocked {
+            background: none;
+            font-size: 40px;
+            line-height: 50px;
         }
 
         #scoreboard {
             margin: 10px;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         button {
-            margin-top: 20px;
+            margin: 10px;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
+        }
+
+        select,
+        option {
+            font-size: 16px;
+            padding: 5px;
+        }
+
+        #options {
+            margin: 20px;
+        }
+
+        .locked {
+            color: #888;
+        }
+
+        .unlock-btn {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 2px;
+        }
+
+        .unlock-btn:disabled {
+            background-color: #222;
+            color: #777;
+            cursor: default;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: yellow;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: explode 0.6s ease-out forwards;
+        }
+
+        @keyframes explode {
+            to {
+                transform: translate(var(--dx), var(--dy)) scale(0.1);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <h1>🎯 Catch the Square!</h1>
+    <h1>🎯 Catch the Squares!</h1>
     <div id="scoreboard">Score: 0 | Time Left: 30s</div>
     <div id="game-area"></div>
-    <button onclick="startGame()">Start Game</button>
 
+    <div id="options">
+        <label>Choose Character:
+            <select id="player-style"></select>
+        </label>
+
+        <label>Choose Difficulty:
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+        </label>
+
+        <br>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="unlock-buttons"></div>
     <script>
         const gameArea = document.getElementById('game-area');
         const scoreboard = document.getElementById('scoreboard');
-        let score = 0;
-        let timeLeft = 30;
-        let interval, squareTimeout;
+        const playerStyleSelect = document.getElementById('player-style');
+        const difficultySelect = document.getElementById('difficulty');
+        const unlockButtonsDiv = document.getElementById('unlock-buttons');
+
+        let score = 0, totalPoints = 0, roundPoints = 0, timeLeft = 30, interval, squareCount = 0;
+        const maxSquares = 5;
+        let squareSpeed = 1, squareLife = 3000;
+        let powerUpTimer;
+
+        const characters = [
+            { name: "Red Square", value: "player-style-basic", cost: 0 },
+            { name: "Red Circle", value: "player-style-circle", cost: 10 },
+            { name: "🐱 Cat Emoji", value: "player-style-emoji", emoji: "🐱", cost: 20 },
+            { name: "🦊 Fox Emoji", value: "player-style-unlocked", emoji: "🦊", cost: 40 }
+        ];
+
+        let highScore = parseInt(localStorage.getItem("highScore") || "0");
+        totalPoints = parseInt(localStorage.getItem("totalPoints") || "0");
+        let unlockedCharacters = JSON.parse(localStorage.getItem("unlockedCharacters") || '["player-style-basic"]');
+
+        function saveProgress() {
+            localStorage.setItem("highScore", highScore);
+            localStorage.setItem("totalPoints", totalPoints);
+            localStorage.setItem("unlockedCharacters", JSON.stringify(unlockedCharacters));
+        }
+
+        function updateCharacterOptions() {
+            playerStyleSelect.innerHTML = "";
+            unlockButtonsDiv.innerHTML = "<h3>🔓 Unlock Characters</h3>";
+
+            characters.forEach(char => {
+                const option = document.createElement("option");
+                option.value = char.value;
+
+                if (unlockedCharacters.includes(char.value)) {
+                    option.textContent = char.name;
+                } else {
+                    option.textContent = `${char.name} - Locked (${char.cost} pts)`;
+                    option.disabled = true;
+                    option.classList.add("locked");
+
+                    const btn = document.createElement("button");
+                    btn.className = "unlock-btn";
+                    btn.textContent = `Unlock ${char.name} (${char.cost})`;
+                    btn.disabled = totalPoints < char.cost;
+                    btn.onclick = () => unlockCharacter(char.value);
+                    unlockButtonsDiv.appendChild(btn);
+                }
+
+                playerStyleSelect.appendChild(option);
+            });
+        }
+
+        function unlockCharacter(value) {
+            const char = characters.find(c => c.value === value);
+            if (!char || unlockedCharacters.includes(value)) return;
+            if (totalPoints >= char.cost) {
+                totalPoints -= char.cost;
+                unlockedCharacters.push(value);
+                saveProgress();
+                updateCharacterOptions();
+                alert(`✅ You unlocked: ${char.name}`);
+            } else {
+                alert("Not enough points!");
+            }
+        }
+
+        function updateScoreboard() {
+            scoreboard.innerHTML = `
+      Score: ${score} | Time Left: ${timeLeft}s <br>
+      Round Points: ${roundPoints} | Total Points: ${totalPoints} | High Score: ${highScore}
+    `;
+        }
+
+        function setDifficulty(level) {
+            switch (level) {
+                case 'easy': squareSpeed = 0.5; squareLife = 4000; break;
+                case 'medium': squareSpeed = 1; squareLife = 3000; break;
+                case 'hard': squareSpeed = 2; squareLife = 2000; break;
+            }
+        }
 
         function getRandomPosition() {
-            const x = Math.floor(Math.random() * (gameArea.clientWidth - 50));
-            const y = Math.floor(Math.random() * (gameArea.clientHeight - 50));
+            const x = Math.random() * (gameArea.clientWidth - 50);
+            const y = Math.random() * (gameArea.clientHeight - 50);
             return { x, y };
         }
 
+        function moveSquare(square) {
+            const { x, y } = getRandomPosition();
+            square.style.left = `${x}px`;
+            square.style.top = `${y}px`;
+        }
+
+        function animateSquare(square) {
+            const moveInterval = setInterval(() => {
+                if (!square.parentNode) {
+                    clearInterval(moveInterval);
+                    return;
+                }
+                moveSquare(square);
+            }, 1000 / squareSpeed);
+        }
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 8; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = `${x}px`;
+                p.style.top = `${y}px`;
+                p.style.setProperty('--dx', `${Math.random() * 100 - 50}px`);
+                p.style.setProperty('--dy', `${Math.random() * 100 - 50}px`);
+                gameArea.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        }
+
         function spawnSquare() {
+            if (squareCount >= maxSquares) return;
+
             const square = document.createElement('div');
             square.classList.add('square');
+
             const { x, y } = getRandomPosition();
             square.style.left = `${x}px`;
             square.style.top = `${y}px`;
 
-            square.onclick = () => {
+            const player = document.createElement('div');
+            const selected = playerStyleSelect.value;
+            const charData = characters.find(c => c.value === selected);
+
+            player.className = selected;
+            player.style.width = "100%";
+            player.style.height = "100%";
+            player.style.display = "flex";
+            player.style.justifyContent = "center";
+            player.style.alignItems = "center";
+            if (charData?.emoji) player.textContent = charData.emoji;
+
+            square.appendChild(player);
+            gameArea.appendChild(square);
+            squareCount++;
+
+            animateSquare(square);
+
+            const removeTimeout = setTimeout(() => {
+                if (square.parentNode) {
+                    square.remove();
+                    squareCount--;
+                    spawnSquare();
+                }
+            }, squareLife);
+
+            const handleClick = (e) => {
                 score++;
+                roundPoints = Math.floor(score / 2);
+                if (score > highScore) highScore = score;
                 updateScoreboard();
+                clearTimeout(removeTimeout);
+                createParticles(e.clientX - gameArea.offsetLeft, e.clientY - gameArea.offsetTop);
                 square.remove();
+                squareCount--;
                 spawnSquare();
             };
 
-            gameArea.appendChild(square);
-
-            squareTimeout = setTimeout(() => {
-                square.remove();
-                spawnSquare();
-            }, 1500); // if not clicked, respawn
+            square.addEventListener("click", handleClick);
+            square.addEventListener("touchstart", handleClick);
         }
 
-        function updateScoreboard() {
-            scoreboard.textContent = `Score: ${score} | Time Left: ${timeLeft}s`;
+        function spawnPowerUp() {
+            const type = Math.random() > 0.5 ? "time" : "points";
+            const powerup = document.createElement("div");
+            powerup.className = "powerup";
+            powerup.title = type === "time" ? "+5s" : "+5 pts";
+            const { x, y } = getRandomPosition();
+            powerup.style.left = `${x}px`;
+            powerup.style.top = `${y}px`;
+            gameArea.appendChild(powerup);
+
+            const onPickup = () => {
+                if (type === "time") timeLeft += 5;
+                if (type === "points") {
+                    score += 5;
+                    roundPoints = Math.floor(score / 2);
+                    if (score > highScore) highScore = score;
+                }
+                updateScoreboard();
+                createParticles(x + 25, y + 25);
+                powerup.remove();
+            };
+
+            powerup.addEventListener("click", onPickup);
+            powerup.addEventListener("touchstart", onPickup);
+
+            setTimeout(() => powerup.remove(), 5000);
         }
 
         function startGame() {
             score = 0;
+            roundPoints = 0;
             timeLeft = 30;
-            updateScoreboard();
+            squareCount = 0;
             gameArea.innerHTML = '';
             clearInterval(interval);
-            clearTimeout(squareTimeout);
-            spawnSquare();
+            clearInterval(powerUpTimer);
 
+            setDifficulty(difficultySelect.value);
+            updateCharacterOptions();
+
+            for (let i = 0; i < maxSquares; i++) spawnSquare();
             interval = setInterval(() => {
                 timeLeft--;
                 updateScoreboard();
                 if (timeLeft <= 0) {
                     clearInterval(interval);
-                    clearTimeout(squareTimeout);
+                    clearInterval(powerUpTimer);
+                    totalPoints += roundPoints;
+                    saveProgress();
+                    alert(`🕹 Game Over! Score: ${score}, Points Earned: ${roundPoints}`);
+                    updateCharacterOptions();
                     gameArea.innerHTML = '';
-                    alert(`⏰ Time's up! Your score: ${score}`);
                 }
             }, 1000);
+
+            powerUpTimer = setInterval(spawnPowerUp, 8000); // powerup every 8s
+            updateScoreboard();
         }
+
+        updateCharacterOptions();
+        updateScoreboard();
     </script>
+    function spawnBadBlock() {
+    const bad = document.createElement("div");
+    bad.className = "square";
+    bad.style.background = "darkred"; // distinguish from blue
 
-</body>
+    const { x, y } = getRandomPosition();
+    bad.style.left = `${x}px`;
+    bad.style.top = `${y}px`;
 
-</html>
+    gameArea.appendChild(bad);
+
+    animateSquare(bad);
+
+    const removeTimeout = setTimeout(() => {
+    if (bad.parentNode) bad.remove();
+    }, 4000); // lasts 4 seconds
+
+    const endGame = () => {
+    clearInterval(interval);
+    clearInterval(powerUpTimer);
+    bad.remove();
+    alert("💥 You clicked a trap! Game over.");
+    gameArea.innerHTML = "";
+    totalPoints += roundPoints;
+    saveProgress();
+    updateCharacterOptions();
+    };
+
+    bad.addEventListener("click", endGame);
+    bad.addEventListener("touchstart", endGame);
+    }
+    badBlockTimer = setInterval(spawnBadBlock, 6000); // every 6s
+    clearInterval(badBlockTimer);
+    {
+    "rules": {
+    ".read": true,
+    ".write": true
+    }
+    }
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+    </script>
+    function submitScore(name, score) {
+    const entry = {
+    name: name || "Anonymous",
+    score: score,
+    timestamp: Date.now()
+    };
+    db.ref("leaderboard").push(entry);
+    }
+
+    function showLeaderboard() {
+    db.ref("leaderboard")
+    .orderByChild("score")
+    .limitToLast(5)
+    .once("value", snapshot => {
+    const data = snapshot.val();
+    const list = Object.values(data || {}).sort((a, b) => b.score - a.score);
+    let html = "<h3>🌍 Top 5 Scores</h3>
+    <ol>";
+        list.forEach(entry => {
+        html += `<li>${entry.name}: ${entry.score}</li>`;
+        });
+        html += "</ol>";
+    document.getElementById("unlock-buttons").innerHTML += html;
+    });
+    }
+    let name = prompt("Enter your name for leaderboard:");
+    submitScore(name, score);
+    showLeaderboard();
