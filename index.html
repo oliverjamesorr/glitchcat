@@ -155,3 +155,126 @@
 </body>
 
 </html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Catch the Square</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        #game-area {
+            position: relative;
+            margin: 20px auto;
+            width: 600px;
+            height: 400px;
+            background: #222;
+            border: 2px solid #555;
+            overflow: hidden;
+        }
+
+        .square {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: red;
+            cursor: pointer;
+        }
+
+        #scoreboard {
+            margin: 10px;
+            font-size: 20px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎯 Catch the Square!</h1>
+    <div id="scoreboard">Score: 0 | Time Left: 30s</div>
+    <div id="game-area"></div>
+    <button onclick="startGame()">Start Game</button>
+
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const scoreboard = document.getElementById('scoreboard');
+        let score = 0;
+        let timeLeft = 30;
+        let interval, squareTimeout;
+
+        function getRandomPosition() {
+            const x = Math.floor(Math.random() * (gameArea.clientWidth - 50));
+            const y = Math.floor(Math.random() * (gameArea.clientHeight - 50));
+            return { x, y };
+        }
+
+        function spawnSquare() {
+            const square = document.createElement('div');
+            square.classList.add('square');
+            const { x, y } = getRandomPosition();
+            square.style.left = `${x}px`;
+            square.style.top = `${y}px`;
+
+            square.onclick = () => {
+                score++;
+                updateScoreboard();
+                square.remove();
+                spawnSquare();
+            };
+
+            gameArea.appendChild(square);
+
+            squareTimeout = setTimeout(() => {
+                square.remove();
+                spawnSquare();
+            }, 1500); // if not clicked, respawn
+        }
+
+        function updateScoreboard() {
+            scoreboard.textContent = `Score: ${score} | Time Left: ${timeLeft}s`;
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            updateScoreboard();
+            gameArea.innerHTML = '';
+            clearInterval(interval);
+            clearTimeout(squareTimeout);
+            spawnSquare();
+
+            interval = setInterval(() => {
+                timeLeft--;
+                updateScoreboard();
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    clearTimeout(squareTimeout);
+                    gameArea.innerHTML = '';
+                    alert(`⏰ Time's up! Your score: ${score}`);
+                }
+            }, 1000);
+        }
+    </script>
+
+</body>
+
+</html>
