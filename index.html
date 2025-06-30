@@ -1,481 +1,234 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Gravity Flip Platformer</title>
+    <title>3D Platformer</title>
     <style>
-        /* All your existing CSS is the same, no changes needed */
-        /* You can keep the <style> section exactly as it was */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        #menu,
+        #levelSelector {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        #levelSelector button {
+            margin: 4px;
+            padding: 6px 12px;
+        }
     </style>
 </head>
 
 <body>
+    <div id="ui">Level 1 - WASD + Mouse. Space: Jump | G: Gravity | D: Double Jump | T: Time Slow | F: Dash | Click:
+        Swing Bat<br>❤️ <span id="hearts">3</span> Lives</div>
     <div id="menu">
-        <h1>Gravity Flip Platformer</h1>
-        <button class="menu-btn" onclick="showModeMenu()">Start Game</button>
-        <div>
-            <div>Select Character:</div>
-            <div class="char-select">
-                <div class="char-option char-red" onclick="selectCharacter('#e33')"></div>
-                <div class="char-option char-blue" onclick="selectCharacter('#33e')"></div>
-                <div class="char-option char-green" onclick="selectCharacter('#3e3')"></div>
-                <div class="char-option char-yellow" onclick="selectCharacter('#ee3')"></div>
-                <div class="char-option char-pink" onclick="selectCharacter('#e3e')"></div>
-            </div>
-        </div>
-        <div>
-            <div>Select Theme:</div>
-            <div class="preview-grid">
-                <div class="theme-preview preview-normal" onclick="selectTheme('normal')"></div>
-                <div class="theme-preview preview-jungle" onclick="selectTheme('jungle')"></div>
-                <div class="theme-preview preview-snowy" onclick="selectTheme('snowy')"></div>
-                <div class="theme-preview preview-space" onclick="selectTheme('space')"></div>
-                <div class="theme-preview preview-underwater" onclick="selectTheme('underwater')"></div>
-            </div>
-        </div>
-        <button class="menu-btn" onclick="showSettings()">Settings</button>
+        <button onclick="startGame()">Start Game</button>
+        <button onclick="loadGame()">Load Game</button>
     </div>
-
-    <div id="modeMenu">
-        <h2>Select Game Mode</h2>
-        <button class="menu-btn" onclick="enterStoryMode()">Story Mode</button>
-        <button class="menu-btn" onclick="enterOnlyUpMode()">Only Up Mode</button>
-    </div>
-
-    <div id="levelMenu">
-        <h2>Select Level</h2>
-        <div id="levelButtons"></div>
-    </div>
-
-    <div id="settingsMenu">
-        <h2>Settings</h2>
-        <label>
-            <input type="checkbox" id="vibrateToggle" onchange="toggleVibration()" checked>
-            Vibration Feedback
-        </label>
-        <button class="menu-btn" onclick="hideSettings()">Back</button>
-    </div>
-    <canvas id="gameCanvas"></canvas>
-
-    <div id="levelIntro"></div>
-    <div id="infoOverlay">
-        Theme: <span id="themeLabel">Normal</span><br>
-        Character: <span id="charSwatch"></span>
-    </div>
-    <button id="backBtn" onclick="returnToMenu()">Back to Menu</button>
-    <button id="musicBtn" onclick="toggleMusic()">🔊 Music</button>
-
-    <div id="touchControls">
-        <div class="touch-btn" ontouchstart="touchLeft=true" ontouchend="touchLeft=false">◀</div>
-        <div class="touch-btn" ontouchstart="touchRight=true" ontouchend="touchRight=false">▶</div>
-    </div>
-    <div id="jumpBtn" class="touch-btn" ontouchstart="touchJump=true" ontouchend="touchJump=false">⤒</div>
-    <div id="flipBtn" class="touch-btn" ontouchstart="touchFlip=true" ontouchend="touchFlip=false">⟳</div>
-
+    <div id="levelSelector"></div>
+    <audio id="hitSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_d229b2bb27.mp3"></audio>
+    <audio id="winSound" src="https://cdn.pixabay.com/audio/2022/03/02/audio_d79e5306c3.mp3"></audio>
+    <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2022/03/16/audio_5df7b2f1f6.mp3" loop autoplay></audio>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/PointerLockControls.js"></script>
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+        let scene, camera, renderer, controls, player, velocity, onGround = false;
+        let powerups = { gravity: false, doubleJump: false, dash: true, timeSlow: false };
+        let canDoubleJump = false, speed = 400;
+        let boss, bossHealth = 3;
+        let enemies = [], particles = [], fireballs = [];
+        const hitSound = document.getElementById("hitSound");
+        const winSound = document.getElementById("winSound");
+        let currentLevel = 1;
+        let maxLevel = 1;
+        let shakeTime = 0;
+        let health = 3;
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        const ui = document.getElementById("ui");
+        const hearts = document.getElementById("hearts");
+        const menu = document.getElementById("menu");
+        const levelSelector = document.getElementById("levelSelector");
+
+        function saveGame() {
+            localStorage.setItem("platformerSave", JSON.stringify({ level: maxLevel, health }));
         }
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
-
-        const themes = {
-            normal: { "--bg": "#222", platform: "#888", enemy: "#f44", lava: "#c00" },
-            jungle: { "--bg": "#2b4028", platform: "#5a3e1b", enemy: "#d93", lava: "#831" },
-            snowy: { "--bg": "#ddeeff", platform: "#aaccee", enemy: "#44f", lava: "#00f" },
-            space: { "--bg": "#000010", platform: "#666", enemy: "#f6f", lava: "#f3f" },
-            underwater: { "--bg": "#003344", platform: "#227788", enemy: "#0cc", lava: "#f06" }
-        };
-
-        let selectedTheme = 'normal';
-        let playerColor = '#e33';
-
-        function applyTheme(name) {
-            selectedTheme = name;
-            const t = themes[name];
-            for (const key in t) {
-                document.documentElement.style.setProperty(key, t[key]);
+        function loadGame() {
+            const save = JSON.parse(localStorage.getItem("platformerSave"));
+            if (save) {
+                maxLevel = save.level || 1;
+                health = save.health || 3;
+                updateHearts();
+                showLevelSelector();
+            }
+        }
+        function startGame() {
+            menu.style.display = "none";
+            levelSelector.style.display = "none";
+            currentLevel = 1;
+            health = 3;
+            maxLevel = 1;
+            init();
+            animate();
+        }
+        function showLevelSelector() {
+            levelSelector.innerHTML = '<h2>Select Level</h2>';
+            for (let i = 1; i <= maxLevel; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = `Level ${i}`;
+                btn.onclick = () => {
+                    currentLevel = i;
+                    levelSelector.style.display = "none";
+                    clearScene();
+                    addLevel(currentLevel);
+                    player.position.set(0, 20, 0);
+                };
+                levelSelector.appendChild(btn);
+            }
+            levelSelector.style.display = "block";
+        }
+        function updateHearts() {
+            hearts.textContent = health;
+            if (health <= 0) {
+                alert("Game Over");
+                health = 3;
+                currentLevel = 1;
+                maxLevel = 1;
+                saveGame();
             }
         }
 
-        function selectTheme(name) {
-            applyTheme(name);
-            updateOverlay();
+        menu.style.display = "block";
+        // GAMEPLAY LOGIC CONTINUES FROM CHUNK 1
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            controls = new THREE.PointerLockControls(camera, document.body);
+            scene.add(controls.getObject());
+            document.body.addEventListener('click', () => controls.lock());
+            document.addEventListener('mousedown', () => swingBat());
+            const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+            light.position.set(0, 200, 0);
+            scene.add(light);
+            addLevel(currentLevel);
+            player = controls.getObject();
+            velocity = new THREE.Vector3();
+            document.addEventListener('keydown', onKeyDown);
         }
 
-        function selectCharacter(color) {
-            playerColor = color;
-            updateOverlay();
-        }
-
-        function updateOverlay() {
-            document.getElementById("themeLabel").textContent = selectedTheme[0].toUpperCase() + selectedTheme.slice(1);
-            document.getElementById("charSwatch").style.background = playerColor;
-        }
-
-        let vibrationEnabled = JSON.parse(localStorage.getItem("vibration") ?? "true");
-        function toggleVibration() {
-            vibrationEnabled = document.getElementById("vibrateToggle").checked;
-            localStorage.setItem("vibration", JSON.stringify(vibrationEnabled));
-        }
-        function vibrate(ms) {
-            if (vibrationEnabled && navigator.vibrate) navigator.vibrate(ms);
-        }
-
-        let music = new Audio();
-        music.src = "https://upload.wikimedia.org/wikipedia/commons/8/8e/Lo-fi_song_for_background.ogg";
-        music.loop = true;
-
-        function toggleMusic() {
-            if (music.paused) {
-                music.play();
-                document.getElementById("musicBtn").textContent = "🔊 Music";
-            } else {
-                music.pause();
-                document.getElementById("musicBtn").textContent = "🔇 Music";
-            }
-        }
-    </script>
-    <script>
-        let keys = {};
-        document.addEventListener("keydown", e => keys[e.key] = true);
-        document.addEventListener("keyup", e => keys[e.key] = false);
-
-        // Touch swipe to flip gravity
-        let swipeStart = null;
-        document.addEventListener("touchstart", e => {
-            swipeStart = e.touches[0].clientY;
-        });
-        document.addEventListener("touchend", e => {
-            const dy = e.changedTouches[0].clientY - swipeStart;
-            if (Math.abs(dy) > 40 && dy < 0) flipGravity();
-        });
-
-        let touchLeft = false, touchRight = false, touchJump = false, touchFlip = false;
-
-        function flipGravity() {
-            player.flipped = !player.flipped;
-            vibrate(30);
-        }
-
-        let gameMode = 'story';
-        let currentLevel = 0;
-        let storyProgress = JSON.parse(localStorage.getItem("gfpProgress") || "0");
-
-        let player = { x: 100, y: 500, w: 30, h: 30, dx: 0, dy: 0, onGround: false, flipped: false, climbing: false };
-        let platforms = [], spikes = [], enemies = [], particles = [], lava = { y: 1000 }, goal = {}, ladders = [];
-
-        let cameraY = 0;
-        let gravity = 0.5;
-        let loopId;
-
-        function loop() {
-            loopId = requestAnimationFrame(loop);
-            update();
-            draw();
-        }
-
-        function update() {
-            const inputLeft = keys["ArrowLeft"] || keys["a"] || touchLeft;
-            const inputRight = keys["ArrowRight"] || keys["d"] || touchRight;
-            const inputJump = keys["ArrowUp"] || keys["w"] || touchJump;
-            const inputDown = keys["ArrowDown"] || keys["s"];
-
-            if (inputLeft) player.dx -= 0.5;
-            if (inputRight) player.dx += 0.5;
-            player.dx *= 0.85;
-
-            player.climbing = ladders.some(l =>
-                player.x + player.w > l.x &&
-                player.x < l.x + l.w &&
-                player.y + player.h > l.y &&
-                player.y < l.y + l.h
-            );
-
-            if (player.climbing) {
-                if (inputJump) player.dy = -2;
-                else if (inputDown) player.dy = 2;
-                else player.dy = 0;
-            } else {
-                player.dy += player.flipped ? -gravity : gravity;
-            }
-
-            player.x += player.dx;
-            player.y += player.dy;
-
-            // --- Collision: Platforms ---
-            player.onGround = false;
-            for (let p of platforms) {
-                let dir = collide(player, p);
-                if (dir === "bottom" && !player.flipped) {
-                    player.y = p.y - player.h;
-                    player.dy = 0;
-                    player.onGround = true;
-                }
-                if (dir === "top" && player.flipped) {
-                    player.y = p.y + p.h;
-                    player.dy = 0;
-                    player.onGround = true;
-                }
-                if (dir === "left" || dir === "right") {
-                    player.dx = 0;
+        function clearScene() {
+            for (let i = scene.children.length - 1; i >= 0; i--) {
+                const obj = scene.children[i];
+                if (obj !== camera && obj !== controls.getObject()) {
+                    scene.remove(obj);
                 }
             }
+            enemies = [];
+            fireballs = [];
+            boss = null;
+            bossHealth = 3;
+        }
 
-            if (inputJump && player.onGround && !player.climbing) {
-                player.dy = player.flipped ? -10 : 10;
-                vibrate(30);
-                player.onGround = false;
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel > maxLevel) {
+                maxLevel = currentLevel;
+                saveGame();
+            }
+            clearScene();
+            addLevel(currentLevel);
+            player.position.set(0, 20, 0);
+        }
+
+        function respawnPlayer() {
+            health--;
+            updateHearts();
+            player.position.set(0, 20, 0);
+            velocity.set(0, 0, 0);
+            ui.innerText = `☠️ You took damage! Lives: ${health}`;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = 0.016;
+            velocity.y -= (powerups.gravity ? 2 : 9.8) * delta;
+            player.position.y += velocity.y;
+            if (player.position.y <= 0) {
+                velocity.y = 0;
+                player.position.y = 0;
+                onGround = true;
+                canDoubleJump = true;
+            }
+            if (player.position.y < -50) respawnPlayer();
+
+            const portal = scene.getObjectByName("levelPortal");
+            if (portal && player.position.distanceTo(portal.position) < 15) {
+                nextLevel();
+                ui.innerText = `➡️ Welcome to Level ${currentLevel}`;
             }
 
-            for (let e of enemies) {
-                if (!e.alive) continue;
-                e.x += e.dx;
-                const edge = !platforms.some(p =>
-                    e.x + e.w > p.x &&
-                    e.x < p.x + p.w &&
-                    e.y + e.h <= p.y &&
-                    e.y + e.h + 1 >= p.y
-                );
-                if (edge) e.dx *= -1;
+            enemies.forEach(e => {
+                if (e.tick) e.tick(performance.now());
+                if (player.position.distanceTo(e.position) < 10) respawnPlayer();
+            });
 
-                const hit = collide(player, e);
-                if (hit && ((player.dy > 0 && !player.flipped) || (player.dy < 0 && player.flipped))) {
-                    e.alive = false;
-                    player.dy = player.flipped ? -6 : 6;
-                    spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
-                    vibrate(60);
-                } else if (hit) {
-                    death();
+            fireballs.forEach(f => {
+                f.position.add(f.velocity);
+                f.rotation.x += 0.1;
+                f.rotation.y += 0.05;
+                if (performance.now() - f.lastTrail > 100) {
+                    const trail = new THREE.Mesh(new THREE.SphereGeometry(1, 4, 4), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+                    trail.position.copy(f.position);
+                    scene.add(trail);
+                    setTimeout(() => scene.remove(trail), 500);
+                    f.lastTrail = performance.now();
                 }
-            }
+                if (f.position.x > 100 || f.position.x < -100) f.velocity.x *= -1;
+                if (player.position.distanceTo(f.position) < 10) respawnPlayer();
+            });
 
-            for (let s of spikes) {
-                if (collide(player, s)) death();
-            }
-
-            if (player.y > lava.y || player.y < -5000) death();
-
-            if (collide(player, goal)) {
-                vibrate(100);
-                if (gameMode === 'story' && currentLevel === storyProgress) {
-                    storyProgress++;
-                    localStorage.setItem("gfpProgress", JSON.stringify(storyProgress));
+            particles.forEach((p, i) => {
+                p.position.add(p.velocity.clone().multiplyScalar(delta));
+                p.velocity.y -= 9.8 * delta;
+                if (p.position.y < -5) {
+                    scene.remove(p);
+                    particles.splice(i, 1);
                 }
-                returnToMenu();
+            });
+
+            if (shakeTime > 0) {
+                camera.position.x += (Math.random() - 0.5) * 0.5;
+                camera.position.y += (Math.random() - 0.5) * 0.5;
+                shakeTime--;
             }
 
-            cameraY = player.y - canvas.height / 2;
+            renderer.render(scene, camera);
         }
-
-        const storyLevels = [
-            {
-                name: "Level 1: Getting Started", theme: "normal",
-                platforms: [{ x: 0, y: 550, w: 800, h: 50 }, { x: 200, y: 450, w: 100, h: 20 }],
-                spikes: [{ x: 350, y: 530, w: 20, h: 20 }],
-                enemies: [{ x: 400, y: 520, w: 30, h: 30, dx: -1, alive: true }],
-                ladders: [{ x: 200, y: 480, w: 30, h: 70 }],
-                goal: { x: 700, y: 500, w: 40, h: 50 }
-            },
-            {
-                name: "Level 2: Vertical Shift", theme: "jungle",
-                platforms: [{ x: 0, y: 550, w: 800, h: 50 }, { x: 150, y: 470, w: 100, h: 20 }, { x: 150, y: 370, w: 100, h: 20 }],
-                spikes: [],
-                enemies: [{ x: 150, y: 440, w: 30, h: 30, dx: 1, alive: true }],
-                ladders: [{ x: 160, y: 390, w: 30, h: 100 }],
-                goal: { x: 700, y: 300, w: 40, h: 50 }
-            },
-            {
-                name: "Level 3: Ice Climber", theme: "snowy",
-                platforms: [{ x: 0, y: 550, w: 800, h: 50 }, { x: 300, y: 400, w: 100, h: 20 }, { x: 300, y: 300, w: 100, h: 20 }, { x: 300, y: 200, w: 100, h: 20 }],
-                spikes: [],
-                enemies: [{ x: 300, y: 370, w: 30, h: 30, dx: 1, alive: true }],
-                ladders: [{ x: 320, y: 220, w: 30, h: 130 }],
-                goal: { x: 700, y: 150, w: 40, h: 50 }
-            }
-        ];
-    </script>
-    <script>
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Background
-            ctx.fillStyle = themes[selectedTheme]["--bg"] || "#222";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Parallax
-            ctx.fillStyle = "#ffffff08";
-            for (let i = 0; i < 40; i++) {
-                ctx.beginPath();
-                ctx.arc((i * 87) % canvas.width, ((i * 71) % canvas.height) - cameraY * 0.3, 40, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // Platforms
-            ctx.fillStyle = themes[selectedTheme].platform;
-            for (let p of platforms) {
-                ctx.fillRect(p.x, p.y - cameraY, p.w, p.h);
-            }
-
-            // Ladders
-            ctx.fillStyle = "#cc9";
-            for (let l of ladders) {
-                ctx.fillRect(l.x + 10, l.y - cameraY, 10, l.h);
-                ctx.strokeStyle = "#996";
-                ctx.beginPath();
-                ctx.moveTo(l.x + 5, l.y - cameraY);
-                ctx.lineTo(l.x + 5, l.y + l.h - cameraY);
-                ctx.moveTo(l.x + 25, l.y - cameraY);
-                ctx.lineTo(l.x + 25, l.y + l.h - cameraY);
-                ctx.stroke();
-            }
-
-            // Spikes
-            ctx.fillStyle = "#c33";
-            for (let s of spikes) {
-                ctx.beginPath();
-                ctx.moveTo(s.x, s.y - cameraY + s.h);
-                ctx.lineTo(s.x + s.w / 2, s.y - cameraY);
-                ctx.lineTo(s.x + s.w, s.y - cameraY + s.h);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            // Enemies
-            for (let e of enemies) {
-                if (!e.alive) continue;
-                ctx.fillStyle = themes[selectedTheme].enemy;
-                ctx.fillRect(e.x, e.y - cameraY, e.w, e.h);
-                // Eyes
-                ctx.fillStyle = "#fff";
-                ctx.beginPath();
-                ctx.arc(e.x + 8, e.y - cameraY + 10, 3, 0, 2 * Math.PI);
-                ctx.arc(e.x + e.w - 8, e.y - cameraY + 10, 3, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-
-            // Goal
-            ctx.save();
-            ctx.translate(goal.x + goal.w / 2, goal.y + goal.h / 2 - cameraY);
-            const t = Date.now() * 0.005;
-            ctx.rotate(Math.sin(t) * 0.1);
-            ctx.scale(1 + Math.sin(t * 2) * 0.05, 1 + Math.cos(t * 2) * 0.05);
-            ctx.fillStyle = "#ff0";
-            ctx.fillRect(-goal.w / 2, -goal.h / 2, goal.w, goal.h);
-            ctx.restore();
-
-            // Particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.dx;
-                p.y += p.dy;
-                p.life--;
-                ctx.fillStyle = `rgba(255,255,0,${p.life / 30})`;
-                ctx.fillRect(p.x, p.y - cameraY, 4, 4);
-                if (p.life <= 0) particles.splice(i, 1);
-            }
-
-            // Player
-            ctx.fillStyle = playerColor;
-            ctx.fillRect(player.x, player.y - cameraY, player.w, player.h);
-            ctx.fillStyle = "rgba(255,255,255,0.1)";
-            ctx.fillRect(player.x - 2, player.y - cameraY + 2, player.w + 4, player.h - 4);
-        }
-
-        function spawnParticles(x, y) {
-            for (let i = 0; i < 10; i++) {
-                particles.push({
-                    x, y,
-                    dx: Math.random() * 4 - 2,
-                    dy: Math.random() * 4 - 2,
-                    life: 30
-                });
-            }
-        }
-
-        function collide(a, b) {
-            if (
-                a.x < b.x + b.w &&
-                a.x + a.w > b.x &&
-                a.y < b.y + b.h &&
-                a.y + a.h > b.y
-            ) {
-                const dx = (a.x + a.w / 2) - (b.x + b.w / 2);
-                const dy = (a.y + a.h / 2) - (b.y + b.h / 2);
-                if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? "right" : "left";
-                else return dy > 0 ? "bottom" : "top";
-            }
-            return null;
-        }
-
-        function death() {
-            vibrate(100);
-            cancelAnimationFrame(loopId);
-            ctx.fillStyle = "#f00";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            setTimeout(() => {
-                loadLevel(storyLevels[currentLevel]);
-            }, 500);
-        }
-
-        function returnToMenu() {
-            cancelAnimationFrame(loopId);
-            document.getElementById("menu").style.display = "flex";
-            document.getElementById("modeMenu").style.display = "none";
-            document.getElementById("levelMenu").style.display = "none";
-            document.getElementById("settingsMenu").style.display = "none";
-        }
-
-        function showModeMenu() {
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("modeMenu").style.display = "flex";
-        }
-
-        function showSettings() {
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("settingsMenu").style.display = "flex";
-            document.getElementById("vibrateToggle").checked = vibrationEnabled;
-        }
-
-        function hideSettings() {
-            document.getElementById("settingsMenu").style.display = "none";
-            document.getElementById("menu").style.display = "flex";
-        }
-
-        function enterStoryMode() {
-            gameMode = "story";
-            currentLevel = storyProgress;
-            loadLevel(storyLevels[currentLevel]);
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("modeMenu").style.display = "none";
-        }
-
-        function loadLevel(lvl) {
-            applyTheme(lvl.theme);
-            player.x = 100;
-            player.y = 500;
-            player.dx = player.dy = 0;
-            player.flipped = false;
-            platforms = lvl.platforms || [];
-            spikes = lvl.spikes || [];
-            enemies = lvl.enemies || [];
-            ladders = lvl.ladders || [];
-            goal = lvl.goal || {};
-            document.getElementById("levelIntro").textContent = lvl.name;
-            document.getElementById("levelIntro").classList.add("show");
-            setTimeout(() => {
-                document.getElementById("levelIntro").classList.remove("show");
-            }, 1500);
-            loop();
-        }
-
-        // Initialize overlay display
-        updateOverlay();
     </script>
 </body>
 
