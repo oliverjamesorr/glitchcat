@@ -44,17 +44,24 @@
 <body>
     <div id="ui">Level 1 - WASD + Mouse. Space: Jump | G: Gravity | D: Double Jump | T: Time Slow | F: Dash | Click:
         Swing Bat<br>❤️ <span id="hearts">3</span> Lives</div>
+
     <div id="menu">
         <button onclick="startGame()">Start Game</button>
         <button onclick="loadGame()">Load Game</button>
     </div>
+
     <div id="levelSelector"></div>
+
     <audio id="hitSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_d229b2bb27.mp3"></audio>
     <audio id="winSound" src="https://cdn.pixabay.com/audio/2022/03/02/audio_d79e5306c3.mp3"></audio>
     <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2022/03/16/audio_5df7b2f1f6.mp3" loop autoplay></audio>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/PointerLockControls.js"></script>
-    <script>
+
+    <!-- External Scripts with defer -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/PointerLockControls.js"></script>
+
+    <!-- Game Script -->
+    <script defer>
         let scene, camera, renderer, controls, player, velocity, onGround = false;
         let powerups = { gravity: false, doubleJump: false, dash: true, timeSlow: false };
         let canDoubleJump = false, speed = 400;
@@ -75,6 +82,7 @@
         function saveGame() {
             localStorage.setItem("platformerSave", JSON.stringify({ level: maxLevel, health }));
         }
+
         function loadGame() {
             const save = JSON.parse(localStorage.getItem("platformerSave"));
             if (save) {
@@ -84,6 +92,7 @@
                 showLevelSelector();
             }
         }
+
         function startGame() {
             menu.style.display = "none";
             levelSelector.style.display = "none";
@@ -93,6 +102,7 @@
             init();
             animate();
         }
+
         function showLevelSelector() {
             levelSelector.innerHTML = '<h2>Select Level</h2>';
             for (let i = 1; i <= maxLevel; i++) {
@@ -109,6 +119,7 @@
             }
             levelSelector.style.display = "block";
         }
+
         function updateHearts() {
             hearts.textContent = health;
             if (health <= 0) {
@@ -121,23 +132,29 @@
         }
 
         menu.style.display = "block";
-        // GAMEPLAY LOGIC CONTINUES FROM CHUNK 1
+
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
+
             controls = new THREE.PointerLockControls(camera, document.body);
             scene.add(controls.getObject());
+
             document.body.addEventListener('click', () => controls.lock());
             document.addEventListener('mousedown', () => swingBat());
+
             const light = new THREE.HemisphereLight(0xffffff, 0x444444);
             light.position.set(0, 200, 0);
             scene.add(light);
+
             addLevel(currentLevel);
+
             player = controls.getObject();
             velocity = new THREE.Vector3();
+
             document.addEventListener('keydown', onKeyDown);
         }
 
@@ -176,14 +193,17 @@
         function animate() {
             requestAnimationFrame(animate);
             const delta = 0.016;
+
             velocity.y -= (powerups.gravity ? 2 : 9.8) * delta;
             player.position.y += velocity.y;
+
             if (player.position.y <= 0) {
                 velocity.y = 0;
                 player.position.y = 0;
                 onGround = true;
                 canDoubleJump = true;
             }
+
             if (player.position.y < -50) respawnPlayer();
 
             const portal = scene.getObjectByName("levelPortal");
@@ -201,6 +221,7 @@
                 f.position.add(f.velocity);
                 f.rotation.x += 0.1;
                 f.rotation.y += 0.05;
+
                 if (performance.now() - f.lastTrail > 100) {
                     const trail = new THREE.Mesh(new THREE.SphereGeometry(1, 4, 4), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
                     trail.position.copy(f.position);
@@ -208,7 +229,9 @@
                     setTimeout(() => scene.remove(trail), 500);
                     f.lastTrail = performance.now();
                 }
+
                 if (f.position.x > 100 || f.position.x < -100) f.velocity.x *= -1;
+
                 if (player.position.distanceTo(f.position) < 10) respawnPlayer();
             });
 
@@ -229,6 +252,11 @@
 
             renderer.render(scene, camera);
         }
+
+        // Placeholder for functions like onKeyDown, addLevel, swingBat
+        function onKeyDown() { /* implement your controls here */ }
+        function addLevel(level) { /* implement your level design here */ }
+        function swingBat() { /* implement bat swing here */ }
     </script>
 </body>
 
