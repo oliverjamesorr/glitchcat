@@ -1,25 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>3D Platformer</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3D Platformer - Power-up Unlocks & UI Polish</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             background: #000;
             color: white;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         #ui {
             position: absolute;
             top: 10px;
             left: 10px;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px;
-            border-radius: 5px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.4;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+            max-width: 320px;
+            user-select: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #cooldowns {
+            position: absolute;
+            top: 80px;
+            left: 10px;
+            font-size: 14px;
+            color: #a0d8f7;
+            z-index: 20;
+            user-select: none;
+        }
+
+        #bossHealthBar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 20px;
+            background: rgba(255, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            z-index: 20;
+        }
+
+        #bossHealthFill {
+            height: 100%;
+            width: 100%;
+            background: #ff4444;
+            border-radius: 10px 0 0 10px;
+            transition: width 0.3s ease;
+        }
+
+        #gameOverModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.95);
+            padding: 40px 60px;
+            border-radius: 12px;
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            display: none;
+            z-index: 50;
+            user-select: none;
+        }
+
+        #gameOverModal button {
+            margin-top: 20px;
+            padding: 10px 24px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #ff4444;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        #gameOverModal button:hover {
+            background-color: #ff2222;
         }
 
         #menu,
@@ -32,18 +106,141 @@
             padding: 20px;
             border-radius: 10px;
             display: none;
+            color: #fff;
+            user-select: none;
         }
 
-        #levelSelector button {
-            margin: 4px;
-            padding: 6px 12px;
+        #levelSelector button,
+        #menu button {
+            margin: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #powerupPanel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 10px 16px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            display: flex;
+            gap: 18px;
+            user-select: none;
+            z-index: 25;
+            min-width: 280px;
+            justify-content: center;
+        }
+
+        .powerup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: default;
+            opacity: 0.5;
+            transition: opacity 0.4s ease, transform 0.3s ease;
+            position: relative;
+        }
+
+        .powerup.unlocked {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .powerup:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .powerup-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .powerup-label {
+            font-weight: 600;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 110%;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            user-select: none;
+        }
+
+        /* Icons using Unicode emojis */
+        .icon-gravity::before {
+            content: "🌌";
+        }
+
+        .icon-doublejump::before {
+            content: "⏫";
+        }
+
+        .icon-dash::before {
+            content: "💨";
+        }
+
+        .icon-timeslow::before {
+            content: "🐢";
         }
     </style>
 </head>
 
 <body>
-    <div id="ui">Level 1 - WASD + Mouse. Space: Jump | G: Gravity | D: Double Jump | T: Time Slow | F: Dash | Click:
-        Swing Bat<br>❤️ <span id="hearts">3</span> Lives</div>
+
+    <div id="ui">
+        Level 1 - WASD + Mouse. Space: Jump | G: Gravity | D: Double Jump | T: Time Slow | F: Dash | Click: Swing
+        Bat<br>
+        ❤️ <span id="hearts">3</span> Lives
+    </div>
+
+    <div id="cooldowns">
+        Dash Cooldown: <span id="dashCooldown">Ready</span> | Time Slow: <span id="timeSlowCooldown">Ready</span>
+    </div>
+
+    <div id="powerupPanel" title="Unlocked Power-ups">
+        <div id="puGravity" class="powerup" data-tooltip="Toggle gravity flip (G)">
+            <div class="powerup-icon icon-gravity"></div>
+            <div class="powerup-label">Gravity</div>
+            <div class="tooltip">Locked - Unlock at Level 3</div>
+        </div>
+        <div id="puDoubleJump" class="powerup" data-tooltip="Double jump (D)">
+            <div class="powerup-icon icon-doublejump"></div>
+            <div class="powerup-label">Double Jump</div>
+            <div class="tooltip">Locked - Unlock at Level 5</div>
+        </div>
+        <div id="puDash" class="powerup" data-tooltip="Dash (F)">
+            <div class="powerup-icon icon-dash"></div>
+            <div class="powerup-label">Dash</div>
+            <div class="tooltip">Unlocked</div>
+        </div>
+        <div id="puTimeSlow" class="powerup" data-tooltip="Time slow (T)">
+            <div class="powerup-icon icon-timeslow"></div>
+            <div class="powerup-label">Time Slow</div>
+            <div class="tooltip">Locked - Unlock at Level 7</div>
+        </div>
+    </div>
+
+    <div id="bossHealthBar">
+        <div id="bossHealthFill"></div>
+    </div>
+
+    <div id="gameOverModal">
+        Game Over!<br />
+        <button onclick="restartGame()">Restart</button>
+    </div>
 
     <div id="menu">
         <button onclick="startGame()">Start Game</button>
@@ -56,83 +253,39 @@
     <audio id="winSound" src="https://cdn.pixabay.com/audio/2022/03/02/audio_d79e5306c3.mp3"></audio>
     <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2022/03/16/audio_5df7b2f1f6.mp3" loop autoplay></audio>
 
-    <!-- External Scripts with defer -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/PointerLockControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/PointerLockControls.js"></script>
 
-    <!-- Game Script -->
-    <script defer>
+    <script>
         let scene, camera, renderer, controls, player, velocity, onGround = false;
         let powerups = { gravity: false, doubleJump: false, dash: true, timeSlow: false };
         let canDoubleJump = false, speed = 400;
         let boss, bossHealth = 3;
         let enemies = [], particles = [], fireballs = [];
-        const hitSound = document.getElementById("hitSound");
-        const winSound = document.getElementById("winSound");
-        let currentLevel = 1;
-        let maxLevel = 1;
         let shakeTime = 0;
         let health = 3;
+        let currentLevel = 1, maxLevel = 1;
+        let dashReady = true, timeSlowReady = true;
 
         const ui = document.getElementById("ui");
         const hearts = document.getElementById("hearts");
         const menu = document.getElementById("menu");
         const levelSelector = document.getElementById("levelSelector");
+        const dashCooldownEl = document.getElementById('dashCooldown');
+        const timeSlowCooldownEl = document.getElementById('timeSlowCooldown');
+        const bossHealthBar = document.getElementById('bossHealthBar');
+        const bossHealthFill = document.getElementById('bossHealthFill');
+        const gameOverModal = document.getElementById('gameOverModal');
 
-        function saveGame() {
-            localStorage.setItem("platformerSave", JSON.stringify({ level: maxLevel, health }));
-        }
+        // Power-up panel elements
+        const puGravity = document.getElementById('puGravity');
+        const puDoubleJump = document.getElementById('puDoubleJump');
+        const puDash = document.getElementById('puDash');
+        const puTimeSlow = document.getElementById('puTimeSlow');
 
-        function loadGame() {
-            const save = JSON.parse(localStorage.getItem("platformerSave"));
-            if (save) {
-                maxLevel = save.level || 1;
-                health = save.health || 3;
-                updateHearts();
-                showLevelSelector();
-            }
-        }
+        let move = { forward: false, backward: false, left: false, right: false };
 
-        function startGame() {
-            menu.style.display = "none";
-            levelSelector.style.display = "none";
-            currentLevel = 1;
-            health = 3;
-            maxLevel = 1;
-            init();
-            animate();
-        }
-
-        function showLevelSelector() {
-            levelSelector.innerHTML = '<h2>Select Level</h2>';
-            for (let i = 1; i <= maxLevel; i++) {
-                const btn = document.createElement("button");
-                btn.textContent = `Level ${i}`;
-                btn.onclick = () => {
-                    currentLevel = i;
-                    levelSelector.style.display = "none";
-                    clearScene();
-                    addLevel(currentLevel);
-                    player.position.set(0, 20, 0);
-                };
-                levelSelector.appendChild(btn);
-            }
-            levelSelector.style.display = "block";
-        }
-
-        function updateHearts() {
-            hearts.textContent = health;
-            if (health <= 0) {
-                alert("Game Over");
-                health = 3;
-                currentLevel = 1;
-                maxLevel = 1;
-                saveGame();
-            }
-        }
-
-        menu.style.display = "block";
-
+        // --- Initialization ---
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
@@ -156,8 +309,216 @@
             velocity = new THREE.Vector3();
 
             document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            updateCooldownUI();
+            updateHearts();
+            updateLevelDisplay();
+            updatePowerupUI();
         }
 
+        // --- Controls ---
+        function onKeyDown(e) {
+            switch (e.code) {
+                case "KeyW": move.forward = true; break;
+                case "KeyS": move.backward = true; break;
+                case "KeyA": move.left = true; break;
+                case "KeyD": move.right = true; break;
+                case "Space":
+                    if (onGround) {
+                        velocity.y = 7;
+                        onGround = false;
+                    } else if (canDoubleJump && powerups.doubleJump) {
+                        velocity.y = 7;
+                        canDoubleJump = false;
+                    }
+                    break;
+                case "KeyG":
+                    if (powerups.gravity) powerups.gravity = !powerups.gravity;
+                    break;
+                case "KeyF":
+                    if (powerups.dash && dashReady) {
+                        const dir = new THREE.Vector3();
+                        camera.getWorldDirection(dir);
+                        player.position.addScaledVector(dir, 15);
+                        startDashCooldown();
+                    }
+                    break;
+                case "KeyT":
+                    if (powerups.timeSlow && timeSlowReady) {
+                        speed = 200;
+                        startTimeSlowCooldown();
+                        setTimeout(() => speed = 400, 3000);
+                    }
+                    break;
+            }
+        }
+
+        function onKeyUp(e) {
+            switch (e.code) {
+                case "KeyW": move.forward = false; break;
+                case "KeyS": move.backward = false; break;
+                case "KeyA": move.left = false; break;
+                case "KeyD": move.right = false; break;
+            }
+        }
+
+        // --- Cooldown UI ---
+        function updateCooldownUI() {
+            dashCooldownEl.textContent = dashReady ? 'Ready' : 'Cooldown';
+            timeSlowCooldownEl.textContent = timeSlowReady ? 'Ready' : 'Cooldown';
+        }
+
+        function startDashCooldown() {
+            dashReady = false;
+            updateCooldownUI();
+            setTimeout(() => {
+                dashReady = true;
+                updateCooldownUI();
+            }, 1000);
+        }
+
+        function startTimeSlowCooldown() {
+            timeSlowReady = false;
+            updateCooldownUI();
+            setTimeout(() => {
+                timeSlowReady = true;
+                updateCooldownUI();
+            }, 5000);
+        }
+
+        // --- UI Updates ---
+        function updateHearts() {
+            hearts.textContent = health;
+            if (health <= 0) {
+                showGameOver();
+            }
+        }
+
+        function updateLevelDisplay() {
+            ui.innerHTML = `Level ${currentLevel} - WASD + Mouse. Space: Jump | G: Gravity | D: Double Jump | T: Time Slow | F: Dash | Click: Swing Bat<br>❤️ <span id="hearts">${health}</span> Lives`;
+        }
+
+        function updateBossHealthUI() {
+            if (boss) {
+                bossHealthBar.style.display = 'block';
+                const percentage = (bossHealth / 3) * 100;
+                bossHealthFill.style.width = `${percentage}%`;
+            } else {
+                bossHealthBar.style.display = 'none';
+            }
+        }
+
+        function updatePowerupUI() {
+            updatePowerup(puGravity, powerups.gravity, 'Unlock at Level 3');
+            updatePowerup(puDoubleJump, powerups.doubleJump, 'Unlock at Level 5');
+            updatePowerup(puDash, powerups.dash, 'Unlocked');
+            updatePowerup(puTimeSlow, powerups.timeSlow, 'Unlock at Level 7');
+        }
+
+        function updatePowerup(el, unlocked, lockedMsg) {
+            if (unlocked) {
+                el.classList.add('unlocked');
+                el.querySelector('.tooltip').textContent = 'Unlocked';
+            } else {
+                el.classList.remove('unlocked');
+                el.querySelector('.tooltip').textContent = lockedMsg;
+            }
+        }
+
+        // --- Game Over Modal ---
+        function showGameOver() {
+            gameOverModal.style.display = 'block';
+            ui.style.opacity = '0.2';
+        }
+
+        function hideGameOver() {
+            gameOverModal.style.display = 'none';
+            ui.style.opacity = '1';
+        }
+
+        function restartGame() {
+            hideGameOver();
+            health = 3;
+            updateHearts();
+            currentLevel = 1;
+            maxLevel = 1;
+            clearScene();
+            addLevel(currentLevel);
+            player.position.set(0, 20, 0);
+            menu.style.display = 'none';
+            updateLevelDisplay();
+            unlockPowerupsByLevel(currentLevel);
+            updatePowerupUI();
+        }
+
+        // --- Game saving/loading/menus ---
+        function saveGame() {
+            localStorage.setItem("platformerSave", JSON.stringify({ level: maxLevel, health }));
+        }
+
+        function loadGame() {
+            const save = JSON.parse(localStorage.getItem("platformerSave"));
+            if (save) {
+                maxLevel = save.level || 1;
+                health = save.health || 3;
+                updateHearts();
+                showLevelSelector();
+                unlockPowerupsByLevel(maxLevel);
+                updatePowerupUI();
+            } else {
+                alert("No saved game found!");
+            }
+        }
+
+        function showLevelSelector() {
+            levelSelector.innerHTML = '<h2>Select Level</h2>';
+            for (let i = 1; i <= maxLevel; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = `Level ${i}`;
+                btn.onclick = () => {
+                    currentLevel = i;
+                    unlockPowerupsByLevel(currentLevel);
+                    levelSelector.style.display = "none";
+                    menu.style.display = "none";
+                    clearScene();
+                    addLevel(currentLevel);
+                    player.position.set(0, 20, 0);
+                    updateLevelDisplay();
+                    updatePowerupUI();
+                };
+                levelSelector.appendChild(btn);
+            }
+            levelSelector.style.display = "block";
+        }
+
+        function startGame() {
+            menu.style.display = "none";
+            levelSelector.style.display = "none";
+            currentLevel = 1;
+            health = 3;
+            maxLevel = 1;
+            unlockPowerupsByLevel(currentLevel);
+            init();
+            animate();
+            updateHearts();
+            updateLevelDisplay();
+            updatePowerupUI();
+        }
+
+        window.onload = () => {
+            menu.style.display = "block";
+        };
+
+        window.addEventListener('beforeunload', saveGame);
+
+        // --- Helpers ---
         function clearScene() {
             for (let i = scene.children.length - 1; i >= 0; i--) {
                 const obj = scene.children[i];
@@ -169,31 +530,123 @@
             fireballs = [];
             boss = null;
             bossHealth = 3;
+            if (scene.tickables) scene.tickables.length = 0;
         }
 
-        function nextLevel() {
-            currentLevel++;
-            if (currentLevel > maxLevel) {
-                maxLevel = currentLevel;
-                saveGame();
+        function createPlatform(x, y, z, w, h, d, color = 0x4444ff) {
+            const geometry = new THREE.BoxGeometry(w, h, d);
+            const material = new THREE.MeshStandardMaterial({ color });
+            const platform = new THREE.Mesh(geometry, material);
+            platform.position.set(x, y, z);
+            scene.add(platform);
+            return platform;
+        }
+
+        function addPortal(x, y, z) {
+            const geometry = new THREE.TorusGeometry(5, 1, 16, 100);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const portal = new THREE.Mesh(geometry, material);
+            portal.position.set(x, y, z);
+            portal.name = "levelPortal";
+            scene.add(portal);
+            return portal;
+        }
+
+        function createBoss(x, y, z) {
+            const geometry = new THREE.ConeGeometry(6, 15, 8);
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            const bossMesh = new THREE.Mesh(geometry, material);
+            bossMesh.position.set(x, y, z);
+            scene.add(bossMesh);
+            return bossMesh;
+        }
+
+        // --- Level logic ---
+        function addLevel(level) {
+            switch (level) {
+                case 1:
+                    createPlatform(0, 0, 0, 40, 2, 40);
+                    addPortal(10, 3, -35);
+                    break;
+                case 2:
+                    createPlatform(0, 0, 0, 50, 2, 50);
+                    addPortal(15, 3, -45);
+                    break;
+                case 3:
+                    createPlatform(0, 0, 0, 50, 2, 50);
+                    addPortal(20, 3, -50);
+                    break;
+                case 4:
+                    createPlatform(0, 0, 0, 60, 2, 60);
+                    addPortal(25, 3, -55);
+                    break;
+                case 5:
+                    createPlatform(0, 0, 0, 70, 2, 70);
+                    addPortal(30, 3, -60);
+                    break;
+                case 6:
+                    createPlatform(0, 0, 0, 70, 2, 70);
+                    addPortal(35, 3, -65);
+                    break;
+                case 7:
+                    createPlatform(0, 0, 0, 80, 2, 80);
+                    addPortal(40, 3, -70);
+                    break;
+                case 8:
+                    createPlatform(0, 0, 0, 80, 2, 80);
+                    addPortal(45, 3, -75);
+                    break;
+                case 9:
+                    createPlatform(0, 0, 0, 90, 2, 90);
+                    addPortal(50, 3, -80);
+                    break;
+                case 10:
+                    createPlatform(0, 0, 0, 90, 2, 90);
+                    addPortal(55, 3, -85);
+                    break;
+                case 11: // Boss level
+                    createPlatform(0, 0, 0, 100, 2, 100, 0x111111);
+                    boss = createBoss(0, 5, -30);
+                    bossHealth = 3;
+                    updateBossHealthUI();
+                    break;
+                default:
+                    createPlatform(0, 0, 0, 40, 2, 40);
+                    addPortal(10, 3, -35);
             }
-            clearScene();
-            addLevel(currentLevel);
-            player.position.set(0, 20, 0);
         }
 
-        function respawnPlayer() {
-            health--;
-            updateHearts();
-            player.position.set(0, 20, 0);
-            velocity.set(0, 0, 0);
-            ui.innerText = `☠️ You took damage! Lives: ${health}`;
-        }
-
-        function animate() {
+        // --- Animate loop ---
+        function animate(time = 0) {
             requestAnimationFrame(animate);
-            const delta = 0.016;
 
+            const delta = 0.016; // ~60fps
+
+            // Tickables
+            if (scene.tickables) scene.tickables.forEach(obj => { if (obj.tick) obj.tick(); });
+
+            // Movement direction
+            let direction = new THREE.Vector3();
+            if (move.forward) direction.z -= 1;
+            if (move.backward) direction.z += 1;
+            if (move.left) direction.x -= 1;
+            if (move.right) direction.x += 1;
+            direction.normalize();
+            direction.multiplyScalar(speed * delta);
+
+            // Move horizontally relative to camera
+            const camDir = new THREE.Vector3();
+            camera.getWorldDirection(camDir);
+            camDir.y = 0;
+            camDir.normalize();
+
+            const camRight = new THREE.Vector3();
+            camRight.crossVectors(camera.up, camDir).normalize();
+
+            player.position.add(camDir.multiplyScalar(-direction.z));
+            player.position.add(camRight.multiplyScalar(direction.x));
+
+            // Gravity & jump
             velocity.y -= (powerups.gravity ? 2 : 9.8) * delta;
             player.position.y += velocity.y;
 
@@ -203,38 +656,39 @@
                 onGround = true;
                 canDoubleJump = true;
             }
-
             if (player.position.y < -50) respawnPlayer();
 
+            // Portal collision
             const portal = scene.getObjectByName("levelPortal");
             if (portal && player.position.distanceTo(portal.position) < 15) {
                 nextLevel();
-                ui.innerText = `➡️ Welcome to Level ${currentLevel}`;
+                updateLevelDisplay();
             }
 
+            // Enemies collision
             enemies.forEach(e => {
-                if (e.tick) e.tick(performance.now());
+                if (e.tick) e.tick(time);
                 if (player.position.distanceTo(e.position) < 10) respawnPlayer();
             });
 
-            fireballs.forEach(f => {
+            // Fireballs
+            fireballs.forEach((f, i) => {
                 f.position.add(f.velocity);
                 f.rotation.x += 0.1;
                 f.rotation.y += 0.05;
-
-                if (performance.now() - f.lastTrail > 100) {
-                    const trail = new THREE.Mesh(new THREE.SphereGeometry(1, 4, 4), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+                if (time - (f.lastTrail || 0) > 100) {
+                    const trail = new THREE.Mesh(new THREE.SphereGeometry(1, 4, 4),
+                        new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
                     trail.position.copy(f.position);
                     scene.add(trail);
                     setTimeout(() => scene.remove(trail), 500);
-                    f.lastTrail = performance.now();
+                    f.lastTrail = time;
                 }
-
                 if (f.position.x > 100 || f.position.x < -100) f.velocity.x *= -1;
-
                 if (player.position.distanceTo(f.position) < 10) respawnPlayer();
             });
 
+            // Particles physics
             particles.forEach((p, i) => {
                 p.position.add(p.velocity.clone().multiplyScalar(delta));
                 p.velocity.y -= 9.8 * delta;
@@ -244,20 +698,73 @@
                 }
             });
 
+            // Camera shake effect
             if (shakeTime > 0) {
                 camera.position.x += (Math.random() - 0.5) * 0.5;
                 camera.position.y += (Math.random() - 0.5) * 0.5;
                 shakeTime--;
             }
 
+            // Boss logic
+            if (boss) {
+                boss.rotation.y += 0.01;
+                updateBossHealthUI();
+                if (bossHealth <= 0) {
+                    scene.remove(boss);
+                    boss = null;
+                    winSound.play();
+                    alert("You defeated the Boss! You won!");
+                    restartGame();
+                }
+            }
+
             renderer.render(scene, camera);
         }
 
-        // Placeholder for functions like onKeyDown, addLevel, swingBat
-        function onKeyDown() { /* implement your controls here */ }
-        function addLevel(level) { /* implement your level design here */ }
-        function swingBat() { /* implement bat swing here */ }
+        // --- Player respawn ---
+        function respawnPlayer() {
+            health--;
+            updateHearts();
+            player.position.set(0, 20, 0);
+            velocity.set(0, 0, 0);
+            ui.innerHTML = `☠️ You took damage! Lives: ${health}<br>❤️ <span id="hearts">${health}</span> Lives`;
+            if (health <= 0) showGameOver();
+        }
+
+        // --- Level management ---
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel > maxLevel) {
+                maxLevel = currentLevel;
+                saveGame();
+            }
+            clearScene();
+            addLevel(currentLevel);
+            player.position.set(0, 20, 0);
+            unlockPowerupsByLevel(currentLevel);
+            updatePowerupUI();
+        }
+
+        // --- Swing Bat (damage boss) ---
+        function swingBat() {
+            if (!boss) return;
+            if (player.position.distanceTo(boss.position) < 15) {
+                bossHealth--;
+                hitSound.play();
+                shakeTime = 20;
+                updateBossHealthUI();
+            }
+        }
+
+        // --- Unlock power-ups by level ---
+        function unlockPowerupsByLevel(level) {
+            if (level >= 3) powerups.gravity = true;
+            if (level >= 5) powerups.doubleJump = true;
+            if (level >= 7) powerups.timeSlow = true;
+        }
+
     </script>
+
 </body>
 
 </html>
