@@ -5,92 +5,618 @@
     <title>Steal a Doughnut</title>
     <style>
         body {
-            background-color: pink;
-            font-family: Comic Sans MS, cursive, sans-serif;
+            background: #fff0f5;
+            font-family: 'Comic Sans MS';
             text-align: center;
-            padding: 50px;
+            margin: 0;
+            padding: 20px;
         }
 
         h1 {
+            color: #d2691e;
             font-size: 3em;
-            color: chocolate;
-            text-shadow: 2px 2px white;
+            margin-top: 10px;
         }
 
-        #doughnutButton {
-            font-size: 2em;
-            padding: 20px 40px;
-            background-color: chocolate;
+        #startArea,
+        #gameArea {
+            margin-top: 20px;
+        }
+
+        #stealBtn,
+        #stealFromOthersBtn,
+        #buyTrapBtn {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            background: chocolate;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 10px;
             cursor: pointer;
-            box-shadow: 5px 5px 0 orange;
+            margin: 5px;
         }
 
-        #chaos {
-            margin-top: 30px;
-            font-size: 1.5em;
-            color: purple;
-        }
-
-        .sprinkle {
+        #sprinkles span {
             position: absolute;
-            font-size: 1.5em;
-            color: #ff69b4;
-            animation: float 3s linear infinite;
+            animation: float 4s linear infinite;
+            font-size: 1.2em;
         }
 
         @keyframes float {
-            from {
+            0% {
+                opacity: 1;
                 transform: translateY(0);
             }
 
-            to {
-                transform: translateY(-100vh);
+            100% {
                 opacity: 0;
+                transform: translateY(-100vh);
+            }
+        }
+
+        #inventory,
+        #base,
+        #leaderboard,
+        #moneyDisplay,
+        #shop {
+            margin-top: 30px;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .donut {
+            margin: 5px 0;
+            padding: 10px;
+            background: #ffe;
+            border: 1px solid #ffb6c1;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .donut img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        audio {
+            display: none;
+        }
+
+        .animation-common {
+            animation: pulse 0.5s ease-out;
+            background-color: #fffae6;
+        }
+
+        .animation-epic {
+            animation: glow 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 10px #b388eb;
+            }
+
+            100% {
+                box-shadow: 0 0 20px #b388eb;
+            }
+        }
+
+        .animation-rare {
+            animation: bounce 1s infinite;
+            background-color: #e0f7fa;
+        }
+
+        .animation-legendary {
+            animation: spin 1.5s linear infinite;
+            background-color: #fff8e1;
+        }
+
+        .animation-secret {
+            animation: sparkle 2s infinite ease-in-out;
+            background-color: #f3e5f5;
+        }
+
+        .animation-doughnut-god {
+            animation: shake 0.5s infinite;
+            background-color: #ffebee;
+        }
+
+        .animation-glitchy {
+            animation: glitch 0.3s infinite;
+            background-color: #fce4ec;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes sparkle {
+            0% {
+                box-shadow: 0 0 5px gold;
+            }
+
+            100% {
+                box-shadow: 0 0 20px gold;
+            }
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px);
+            }
+
+            50% {
+                transform: translateX(3px);
+            }
+
+            75% {
+                transform: translateX(-3px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            20% {
+                transform: translate(-2px, 2px);
+            }
+
+            40% {
+                transform: translate(2px, -2px);
+            }
+
+            60% {
+                transform: translate(-2px, -2px);
+            }
+
+            80% {
+                transform: translate(2px, 2px);
+            }
+
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+        #conveyor {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+            background: #fdd;
+            margin: 20px 0;
+            border: 2px dashed #d2691e;
+        }
+
+        .conveyor-donut {
+            position: absolute;
+            top: 10px;
+            font-size: 2em;
+            animation: scrollLeft 15s linear infinite;
+        }
+
+        @keyframes scrollLeft {
+            0% {
+                left: 100%;
+            }
+
+            100% {
+                left: -100px;
+            }
+        }
+
+        .steal-effect {
+            animation: pop-scale 0.3s ease-out;
+        }
+
+        @keyframes pop-scale {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.5);
+            }
+
+            100% {
+                transform: scale(1);
             }
         }
     </style>
 </head>
 
 <body>
+    <div id="conveyor"></div>
+    <audio id="stealSound"
+        src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_409e987a51.mp3?filename=pop-94319.mp3"></audio>
 
     <h1>🍩 Steal a Doughnut 🍩</h1>
-    <button id="doughnutButton">STEAL IT</button>
-    <div id="chaos"></div>
+
+    <div id="moneyDisplay">💰 Money: <span id="money">0</span></div>
+
+    <div id="gameArea">
+        <button id="stealBtn" onclick="stealDonut()">Steal a Doughnut</button>
+        <button id="stealFromOthersBtn" onclick="stealFromOthers()">Steal from Others</button>
+        <button id="buyTrapBtn" onclick="buyProtection()">Buy Trap (30s)</button>
+
+        <div id="inventory">
+            <h2>Your Inventory</h2>
+            <ul id="inventoryList"></ul>
+        </div>
+
+        <div id="base">
+            <h2>Your Base</h2>
+            <div id="baseDisplay"></div>
+        </div>
+
+        <div id="shop">
+            <h2>Shop</h2>
+            <button onclick="buyUpgrade()">Buy Upgrade</button>
+            <button onclick="buyMultiplier()">Buy Multiplier</button>
+            <button onclick="toggleCredits()">Credits</button>
+        </div>
+
+        <div id="encyclopedia">
+            <h2>Doughnut Encyclopedia</h2>
+            <ul id="encyclopediaList"></ul>
+        </div>
+
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <ul id="leaderboardList"></ul>
+        </div>
+    </div>
+
+    <div id="credits"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; text-align:center; padding-top:100px;">
+        <div>Made by Puppy and Glitch Cat</div>
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1" target="_blank"
+            style="color:lightblue; display:block; margin-top:20px;">Free Doughnuts</a>
+        <a href="https://www.youtube.com/@GlitchCat-Kitty" target="_blank"
+            style="color:lightblue; display:block;">Glitch Cat Channel</a>
+        <div style="position:absolute; top:10px; right:20px; cursor:pointer; font-size:2em;" onclick="toggleCredits()">✖
+        </div>
+    </div>
 
     <script>
-        const messages = [
-            "Ballerina Doughnutina has joined the sprinkle storm!",
-            "You stole the Jellycore!",
-            "Powdered Prophecy unlocked!",
-            "Cruller Protocol engaged!",
-            "Glazed Guardian enraged!",
-            "SUGAR OVERLOAD INCOMING!!!",
-            "You poked the Bavarian Entity.",
-            "DONUT.EXE IS CORRUPTING REALITY.",
-            "The final cinnamon twist has begun..."
-        ];
+        function updateInventoryDisplay() {
+            const invList = document.getElementById('inventoryList');
+            invList.innerHTML = '';
+            inventory.forEach(d => {
+                const li = document.createElement('li');
+                li.className = 'donut';
+                const rarity = rarityAssignment[d];
+                const rarityClass = 'animation-' + rarity.toLowerCase().replace(/\s+/g, '-');
+                li.classList.add(rarityClass);
+                li.innerHTML = (rarityArt[rarity] || '🍩') + ' ' + d + ' (' + rarity + ')';
+                invList.appendChild(li);
+            });
+        }
 
-        document.getElementById("doughnutButton").addEventListener("click", () => {
-            // Show random chaos message
-            const chaos = document.getElementById("chaos");
-            const msg = messages[Math.floor(Math.random() * messages.length)];
-            const p = document.createElement("p");
-            p.textContent = msg;
-            chaos.appendChild(p);
-
-            // Sprinkle effect
-            for (let i = 0; i < 10; i++) {
-                const sprinkle = document.createElement("div");
-                sprinkle.className = "sprinkle";
-                sprinkle.style.left = Math.random() * window.innerWidth + "px";
-                sprinkle.textContent = "✨";
-                document.body.appendChild(sprinkle);
-                setTimeout(() => sprinkle.remove(), 3000);
+        function updateBaseDisplay() {
+            const baseDisplay = document.getElementById('baseDisplay');
+            baseDisplay.innerHTML = '';
+            for (const [donut, count] of Object.entries(base)) {
+                const div = document.createElement('div');
+                div.className = 'donut';
+                const rarity = rarityAssignment[donut];
+                const rarityClass = 'animation-' + rarity.toLowerCase().replace(/\s+/g, '-');
+                div.classList.add(rarityClass);
+                div.innerHTML = (rarityArt[rarity] || '🍩') + ' ' + donut + ' × ' + count + ' (' + rarity + ')';
+                baseDisplay.appendChild(div);
             }
-        });
+        }
+        function spawnConveyorDonut(symbol = '🍩') {
+            const conveyor = document.getElementById('conveyor');
+            const el = document.createElement('div');
+            el.className = 'conveyor-donut';
+            el.textContent = symbol;
+            el.style.left = '100%';
+            conveyor.appendChild(el);
+            setTimeout(() => conveyor.removeChild(el), 15000);
+        }
+
+        setInterval(() => spawnConveyorDonut(), 1000);
+
+        function triggerStealEffect() {
+            const sound = document.getElementById('stealSound');
+            sound.currentTime = 0;
+            sound.play();
+            const btn = document.getElementById('stealBtn');
+            btn.classList.add('steal-effect');
+            setTimeout(() => btn.classList.remove('steal-effect'), 300);
+        }
+
+        // Example of adjusting spawn chances (rarer = lower probability)
+        const rarityChances = {
+            'Common': 0.6,
+            'Rare': 0.2,
+            'Epic': 0.1,
+            'Legendary': 0.05,
+            'Secret': 0.02,
+            'Doughnut god': 0.005,
+            'Glitchy': 0.003
+        };
+        let money = 0;
+        let inventory = [];
+        let base = {};
+        let upgradeLevel = 1;
+        let multiplier = 1;
+        let trapActive = false;
+        let rarityAssignment = {};
+        let rarityArt = {
+            'Common': '🍩', 'Rare': '🍓', 'Epic': '🍫', 'Legendary': '💎',
+            'Secret': '🌀', 'Doughnut god': '👑', 'Glitchy': '🧬'
+        };
+
+        function stealDonut() {
+            const rarities = Object.keys(rarityChances);
+            let picked = 'Common';
+            let roll = Math.random();
+            let total = 0;
+            for (let r of rarities) {
+                total += rarityChances[r];
+                if (roll < total) {
+                    picked = r;
+                    break;
+                }
+            }
+            const donutName = picked + ' Doughnut';
+            inventory.push(donutName);
+            rarityAssignment[donutName] = picked;
+            money += Math.round((upgradeLevel * multiplier * (1 + rarities.indexOf(picked))));
+            updateInventoryDisplay();
+            updateMoney();
+            triggerStealEffect();
+        }
+
+        function stealFromOthers() {
+            if (inventory.length > 0) {
+                const stolen = inventory.pop();
+                alert('A thief stole: ' + stolen);
+                updateInventoryDisplay();
+            } else {
+                alert('No doughnuts to steal!');
+            }
+        }
+
+        function updateMoney() {
+            document.getElementById('money').textContent = money;
+        }
+
+        function buyUpgrade() {
+            const cost = 50 * upgradeLevel;
+            if (money >= cost) {
+                money -= cost;
+                upgradeLevel++;
+                updateMoney();
+                alert('Upgrade bought! Level: ' + upgradeLevel);
+            } else {
+                alert('Not enough money.');
+            }
+        }
+
+        function buyMultiplier() {
+            const cost = 100 * multiplier;
+            if (money >= cost) {
+                money -= cost;
+                multiplier++;
+                updateMoney();
+                alert('Multiplier bought! x' + multiplier);
+            } else {
+                alert('Not enough money.');
+            }
+        }
+
+        function buyProtection() {
+            const cost = 75;
+            if (money >= cost && !trapActive) {
+                money -= cost;
+                trapActive = true;
+                updateMoney();
+                alert('Trap active for 30 seconds!');
+                setTimeout(() => {
+                    trapActive = false;
+                    alert('Trap expired.');
+                }, 30000);
+            } else if (trapActive) {
+                alert('Trap is already active.');
+            } else {
+                alert('Not enough money.');
+            }
+        }
+
+        function toggleCredits() {
+            const c = document.getElementById('credits');
+            c.style.display = c.style.display === 'none' ? 'block' : 'none';
+        }
+        // Trading System
+        function tradeDonut(fromPlayer, toPlayer, donutName) {
+            // Example placeholder; real implementation would depend on multiplayer system
+            console.log(`${fromPlayer} traded ${donutName} to ${toPlayer}`);
+        }
+
+        // Achievements
+        let achievements = [];
+        function checkAchievements() {
+            if (inventory.length >= 10 && !achievements.includes('Collector')) {
+                achievements.push('Collector');
+                alert('Achievement Unlocked: Collector!');
+            }
+            if (money >= 1000 && !achievements.includes('Richie Rich')) {
+                achievements.push('Richie Rich');
+                alert('Achievement Unlocked: Richie Rich!');
+            }
+        }
+
+        // Polish UI on updates
+        function updatePolishedUI() {
+            updateInventoryDisplay();
+            updateBaseDisplay();
+            updateMoney();
+            checkAchievements();
+            updateAchievementsUI();
+            updateEncyclopediaUI();
+        }
+        // Add more achievements
+        function unlockAchievement(name, condition) {
+            if (!achievements.includes(name) && condition()) {
+                achievements.push(name);
+                alert(`Achievement Unlocked: ${name}!`);
+            }
+        }
+
+        function checkAchievements() {
+            unlockAchievement('Collector', () => inventory.length >= 10);
+            unlockAchievement('Richie Rich', () => money >= 1000);
+            unlockAchievement('Hoarder', () => inventory.length >= 50);
+            unlockAchievement('Tycoon', () => money >= 5000);
+            unlockAchievement('Elite Thief', () => upgradeLevel >= 5);
+            unlockAchievement('Multiplier Master', () => multiplier >= 5);
+        }
+
+        // Improve UI polish
+        function showPopup(message) {
+            const pop = document.createElement('div');
+            pop.textContent = message;
+            pop.style.position = 'fixed';
+            pop.style.top = '20px';
+            pop.style.left = '50%';
+            pop.style.transform = 'translateX(-50%)';
+            pop.style.background = '#fff';
+            pop.style.border = '2px solid #d2691e';
+            pop.style.padding = '10px 20px';
+            pop.style.borderRadius = '12px';
+            pop.style.zIndex = 9999;
+            pop.style.boxShadow = '0 0 15px rgba(0,0,0,0.3)';
+            document.body.appendChild(pop);
+            setTimeout(() => document.body.removeChild(pop), 3000);
+        }
+
+        function alert(msg) {
+            showPopup(msg);
+        }
+
+        // Call updatePolishedUI after major actions
+        function stealDonut() {
+            const rarities = Object.keys(rarityChances);
+            let picked = 'Common';
+            let roll = Math.random();
+            let total = 0;
+            for (let r of rarities) {
+                total += rarityChances[r];
+                if (roll < total) {
+                    picked = r;
+                    break;
+                }
+            }
+            const donutName = picked + ' Doughnut';
+            inventory.push(donutName);
+            rarityAssignment[donutName] = picked;
+            money += Math.round((upgradeLevel * multiplier * (1 + rarities.indexOf(picked))));
+            triggerStealEffect();
+            updatePolishedUI();
+        }
+
+
+<div id="trading">
+  <h2>Trading</h2>
+  <input id="tradeFrom" placeholder="Your name" />
+  <input id="tradeTo" placeholder="Recipient name" />
+  <input id="tradeDonut" placeholder="Doughnut name" />
+  <button onclick="submitTrade()">Trade</button>
+</div>
+
+<div id="achievements">
+  <h2>Achievements</h2>
+  <ul id="achievementsList"></ul>
+</div>
+
+<script>
+function submitTrade() {
+  const from = document.getElementById('tradeFrom').value;
+  const to = document.getElementById('tradeTo').value;
+  const donut = document.getElementById('tradeDonut').value;
+  tradeDonut(from, to, donut);
+  alert(`Trade submitted: ${from} ➝ ${to} (${donut})`);
+}
+
+function updateAchievementsUI() {
+  const list = document.getElementById('achievementsList');
+  list.innerHTML = '';
+  achievements.forEach(a => {
+    const li = document.createElement('li');
+    li.textContent = a;
+    list.appendChild(li);
+  });
+}
+
+function updatePolishedUI() {
+  updateInventoryDisplay();
+  updateBaseDisplay();
+  updateMoney();
+  checkAchievements();
+  updateAchievementsUI();
+}
+function updateEncyclopediaUI() {
+  const list = document.getElementById('encyclopediaList');
+  list.innerHTML = '';
+  const seen = new Set(inventory);
+  seen.forEach(function(d) {
+    const li = document.createElement('li');
+    const rarity = rarityAssignment[d] || 'Common';
+    li.className = 'donut';
+    li.textContent = d + ' (' + rarity + ')';
+    list.appendChild(li);
+  });
+}
     </script>
 
 </body>
