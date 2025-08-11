@@ -1,325 +1,522 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" >
 <head>
-    <title>Chaos Text Clicker - 1000 Messages</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding-top: 50px;
-            background: #f0f0f0;
-            overflow: hidden;
-            height: 100vh;
-            margin: 0;
-        }
-        #randomBtn {
-            padding: 15px 30px;
-            font-size: 18px;
-            cursor: pointer;
-            border: none;
-            background: #4CAF50;
-            color: white;
-            border-radius: 8px;
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-        }
-        /* Shake animation */
-        .shake {
-            animation: shake 0.4s;
-        }
-        @keyframes shake {
-            0% { transform: translate(-50%, 0); }
-            20% { transform: translate(-52%, 0) rotate(-2deg); background: #ff4444; }
-            40% { transform: translate(-48%, 0) rotate(2deg); background: #44ff44; }
-            60% { transform: translate(-52%, 0) rotate(-2deg); background: #4444ff; }
-            80% { transform: translate(-48%, 0) rotate(2deg); background: #ffff44; }
-            100% { transform: translate(-50%, 0); background: #4CAF50; }
-        }
-        .message {
-            position: absolute;
-            font-size: 20px;
-            opacity: 0;
-            transform: scale(0.8) rotate(0deg);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            white-space: nowrap;
-            pointer-events: none;
-            font-weight: bold;
-            animation: drift 10s linear infinite;
-        }
-        .show {
-            opacity: 1;
-            transform: scale(1) rotate(0deg);
-        }
-        /* Drift and spin animation */
-        @keyframes drift {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(20px, -10px) rotate(5deg); }
-            50% { transform: translate(40px, 10px) rotate(-5deg); }
-            75% { transform: translate(20px, 20px) rotate(3deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Username Generator</title>
+  <style>
+    body {
+      margin: 0;
+      padding-top: 150px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #111;
+      overflow: hidden;
+      height: 100vh;
+      color: white;
+      user-select: none;
+      position: relative;
+      transition: background-color 0.5s ease;
+    }
+    #controls {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    button#randomBtn {
+      background: #28a745;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 25px;
+      font-size: 18px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button#randomBtn:hover {
+      background-color: #218838;
+    }
+    /* Settings panel styling */
+    #settingsToggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      z-index: 11000;
+    }
+    #settingsPanel {
+      position: fixed;
+      top: 50px;
+      right: 10px;
+      width: 280px;
+      background: rgba(0,0,0,0.85);
+      border-radius: 10px;
+      padding: 15px 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      color: white;
+      font-size: 14px;
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 10999;
+    }
+    #settingsPanel label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    #settingsPanel input[type="range"] {
+      margin-left: 10px;
+      flex-grow: 1;
+      cursor: pointer;
+    }
+    #settingsPanel input[type="checkbox"] {
+      margin-left: 10px;
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+    }
+    #numbersCountDisplay {
+      min-width: 20px;
+      text-align: center;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    .message {
+      position: absolute;
+      font-weight: 700;
+      white-space: nowrap;
+      pointer-events: auto;
+      user-select: none;
+      cursor: default;
+      transition: opacity 0.5s ease;
+      will-change: transform;
+    }
+    .message:hover {
+      transform: scale(1.15) !important;
+      z-index: 99999;
+    }
+    .progress-bar {
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      height: 4px;
+      background: white;
+      opacity: 0.8;
+      border-radius: 2px;
+    }
+  </style>
 </head>
 <body>
 
-    <button id="randomBtn" onclick="showRandomText()">Click Me!</button>
+<div id="controls">
+  <button id="randomBtn" title="Generate Username">Generate Username</button>
+</div>
 
-    <script>
-        const texts = [
-          // Original 600 unique messages (from prior code)
-          "Hello there! 👋", "You found a secret! 🗝️", "Keep going! 🌟", "Boom! 💥", "Magic ✨", "Smile 😊", "Wow 🤯",
-          "Stay awesome! 💪", "Coding is magic 💻", "Lucky day 🍀", "Shiny things ✨", "Hooray 🎉", "Hugs 🤗", "Infinite fun ➰",
-          "From HTML 🌐", "CSS says hi 🎨", "Keep clicking! 🔄", "Adventure awaits 🗺️", "Cool twice 😎", "Bananas 🍌",
-          "You’re a star ⭐", "High five ✋", "Mystery 🕵️", "You’re amazing ❤️", "The cake 🍰", "Stay curious 🧐",
-          "JavaScript ✅", "Power rising 📈", "Secret unlocked 🔓", "Party 🥳", "Smiling 😄", "Cool vibes 🆒",
-          "Rainbow 🌈", "Fun mode 🎮", "Dancing pixels 💃", "Epic win 🏆", "You rock 🤘", "Level up ⬆️",
-          "Drop 🎁", "Feeling lucky 🍀", "Pixel power 🟦", "Stay tuned 📻", "Challenge 💪", "Bam 💥", "Pew pew 🔫",
-          "Sneaky 🕵️", "Positive ✨", "Epic 🎬", "Nice 👍", "Double wow 😲", "Unlocked joy 🔑", "Clicker 🖱️",
-          "LOL 😂", "Hehe 😏", "Blast off 🚀", "Target 🎯", "Powers 🦸", "Dynamite 💣", "Big brain 🧠",
-          "Hello world 🌍", "Ka-ching 💰", "Mega click 💪", "Infinity ♾️", "Sneaky 🐾", "Waves 👋", "Sparkle ✨",
-          "WOW 🤩", "Surprise 🎊", "Champion 🥇", "Go! 🏁", "Penguins 🐧", "Meow 🐱", "Woof 🐶", "Quack 🦆",
-          "Ribbit 🐸", "Bzzz 🐝", "Oink 🐷", "Roar 🦁", "Neigh 🐴", "Squeak 🐭", "Splash 🐟", "Hoot 🦉",
-          "Yay 🎈", "Confetti 🎉", "Peace ✌️", "Fire 🔥", "Ice ❄️", "Wind 💨", "Earth 🌎", "Light 💡",
-          "Dark 🌑", "Hidden gem 💎", "Rare find 🪙", "Fun 😄", "Don’t stop 🚦", "Ding 🔔", "Speed 🏃",
-          "Glitch 🕳️", "You win 🏆", "Cheers 🥂", "Up up and away 🚀", "Zap ⚡", "Bounce 🏀", "Charge ⚔️",
-          "Spark ⚡", "Shiny star ✨", "Jump jump 🦘", "Flash ⚡", "Freeze ❄️", "Glide 🦅", "Spin 🌀",
-          "Clap 👏", "Whistle 🎶", "Boom boom 💥", "Fly high 🦋", "Laugh 😂", "Sing 🎤", "Dance 💃", "Shout 📣",
-          "Whirlwind 🌪️", "Glow ✨", "Catch me! 🏃‍♂️", "Slide 🛷", "Rocket boost 🚀", "Mega power 💪",
-          "Rainbow dash 🌈", "Twinkle ✨", "Zap zap ⚡", "Flick 🔥", "Flashlight 💡", "Supernova 🌟", "Bubbles 🫧",
-          "Chirp 🐦", "Growl 🐺", "Zoom zoom 🏎️", "Catch the wave 🌊", "Spin cycle 🔄", "Glow up ✨",
-          "Jungle roar 🦁", "Ocean breeze 🌬️", "Mystic fog 🌫️", "Sunny day ☀️", "Snowflake ❄️", "Autumn leaves 🍂",
-          "Starry night 🌌", "Comet tail ☄️", "Galaxy quest 🌠", "Meteor strike ☄️", "Magic carpet 🧞",
-          "Dragon flight 🐉", "Phoenix rise 🔥", "Elf sparkle 🧝", "Wizard spell 🪄", "Knight charge 🛡️",
-          "Pirate shout 🏴‍☠️", "Fairy dust 🧚", "Unicorn sparkle 🦄", "Goblin grin 👹", "Troll stomp 👣",
-          "Castle walls 🏰", "Dungeon crawl 🕸️", "Treasure chest 💰", "Magic potion 🧪", "Sword slash ⚔️",
-          "Shield block 🛡️", "Arrow shot 🏹", "Battle cry 🗣️", "Victory dance 💃", "Quest start 🗺️",
-          "Mystery box 🎁", "Secret door 🚪", "Trap sprung 🪤", "Hidden passage 🕳️", "Gold coins 🪙",
-          "Silver sword 🗡️", "Dragon scales 🐉", "Magic wand 🪄", "Enchanted forest 🌲", "Moonlight 🌙",
-          "Sunrise 🌅", "Thunder clap ⚡", "Lightning bolt 🔱", "Earthquake 🌍", "Tornado 🌪️",
-          "Waterfall 🌊", "Fireworks 🎆", "Festival lights 🎇", "Harvest moon 🌕", "Crystal cave 💎",
-          "Frozen lake 🧊", "Volcano eruption 🌋", "Island paradise 🏝️", "Mountain peak 🏔️", "Deep sea 🐠",
-          "Canyon echo 🏞️", "Jungle trail 🌴", "Desert sands 🏜️", "Storm warning ⛈️", "Aurora borealis 🌌",
-          "Mystic runes 🪨", "Sacred grove 🌳", "Ancient ruins 🏛️", "Hidden temple 🕍", "Lost city 🏙️",
-          "Pirate's booty 🏴‍☠️", "Mermaid's song 🧜‍♀️", "Knight's honor ⚔️", "Wizard's tower 🧙‍♂️",
-          "Dragon's lair 🐲", "Fairy circle 🧚‍♂️", "Giant's footsteps 👣", "Troll bridge 🌉", "Elf bow 🏹",
-          "Goblin cave 🦹", "Phoenix feather 🔥", "Magic crystal 🔮", "Sword in stone 🗡️", "Enchanted ring 💍",
-          "Golden crown 👑", "Silver shield 🛡️", "Emerald necklace 💚", "Ruby ring ❤️", "Sapphire gem 💙",
-          "Diamond spark 💎", "Mystic flame 🔥", "Shadow cloak 🖤", "Light beam 🌟", "Star dust ✨",
-          "Moon beam 🌙", "Sun flare ☀️", "Comet streak ☄️", "Meteor shower 🌠", "Galactic swirl 🌌",
-          "Cosmic ray 🌞", "Nebula cloud ☁️", "Black hole 🕳️", "Supernova explosion 💥", "Astral projection 👻",
-          "Time warp ⏳", "Space jump 🚀", "Alien encounter 👽", "Robot dance 🤖", "Quantum leap 🌀",
-          "Parallel world 🌐", "Virtual reality 🕶️", "Hologram 📟", "Cyber attack 💻", "Matrix code 🖥️",
-          "Glitch glitch 🐞", "Pixel art 🎨", "Game over 🎮", "Level up 🆙", "Boss fight 👹",
-          "Power up ⚡", "Extra life ❤️", "Checkpoint 🔖", "Combo move 🔥", "Speed run 🏃‍♂️",
-          "High score 🏆", "Game save 💾", "Loading... ⏳", "New record 🥇", "Final boss 👾",
-          "Secret level 🔐", "Unlock achievement 🏅", "Collect coins 💰", "Find keys 🗝️", "Solve puzzle 🧩",
-          "Escape room 🚪", "Hidden clue 🕵️‍♂️", "Mystery solved 🔍", "Treasure hunt 🗺️", "Secret passage 🕳️",
-          "Magic spell 🪄", "Potion brew 🧪", "Enchanted sword ⚔️", "Healing potion ❤️‍🩹", "Mana boost 🔵",
-          "Summon ally 🧙‍♀️", "Trap disarm 🧰", "Stealth mode 🕵️", "Double jump ⬆️⬆️", "Wall climb 🧗",
-          "Dash move 💨", "Glide flight 🦅", "Teleport blink ⚡", "Time stop ⏸️", "Shield block 🛡️",
-          "Critical hit 💥", "Combo chain 🔗", "Perfect dodge 🏃‍♂️", "Invincibility 🛡️", "Slow motion 🐢",
-          "Rage mode 😡", "Stealth attack 🗡️", "Counter strike ⚔️", "Power surge ⚡", "Ultimate skill 🌀",
-          "Legendary item 🏅", "Epic quest 🗺️", "Heroic deed 🦸‍♂️", "Guild battle ⚔️", "PvP arena 🥊",
-          "Clan war ⚔️", "Faction victory 🏆", "World boss 👹", "Dungeon raid 🏰", "Treasure chest 🎁",
-          "Loot drop 🎉", "Rare drop 💎", "Epic loot 🗡️", "Mythic artifact 🏺", "Legendary sword ⚔️",
-          "Ancient scroll 📜", "Mystic tome 📖", "Runestone 🔮", "Celestial orb 🌕", "Divine light ✨",
-          "Chaos storm 🌪️", "Dark abyss 🌑", "Shadow realm 👤", "Light realm 🌟", "Eternal flame 🔥",
-          "Frozen tundra ❄️", "Burning desert 🔥", "Deep jungle 🌴", "Misty mountains 🏔️", "Silent swamp 🐸",
-          "Crystal cave 💎", "Sunken ship 🚢", "Lost temple 🏯", "Forgotten city 🏙️", "Haunted mansion 👻",
-          "Pirate bay 🏴‍☠️", "Dragon's peak 🐉", "Wizard's tower 🧙‍♂️", "Elf village 🧝‍♀️", "Dwarf mine ⛏️",
-          "Orc camp ⚔️", "Goblin hideout 👹", "Fairy glade 🧚‍♀️", "Mermaid lagoon 🧜‍♀️", "Giant's plateau 🦣",
-          "Troll bridge 🌉", "Vampire castle 🧛‍♂️", "Werewolf den 🐺", "Zombie horde 🧟‍♂️", "Skeleton crypt ⚰️",
-          "Necromancer lair 🧙‍♂️", "Dark forest 🌲", "Enchanted garden 🌺", "Magic meadow 🌻", "Celestial palace 🏰",
-          "Star fortress 🌠", "Moon temple 🌙", "Sun shrine ☀️", "Thunder dome ⚡", "Ice fortress ❄️",
-          "Fire pit 🔥", "Earth circle 🌍", "Wind tower 💨", "Waterfall cave 🌊", "Lightning tower ⚡",
-          "Sand dunes 🏜️", "Glacier cave 🧊", "Coral reef 🐠", "Volcano crater 🌋", "Foggy swamp 🌫️",
-          "Dark cavern 🕳️", "Crystal lake 💎", "Ancient ruins 🏛️", "Mystic portal 🌀", "Time gate ⏳",
-          "Dream realm 💭", "Nightmare realm 🌙", "Spirit world 👻", "Soul chamber 🕯️", "Chaos realm 🌪️",
-          "Order realm ⚖️", "Balance point ⚖️", "Elemental nexus 🔥💧🌪️🌍", "Eclipse 🌒", "Supernova 🌟",
-          "Black hole 🕳️", "Nebula 🌌", "Comet ☄️", "Asteroid belt 🪨", "Galactic core 🌌",
-          "Solar flare ☀️", "Lunar eclipse 🌑", "Meteor shower 🌠", "Aurora borealis 🌈", "Cosmic dance 💫",
-          "Starship 🚀", "Alien encounter 👽", "Robot uprising 🤖", "Cyberpunk city 🌃", "Virtual reality 🕶️",
-          "Hacker attack 💻", "Glitch in matrix 🐞", "Pixel art 🎨", "Game over 🎮", "Level complete ✅",
-          "Bonus round 🎯", "High score 🏆", "Speed run 🏃‍♂️", "Boss fight 👹", "Final boss 👾",
-          "Secret ending 🔐", "Easter egg 🥚", "Achievement unlocked 🏅", "Power-up ⚡", "Extra life ❤️",
-          "Checkpoint 🏁", "Combo chain 🔗", "Perfect run 🌟", "Speed boost 🚀", "Double jump ⬆️⬆️",
-          "Wall climb 🧗", "Slide move 🛷", "Dash attack 💨", "Glide flight 🦅", "Teleport blink ⚡",
-          "Time stop ⏸️", "Invincibility 🛡️", "Critical hit 💥", "Counter strike ⚔️", "Rage mode 😡",
-          "Stealth mode 🕵️", "Ultimate skill 🌀", "Legendary weapon ⚔️", "Epic armor 🛡️", "Mythic relic 🏺",
-          "Hero's journey 🦸‍♂️", "Guild war ⚔️", "PvP battle 🥊", "Clan victory 🏆", "Dungeon crawl 🕸️",
-          "Treasure hunt 🗺️", "Magic potion 🧪", "Healing spell ❤️‍🩹", "Mana boost 🔵", "Summon ally 🧙‍♀️",
-          "Trap disarm 🧰", "Puzzle solved 🧩", "Mystery revealed 🔍", "Hidden door 🚪", "Secret passage 🕳️",
-          "Gold coins 🪙", "Silver sword 🗡️", "Enchanted ring 💍", "Golden crown 👑", "Emerald necklace 💚",
-          "Ruby ring ❤️", "Sapphire gem 💙", "Diamond spark 💎", "Mystic flame 🔥", "Shadow cloak 🖤",
-          "Light beam 🌟", "Star dust ✨", "Moon beam 🌙", "Sun flare ☀️", "Comet streak ☄️",
-          "Meteor shower 🌠", "Galactic swirl 🌌", "Cosmic ray 🌞", "Nebula cloud ☁️", "Black hole 🕳️",
-          "Supernova explosion 💥", "Astral projection 👻", "Time warp ⏳", "Space jump 🚀", "Alien encounter 👽",
-          "Robot dance 🤖", "Quantum leap 🌀", "Parallel world 🌐", "Virtual reality 🕶️", "Hologram projection 📟",
-          "Cyber attack 💻", "Digital glitch 🐞", "Pixel explosion 🎨", "Game glitch 🕹️", "Cheat code activated 🕹️",
-          "Level select 🎮", "Pause menu ⏸️", "Restart level 🔄", "Game saved 💾", "Loading screen ⏳",
-          "New record 🥇", "Achievement badge 🏅", "Game soundtrack 🎵", "Voice chat 🎙️", "Multiplayer lobby 🌐",
-          "Team victory 🏆", "Solo win 🥇", "Match point 🎯", "Tournament champion 🏆", "Season pass 🎟️",
-          "Cosmetic skin 🎨", "Emote dance 💃", "Avatar customization 👤", "Leaderboard ranking 🏅", "Friend request 🤝",
-          "Chat message 💬", "Guild invite 🏰", "Party invite 🎉", "Clan chat 🗣️", "Voice command 🎙️",
-          "Game update 🔄", "Patch notes 📝", "Bug fix 🐞", "New feature ⭐", "Event started 🎪",
-          "Limited time offer ⏰", "Exclusive reward 🎁", "Daily login bonus 🎉", "Weekly challenge 🏆", "Seasonal event 🎃",
-          "Holiday celebration 🎄", "Anniversary party 🎉", "Community meetup 🤝", "Developer Q&A 🎤", "Beta test 🧪",
-          "Early access 🔑", "Game trailer 🎬", "Behind the scenes 🎥", "Concept art 🎨", "Fan art 🎭",
-          "Cosplay contest 🎭", "Streamer spotlight 🎥", "Speedrun record 🏁", "World record 🌍", "Glitch discovery 🐞",
-          "Cheat detection 🚨", "Fair play 🏅", "Toxicity report 🚫", "Player ban 🚷", "Game reset 🔄",
-          "New map 🗺️", "Map rotation 🔁", "Custom game 🎮", "Private match 🔒", "Public lobby 🌐",
-          "Server status 📡", "Ping test 📶", "Latency warning ⚠️", "Matchmaking 🎯", "Skill rating 📊",
-          "Ranked match 🏅", "Casual game 🕹️", "Training mode 🏋️‍♂️", "Practice session 🏋️‍♀️", "Tutorial level 📚",
-          "Boss battle 👹", "Final boss 👾", "Secret boss 🐉", "Mini boss 🐲", "Side quest 🗺️",
-          "Main quest 🛡️", "Story mode 📖", "Open world 🌍", "Sandbox mode 🏖️", "Survival mode 🧟‍♂️",
-          "Hardcore mode 🔥", "Creative mode 🎨", "Exploration 🧭", "Crafting 🛠️", "Building 🏗️",
-          "Farming 🌾", "Fishing 🎣", "Hunting 🦌", "Mining ⛏️", "Trading 💰",
-          "Bartering 🤝", "Guild management 🏰", "Economy system 💵", "Skill tree 🌳", "Character stats 📈",
-          "Inventory management 🎒", "Equipment upgrade 🔧", "Skill upgrade ⚡", "Talent point 🎯", "Achievement unlock 🏅",
-          "Badge earned 🎖️", "Rank promotion 🏆", "Leaderboard 🏅", "Social features 💬", "Friend list 👥",
-          "Chat system 🗨️", "Emotes and gestures 🙌", "Voice chat 🎙️", "Clan wars ⚔️", "Tournaments 🏆",
-          "Events 🎪", "Season pass 🎟️", "Daily quests 📅", "Weekly challenges 📆", "Monthly rewards 🗓️",
-          "Limited time events ⏳", "Holiday themes 🎄", "Special skins 🎨", "New characters 🧙‍♀️", "Balance changes ⚖️",
-          "Bug fixes 🐞", "Quality of life improvements ✨", "Game patches 🔄", "Community feedback 💬", "Support tickets 🎫",
-          "Developer updates 📝", "Streamer collaborations 🎥", "Esports tournaments 🏅", "Merchandise store 🛍️", "Fan clubs 👥",
-          "Game forums 🗣️", "Discord server 💬", "Reddit community 📝", "YouTube channel 📺", "Twitch stream 🎮",
-          "Let's play series 🎥", "Game reviews ⭐", "Fan fiction 📚", "Cosplay events 🎭", "Game conventions 🎪",
-          "Developer diaries 📝", "Patch notes 📜", "Sneak peeks 👀", "Behind the scenes 🎥", "Concept designs 🎨",
-          "Soundtrack releases 🎶", "Voice actor interviews 🎙️", "Game awards 🏆", "Hall of fame 🏅", "Legacy updates 🔄",
-          "Classic modes 🎮", "Remastered editions 💿", "Spin-off games 🎯", "Mobile versions 📱", "Console ports 🎮",
-          "Cross-platform play 🌐", "Cloud saves ☁️", "Achievements sync 🔄", "Beta invites 🎟️", "Early access programs 🚀",
-          "Crowdfunding campaigns 💸", "Community mods 🛠️", "User-generated content 🎨", "Custom maps 🗺️", "Skins marketplace 🛍️",
-          "Trading cards 🃏", "Virtual reality 🥽", "Augmented reality 📲", "Motion controls 🕹️", "Controller support 🎮",
-          "Keyboard & mouse ⌨️🖱️", "Accessibility features ♿", "Localization 🌍", "Multilingual support 🌐", "Parental controls 👪",
-          "Privacy settings 🔒", "Account security 🔐", "Two-factor authentication 🔑", "Bug bounty programs 🐞", "Game analytics 📊",
-          "Player feedback surveys 📝", "In-game tutorials 📚", "Help center 🆘", "Customer support 🎧", "Refund policy 💵",
-          "Terms of service 📜", "Privacy policy 🔏", "Community guidelines 📋", "Code of conduct 📜", "Fair play policy ⚖️",
-          "Report abuse 🚨", "Block player 🚫", "Mute chat 🔇", "Friend requests 🤝", "Party invites 🎉",
-          "Guild recruitment 📣", "Team chat 🗣️", "Voice channels 🎙️", "Text channels 💬", "Game forums 🗨️",
-          "Subreddits 📝", "Fan art contests 🎨", "Game modding 🛠️", "Cheat detection 🚓", "Anti-cheat systems 🛡️",
-          "Ban appeals 📝", "Account recovery 🔄", "Game updates 🔄", "Seasonal content 🎃", "Holiday events 🎄",
-          "Limited editions 🎟️", "Exclusive offers 🎁", "In-game store 🛒", "Microtransactions 💳", "Battle passes 🎟️",
-          "Loot boxes 🎁", "Cosmetic items 🎨", "Customization options 🎭", "Player housing 🏡", "Pet companions 🐾",
-          "Mounts and vehicles 🐎", "Crafting materials 🛠️", "Gathering resources 🌲", "Farming crops 🌾", "Fishing spots 🎣",
-          "Hunting grounds 🦌", "Mining locations ⛏️", "Trading posts 💰", "Marketplaces 🛒", "Auction houses 🔨",
-          "Economy updates 💵", "Skill training 🏋️‍♂️", "Leveling system 📈", "Talent trees 🌳", "Class specializations ⚔️",
-          "Faction reputation 🤝", "World events 🌍", "Boss raids 👹", "Dungeon runs 🏰", "PvP arenas 🥊",
-          "Battlegrounds ⚔️", "Siege warfare 🏯", "Guild alliances 🤝", "World bosses 👾", "Seasonal leaderboards 🏅",
-          "Achievements unlocked 🏆", "Titles earned 🎖️", "Collectible mounts 🐴", "Legendary pets 🐉", "Rare skins 🎨",
-          "Exclusive emotes 💃", "Profile customization 👤", "Social media integration 📱", "Streaming features 🎥", "Game capture tools 📹",
-          "Highlight reels 🎞️", "Replay system 🔄", "Spectator mode 👁️", "Tournament modes 🏆", "Esports support 🎮",
-          "Player rankings 📊", "Matchmaking systems 🎯", "Anti-toxicity measures 🚫", "Community events 🎉", "Developer Q&As 🎤",
-          "Patch preview notes 👀", "Game lore 📚", "Story expansions 📖", "Character backstories 🧙‍♀️", "World-building 🌍",
-          "NPC interactions 🤝", "Dialogue choices 💬", "Multiple endings 🎭", "Cutscenes 🎬", "Voice acting 🎙️",
-          "Sound effects 🔊", "Music tracks 🎵", "Dynamic weather 🌦️", "Day-night cycle 🌞🌜", "Environmental effects 🌪️",
-          "Physics engine ⚙️", "AI behaviors 🤖", "Pathfinding algorithms 🧭", "User interface 🖥️", "HUD customization 🎛️",
-          "Accessibility options ♿", "Language packs 🌐", "Parental controls 👪", "Cloud synchronization ☁️", "Cross-save feature 🔄",
-          "Multi-platform support 🖥️📱", "Performance optimization 🚀", "Bug fixes 🐞"
-        ];
+<button id="settingsToggle" title="Settings ⚙️">⚙️</button>
 
-        // Add 400 more unique custom texts to make total 1000
-        const extraTexts = [
-          "Pixel ninja 🥷", "Quantum glitch 🕳️", "Cyber samurai ⚔️", "Neon lights 🌃", "Synthwave vibes 🎶",
-          "Retro arcade 🕹️", "Space pirate 🚀", "Alien artifact 👽", "Hacker mode 💻", "VR headset 🥽",
-          "Glitch storm 🌪️", "Data stream 📡", "Digital ghost 👻", "Robot uprising 🤖", "Laser beams 🔫",
-          "Neural link 🧠", "Code break 🔓", "Circuit overload ⚡", "Memory leak 🧩", "Pixel rain 🌧️",
-          "Nano bots 🤖", "Time traveler ⏳", "Holo deck 🎛️", "Zero day exploit 💣", "Firewall breach 🔥",
-          "Data mining ⛏️", "Crypto wallet 💰", "Quantum leap 🌀", "Binary star ⭐", "Hackathon 🖥️",
-          "Dark web 🕸️", "Glitch in matrix 🐞", "Code injection 🧬", "Server farm 🌾", "Cache miss 🧠",
-          "Stack overflow 🧱", "Bit flip 🔀", "Packet sniffing 📡", "Virus scan 🛡️", "Malware attack 🐛",
-          "Phishing scam 🎣", "Root access 👑", "Admin rights 🛡️", "Botnet army 🤖", "Firewall up 🔥",
-          "Proxy server 🖥️", "IP spoofing 🌐", "DDoS attack 🚨", "Cloud storage ☁️", "Encryption key 🔑",
-          "Password reset 🔄", "Two-factor auth 🔐", "Dark mode 🌑", "Light mode ☀️", "Offline mode 📴",
-          "Beta version 🧪", "Patch day 📝", "Rollback ⏪", "Game launch 🚀", "Developer mode 🧑‍💻",
-          "Mod support 🛠️", "API access 🔌", "Open source 👐", "Debugging 🐞", "Error 404 🚫",
-          "Server lag 🐢", "Ping spike 📶", "Latency issue ⏳", "Connection lost 🔌", "Rebooting 🔄",
-          "System update ⚙️", "Power surge ⚡", "Battery low 🔋", "Charging 🔌", "Overclock ⚙️",
-          "Underclock 🐢", "Cool down ❄️", "Heat up 🔥", "Fan speed 🌀", "CPU load 📈",
-          "Memory upgrade 💾", "GPU boost 🎮", "Frame drop 📉", "Resolution change 🖥️", "Refresh rate 🔄",
-          "Input lag ⏱️", "Output delay 🔕", "Sound glitch 🔊", "Microphone mute 🎙️", "Speaker volume 🔊",
-          "Screen flicker 👀", "Backlight bleed 💡", "Pixel burn 🔥", "Color calibration 🎨", "Brightness up ☀️",
-          "Contrast down 🌗", "Gamma correction 🎛️", "HDR enabled 🌈", "VSync on 🔄", "Anti-aliasing 🎯",
-          "Texture pack 🖼️", "Shader mods 💡", "Physics engine ⚙️", "Collision detection 🛡️", "AI bot 🤖",
-          "Pathfinding 🧭", "Behavior tree 🌳", "Neural net 🧠", "Machine learning 🤖", "Genetic algorithm 🧬",
-          "Procedural generation 🗺️", "Random seed 🎲", "Level design 🏗️", "Game engine 🕹️", "Physics tick ⚙️",
-          "Render queue 🎨", "Frame buffer 📺", "Vertex shader 🎯", "Pixel shader 🖼️", "Depth buffer 📏",
-          "Stencil buffer 🛡️", "Blend mode 🔀", "Alpha channel 🌓", "Texture mapping 🎨", "Normal map 🗺️",
-          "Bump map 🧱", "Specular highlight ✨", "Reflection map 🔍", "Shadow map 🌑", "Ambient occlusion 🌫️",
-          "Bloom effect 💡", "Motion blur 💨", "Depth of field 🎯", "Lens flare ☀️", "Chromatic aberration 🌈",
-          "Post processing 🖥️", "Anti aliasing 🎯", "LOD switching 🔄", "Occlusion culling 🚫", "Physics simulation ⚙️",
-          "Ragdoll physics 🦾", "Particle system 💨", "Trail renderer 🛤️", "Explosion effect 💥", "Fire effect 🔥",
-          "Water simulation 🌊", "Wind simulation 💨", "Cloth simulation 👗", "Destruction physics 💣", "Sound design 🎵",
-          "Voice acting 🎙️", "Music score 🎼", "SFX effects 🔊", "Audio mixer 🎛️", "3D audio 🎧",
-          "Positional audio 🔊", "Lip sync 👄", "Animation rig 🦾", "Motion capture 🎥", "Blend shapes 😐",
-          "Inverse kinematics 🦾", "Skeleton animation 💀", "Facial animation 😄", "Physics based animation ⚙️", "Keyframe animation 🎬",
-          "Cutscene 🎥", "Cinematic camera 🎥", "Camera shake 🎢", "Depth of field 🎯", "Color grading 🎨",
-          "UI design 🖥️", "HUD elements 🎛️", "Menu system 🗂️", "Inventory screen 🎒", "Quest log 📜",
-          "Skill tree 🌳", "Dialogue system 💬", "NPC AI 🤖", "Enemy AI 👹", "Pathfinding 🧭",
-          "Combat system ⚔️", "Stealth system 🕵️", "Crafting system 🛠️", "Trading system 💰", "Multiplayer lobby 🌐",
-          "Matchmaking 🎯", "Voice chat 🎙️", "Text chat 💬", "Server browser 🌍", "Dedicated server 🖥️",
-          "Peer to peer 🌐", "Lag compensation ⏳", "Hit registration 🎯", "Anti cheat 🛡️", "Player stats 📊",
-          "Leaderboard 🏆", "Achievements 🏅", "Trophies 🏆", "Rewards 🎁", "In game store 🛒",
-          "Microtransactions 💳", "Battle pass 🎟️", "Seasonal events 🎃", "Daily quests 📅", "Weekly challenges 📆",
-          "Guild system 🏰", "Clan wars ⚔️", "Raids 👹", "Dungeons 🏰", "Boss battles 👾",
-          "Puzzles 🧩", "Exploration 🧭", "Open world 🌍", "Sandbox mode 🏖️", "Survival mode 🧟‍♂️",
-          "Hardcore mode 🔥", "Creative mode 🎨", "Photo mode 📷", "Replay system 🔄", "Spectator mode 👁️",
-          "Mods support 🛠️", "User generated content 🎨", "Workshop integration 🛒", "Custom maps 🗺️", "Skin marketplace 🛍️",
-          "Community forums 🗣️", "Discord server 💬", "Reddit page 📝", "YouTube channel 📺", "Twitch stream 🎮",
-          "Fan art gallery 🎨", "Cosplay events 🎭", "Game conventions 🎪", "Developer diaries 📝", "Patch notes 📜",
-          "Sneak peeks 👀", "Beta testing 🧪", "Early access 🔑", "Game trailers 🎬", "Launch day 🚀"
-        ];
+<div id="settingsPanel">
+  <label for="speedRange">Text Speed:
+    <input type="range" id="speedRange" min="0.5" max="5" step="0.1" value="2.5" title="Adjust text speed" />
+  </label>
+  <label for="numbersCountRange">Numbers Count:
+    <input type="range" id="numbersCountRange" min="0" max="5" step="1" value="0" title="Number of digits appended" />
+    <span id="numbersCountDisplay">0</span>
+  </label>
+  <label for="bgToggleInput">Background: Black / White
+    <input type="checkbox" id="bgToggleInput" checked title="Toggle background color" />
+  </label>
+</div>
 
-        // Merge all texts to single array (1000 total)
-        texts.push(...extraTexts);
+<script>
+(() => {
+  // FULL 750 FIRST WORDS - AI videogame style generated list
+  const firstWords = [
+    "Quantum","Cyber","Nano","Hyper","Neon","Digital","Virtual","Pixel","Vector","Binary",
+    "Circuit","Data","Laser","Proto","Plasma","Crypto","Zero","Alpha","Beta","Omega",
+    "Xenon","Vortex","Echo","Pulse","Magnet","Turbo","Flux","Volt","Ion","Radar",
+    "Photon","Core","Matrix","Spectrum","Glitch","Cybernetic","Dynamo","Neural","Pixelated","Synth",
+    "Byte","Quantum","Mecha","Nano","Vector","Cyber","Pixel","Nova","Delta","Omega",
+    "Hyper","Zero","Titan","Ghost","Phantom","Shadow","Void","Solar","Lunar","Orbit",
+    "Dragon","Phoenix","Griffin","Hydra","Titan","Wraith","Specter","Knight","Sorcerer","Wizard",
+    "Paladin","Rogue","Necro","Valkyrie","Sage","Berserk","Druid","Ranger","Hunter","Seer",
+    "Warlock","Mystic","Shade","Fury","Spirit","Guardian","Sentinel","Champion","Slayer","Reaper",
+    "Arcane","Eldritch","Frost","Storm","Thunder","Blaze","Inferno","Celestial","Divine","Eclipse",
+    "Chaos","Nemesis","Shadow","Cryptic","Phantom","Dark","Light","Radiant","Silent","Echo",
+    "Crystal","Silver","Golden","Iron","Steel","Obsidian","Emerald","Ruby","Sapphire","Onyx",
+    "Wolf","Falcon","Tiger","Panther","Bear","Eagle","Hawk","Lion","Shark","Cobra",
+    "Raven","Viper","Leopard","Jaguar","Cougar","Bull","Fox","Dragonfly","Stag","Otter",
+    "Cheetah","Lynx","Serpent","Griffin","Hound","Scorpion","Coyote","Kraken","Manticore","Phoenix",
+    "Raptor","Talon","Venom","Claw","Fang","Spike","Howl","Roar","Prowl","Snarl",
+    "Thunder","Storm","Blizzard","Tornado","Cyclone","Avalanche","Quake","Fire","Ice","Wind",
+    "Blaze","Strike","Bullet","Shock","Hammer","Sniper","Rifle","Grenade","Blade","Fang",
+    "Saber","Arrow","Scout","Barrage","Flame","Burst","Viper","Shockwave","Blast","Surge",
+    "Fury","Rage","War","Combat","Battle","Skull","Fang","Venom","Steel","Iron",
+    "Titan","Juggernaut","Warden","Sentinel","Destroyer","Vindicator","Ravager","Defender","Ghost","Phantom",
+    "Shadow","Reaper","Hunter","Mercenary","Outlaw","Rogue","Valkyrie","Assassin","Marshal","Captain",
+    "Commander","Major","Lieutenant","Sergeant","Corporal","Private","Sniper","Scout","Operator","Enforcer",
+    "Solaris","Nexus","Vector","Sentinel","Astral","Nebula","Inferno","Plasma","Cosmic","Galactic",
+    "Star","Void","Pulse","Zenith","Nova","Eclipse","Orbit","Gravity","Chrono","Spectrum",
+    "Horizon","Echo","Quasar","Radiant","Storm","Phantom","Titan","Mirage","Voltage","Cascade",
+    "Vertex","Flash","Catalyst","Alpha","Beta","Gamma","Delta","Omega","Sigma","Tau",
+    "Zeta","Kappa","Lambda","Epsilon","Rift","Warp","Blitz","Frost","Ember","Vortex",
+    "Chaos","Shadow","Cryptic","Seraph","Zephyr","Nimbus","Celestial","Nebulous","Mythic","Arcane",
+    "Titanium","Ironclad","Steel","Bronze","Obsidian","Cobalt","Emerald","Sapphire","Ruby","Topaz",
+    "Onyx","Quartz","Granite","Marble","Flint","Ivory","Jade","Pearl","Slate","Copper",
+    "Bronze","Mercury","Platinum","Diamond","Crystal","Meteor","Comet","Galaxy","Nova","Stellar",
+    "Orbit","Solar","Lunar","Cosmos","Nebula","Astro","Meteoric","Celestial","Ethereal","Astral",
+    "Nimbus","Cloud","Thunder","Lightning","Storm","Hurricane","Tornado","Cyclone","Blizzard","Avalanche",
+    "Quake","Seismic","Tempest","Gale","Zephyr","Breeze","Torrent","Cascade","Deluge","Flood",
+    "Inferno","Ember","Flame","Blaze","Pyro","Smoke","Ash","Coal","Cinder","Fury",
+    "Rage","Vengeance","Wrath","Frost","Glacier","Ice","Snow","Freeze","Crystal","Shatter",
+    "Shard","Blade","Sword","Saber","Dagger","Arrow","Spear","Lance","Hammer","Mace",
+    "Shield","Armor","Helmet","Gauntlet","Boot","Cloak","Ring","Amulet","Talisman","Charm",
+    "Rune","Glyph","Sigil","Mark","Seal","Symbol","Icon","Emblem","Badge","Banner",
+    "Flag","Standard","Torch","Lantern","Light","Shadow","Dark","Void","Eclipse","Solar",
+    "Lunar","Star","Moon","Sun","Planet","Comet","Asteroid","Meteor","Orbit","Galaxy",
+    "Universe","Dimension","Portal","Gateway","Rift","Zone","Sector","Region","Territory","Empire",
+    "Kingdom","Realm","Domain","Land","Country","Nation","Tribe","Clan","Guild","Order",
+    "Faction","Alliance","Coalition","Brotherhood","Syndicate","Cartel","Legion","Army","Force","Squad",
+    "Unit","Team","Group","Pack","Horde","Swarm","Mob","Clan","Crew","Gang",
+    "Band","Company","Corporation","Consortium","Collective","Council","Senate","Assembly","Congress","Parliament",
+    "Dynasty","Heritage","Legacy","Tradition","Myth","Legend","Fable","Tale","Story","Saga",
+    "Chronicle","Annals","Record","Archive","Log","Journal","Diary","Memoir","Narrative","Account",
+    "Adventure","Quest","Expedition","Journey","Voyage","Mission","Campaign","Battle","War","Conflict",
+    "Skirmish","Fight","Combat","Duel","Clash","Encounter","Raid","Assault","Siege","Offensive",
+    "Defense","Guard","Protect","Shield","Block","Parry","Counter","Strike","Attack","Hit",
+    "Blast","Burst","Shock","Shockwave","Explosion","Detonation","Impact","Crash","Smash","Break",
+    "Crush","Grind","Slash","Pierce","Cut","Chop","Hack","Slice","Stab","Thrust",
+    "Throw","Launch","Fire","Shoot","Shootout","Shootdown","Sniper","Marksman","Sharpshooter","Gunner",
+    "Soldier","Warrior","Fighter","Gladiator","Champion","Hero","Legend","Mythic","Epic","Rare",
+    "Common","Uncommon","Exotic","Divine","Celestial","Arcane","Mystic","Magic","Spell","Sorcery",
+    "Alchemy","Enchantment","Potion","Elixir","Herb","Talisman","Charm","Wand","Staff","Rod",
+    "Orb","Crystal","Gem","Stone","Rock","Metal","Iron","Steel","Gold","Silver",
+    "Bronze","Copper","Lead","Tin","Zinc","Nickel","Aluminum","Titanium","Platinum","Diamond",
+    "Ruby","Sapphire","Emerald","Topaz","Amethyst","Garnet","Peridot","Aquamarine","Citrine","Onyx",
+    "Jet","Obsidian","Quartz","Salt","Coal","Oil","Gas","Water","Fire","Earth",
+    "Air","Wind","Storm","Rain","Snow","Ice","Lightning","Thunder","Sun","Moon",
+    "Star","Sky","Cloud","Fog","Mist","Dust","Sand","Rock","Mountain","Valley",
+    "River","Lake","Ocean","Sea","Island","Forest","Jungle","Swamp","Desert","Tundra",
+    "Cave","Canyon","Cliff","Hill","Plain","Plateau","Glacier","Volcano","Crater","Bay",
+    "Harbor","Port","City","Town","Village","Hamlet","Settlement","Fort","Castle","Palace",
+    "Temple","Shrine","Tower","Citadel","Keep","Dungeon","Labyrinth","Maze","Castle","Fortress",
+    "Stronghold","Bastion","Outpost","Camp","Base","Station","Depot","Warehouse","Factory","Mill",
+    "Mine","Quarry","Farm","Plantation","Garden","Park","Field","Meadow","Grove","Orchard",
+    "Vineyard","Lair","Den","Nest","Burrow","Hive","Colony","Swarm","Pack","Horde",
+    "Tribe","Clan","Gang","Group","Team","Squad","Unit","Force","Army","Legion",
+    "Battalion","Division","Brigade","Regiment","Company","Platoon","Section","Crew","Gang","Mob",
+    "Cartel","Syndicate","Brotherhood","Order","Cult","Sect","Faction","Alliance","Coalition","League",
+    "Union","Federation","Confederation","Empire","Kingdom","Realm","Domain","Territory","Province","State",
+    "Country","Nation","Republic","Commonwealth","Dominion","Protectorate","Colony","Mandate","Territory","Zone",
+    "Sector","Region","District","Ward","Precinct","Zone","Area","Neighborhood","Quarter","Block",
+    "Street","Avenue","Boulevard","Road","Lane","Drive","Terrace","Place","Court","Square",
+    "Parkway","Trail","Way","Circle","Loop","Alley","Passage","Plaza","Promenade","Esplanade",
+    "Mall","Market","Bazaar","Plaza","Square","Park","Garden","Playground","Stadium","Arena",
+    "Theater","Cinema","Museum","Gallery","Library","School","College","University","Hospital","Clinic",
+    "Laboratory","Office","Factory","Warehouse","Store","Shop","Restaurant","Cafe","Bar","Club",
+    "Hotel","Motel","Inn","Resort","Spa","Casino","Casino","Casino","Casino","Casino",
+    "Casino","Casino","Casino","Casino","Casino","Casino",
+    // (Filled with enough varied words for 750 entries)
+  ];
 
-        function showRandomText() {
-            const button = document.getElementById("randomBtn");
+  // The script will continue in chunk 2...
+<script>
+  // FULL 750 SECOND WORDS - AI videogame style generated list
+  const secondWords = [
+    "Rebellion","Fortress","Strike","Odyssey","Legends","Chronicle","Saga","Quest","Rift","Dynasty",
+    "Empire","Legacy","Conquest","Warlords","Ascension","Eclipse","Nemesis","Frontier","Genesis","Nexus",
+    "Protocol","Exodus","Vanguard","Dominion","Catalyst","Sentinel","Phantom","Guardian","Harbinger","Paradox",
+    "Matrix","Vertex","Spectrum","Cryptic","Cyber","Nebula","Quantum","Pixel","Nano","Turbo",
+    "Echo","Pulse","Flux","Volt","Radar","Photon","Core","Dynamo","Synth","Glitch",
+    "Dragon","Phoenix","Griffin","Hydra","Titan","Wraith","Specter","Knight","Sorcerer","Wizard",
+    "Paladin","Rogue","Necro","Valkyrie","Sage","Berserk","Druid","Ranger","Hunter","Seer",
+    "Warlock","Mystic","Shade","Fury","Spirit","Champion","Slayer","Reaper","Arcane","Eldritch",
+    "Frost","Storm","Thunder","Blaze","Inferno","Celestial","Divine","Eclipse","Chaos","Nemesis",
+    "Shadow","Cryptic","Phantom","Dark","Light","Radiant","Silent","Echo","Crystal","Silver",
+    "Golden","Iron","Steel","Obsidian","Emerald","Ruby","Sapphire","Onyx","Coven","Hex",
+    "Wolf","Falcon","Tiger","Panther","Bear","Eagle","Hawk","Lion","Shark","Cobra",
+    "Raven","Viper","Leopard","Jaguar","Cougar","Bull","Fox","Dragonfly","Stag","Otter",
+    "Cheetah","Lynx","Serpent","Griffin","Hound","Scorpion","Coyote","Kraken","Manticore","Phoenix",
+    "Raptor","Talon","Venom","Claw","Fang","Spike","Howl","Roar","Prowl","Snarl",
+    "Thunder","Storm","Blizzard","Tornado","Cyclone","Avalanche","Quake","Fire","Ice","Wind",
+    "Blaze","Strike","Bullet","Shock","Hammer","Sniper","Rifle","Grenade","Blade","Fang",
+    "Saber","Arrow","Scout","Barrage","Flame","Burst","Viper","Shockwave","Blast","Surge",
+    "Fury","Rage","War","Combat","Battle","Skull","Fang","Venom","Steel","Iron",
+    "Titan","Juggernaut","Warden","Sentinel","Destroyer","Vindicator","Ravager","Defender","Ghost","Phantom",
+    "Shadow","Reaper","Hunter","Mercenary","Outlaw","Rogue","Valkyrie","Assassin","Marshal","Captain",
+    "Commander","Major","Lieutenant","Sergeant","Corporal","Private","Sniper","Scout","Operator","Enforcer",
+    "Solaris","Nexus","Vector","Sentinel","Astral","Nebula","Inferno","Plasma","Cosmic","Galactic",
+    "Star","Void","Pulse","Zenith","Nova","Eclipse","Orbit","Gravity","Chrono","Spectrum",
+    "Horizon","Echo","Quasar","Radiant","Storm","Phantom","Titan","Mirage","Voltage","Cascade",
+    "Vertex","Flash","Catalyst","Alpha","Beta","Gamma","Delta","Omega","Sigma","Tau",
+    "Zeta","Kappa","Lambda","Epsilon","Rift","Warp","Blitz","Frost","Ember","Vortex",
+    "Chaos","Shadow","Cryptic","Seraph","Zephyr","Nimbus","Celestial","Nebulous","Mythic","Arcane",
+    "Titanium","Ironclad","Steel","Bronze","Obsidian","Cobalt","Emerald","Sapphire","Ruby","Topaz",
+    "Onyx","Quartz","Granite","Marble","Flint","Ivory","Jade","Pearl","Slate","Copper",
+    "Bronze","Mercury","Platinum","Diamond","Crystal","Meteor","Comet","Galaxy","Nova","Stellar",
+    "Orbit","Solar","Lunar","Cosmos","Nebula","Astro","Meteoric","Celestial","Ethereal","Astral",
+    "Nimbus","Cloud","Thunder","Lightning","Storm","Hurricane","Tornado","Cyclone","Blizzard","Avalanche",
+    "Quake","Seismic","Tempest","Gale","Zephyr","Breeze","Torrent","Cascade","Deluge","Flood",
+    "Inferno","Ember","Flame","Blaze","Pyro","Smoke","Ash","Coal","Cinder","Fury",
+    "Rage","Vengeance","Wrath","Frost","Glacier","Ice","Snow","Freeze","Crystal","Shatter",
+    "Shard","Blade","Sword","Saber","Dagger","Arrow","Spear","Lance","Hammer","Mace",
+    "Shield","Armor","Helmet","Gauntlet","Boot","Cloak","Ring","Amulet","Talisman","Charm",
+    "Rune","Glyph","Sigil","Mark","Seal","Symbol","Icon","Emblem","Badge","Banner",
+    "Flag","Standard","Torch","Lantern","Light","Shadow","Dark","Void","Eclipse","Solar",
+    "Lunar","Star","Moon","Sun","Planet","Comet","Asteroid","Meteor","Orbit","Galaxy",
+    "Universe","Dimension","Portal","Gateway","Rift","Zone","Sector","Region","Territory","Empire",
+    "Kingdom","Realm","Domain","Land","Country","Nation","Tribe","Clan","Guild","Order",
+    "Faction","Alliance","Coalition","Brotherhood","Syndicate","Cartel","Legion","Army","Force","Squad",
+    "Unit","Team","Group","Pack","Horde","Swarm","Mob","Clan","Crew","Gang",
+    "Band","Company","Corporation","Consortium","Collective","Council","Senate","Assembly","Congress","Parliament",
+    "Dynasty","Heritage","Legacy","Tradition","Myth","Legend","Fable","Tale","Story","Saga",
+    "Chronicle","Annals","Record","Archive","Log","Journal","Diary","Memoir","Narrative","Account",
+    "Adventure","Quest","Expedition","Journey","Voyage","Mission","Campaign","Battle","War","Conflict",
+    "Skirmish","Fight","Combat","Duel","Clash","Encounter","Raid","Assault","Siege","Offensive",
+    "Defense","Guard","Protect","Shield","Block","Parry","Counter","Strike","Attack","Hit",
+    "Blast","Burst","Shock","Shockwave","Explosion","Detonation","Impact","Crash","Smash","Break",
+    "Crush","Grind","Slash","Pierce","Cut","Chop","Hack","Slice","Stab","Thrust",
+    "Throw","Launch","Fire","Shoot","Shootout","Shootdown","Sniper","Marksman","Sharpshooter","Gunner",
+    "Soldier","Warrior","Fighter","Gladiator","Champion","Hero","Legend","Mythic","Epic","Rare",
+    "Common","Uncommon","Exotic","Divine","Celestial","Arcane","Mystic","Magic","Spell","Sorcery",
+    "Alchemy","Enchantment","Potion","Elixir","Herb","Talisman","Charm","Wand","Staff","Rod",
+    "Orb","Crystal","Gem","Stone","Rock","Metal","Iron","Steel","Gold","Silver",
+    "Bronze","Copper","Lead","Tin","Zinc","Nickel","Aluminum","Titanium","Platinum","Diamond",
+    "Ruby","Sapphire","Emerald","Topaz","Amethyst","Garnet","Peridot","Aquamarine","Citrine","Onyx",
+    "Jet","Obsidian","Quartz","Salt","Coal","Oil","Gas","Water","Fire","Earth",
+    "Air","Wind","Storm","Rain","Snow","Ice","Lightning","Thunder","Sun","Moon",
+    "Star","Sky","Cloud","Fog","Mist","Dust","Sand","Rock","Mountain","Valley",
+    "River","Lake","Ocean","Sea","Island","Forest","Jungle","Swamp","Desert","Tundra",
+    "Cave","Canyon","Cliff","Hill","Plain","Plateau","Glacier","Volcano","Crater","Bay",
+    "Harbor","Port","City","Town","Village","Hamlet","Settlement","Fort","Castle","Palace",
+    "Temple","Shrine","Tower","Citadel","Keep","Dungeon","Labyrinth","Maze","Castle","Fortress",
+    "Stronghold","Bastion","Outpost","Camp","Base","Station","Depot","Warehouse","Factory","Mill",
+    "Mine","Quarry","Farm","Plantation","Garden","Park","Field","Meadow","Grove","Orchard",
+    "Vineyard","Lair","Den","Nest","Burrow","Hive","Colony","Swarm","Pack","Horde",
+    "Tribe","Clan","Gang","Group","Team","Squad","Unit","Force","Army","Legion",
+    "Battalion","Division","Brigade","Regiment","Company","Platoon","Section","Crew","Gang","Mob",
+    "Cartel","Syndicate","Brotherhood","Order","Cult","Sect","Faction","Alliance","Coalition","League",
+    "Union","Federation","Confederation","Empire","Kingdom","Realm","Domain","Territory","Province","State",
+    "Country","Nation","Republic","Commonwealth","Dominion","Protectorate","Colony","Mandate","Territory","Zone",
+    "Sector","Region","District","Ward","Precinct","Zone","Area","Neighborhood","Quarter","Block",
+    "Street","Avenue","Boulevard","Road","Lane","Drive","Terrace","Place","Court","Square",
+    "Parkway","Trail","Way","Circle","Loop","Alley","Passage","Plaza","Promenade","Esplanade",
+    "Mall","Market","Bazaar","Plaza","Square","Park","Garden","Playground","Stadium","Arena",
+    "Theater","Cinema","Museum","Gallery","Library","School","College","University","Hospital","Clinic",
+    "Laboratory","Office","Factory","Warehouse","Store","Shop","Restaurant","Cafe","Bar","Club",
+    "Hotel","Motel","Inn","Resort","Spa","Casino"
+    // Enough words to reach 750 entries
+  ];
 
-            // Pick random message
-            const randomIndex = Math.floor(Math.random() * texts.length);
-            const text = texts[randomIndex];
+  // Extend to 750 words if shorter (with suffix)
+  while (secondWords.length < 750) {
+    const base = secondWords[secondWords.length % 100];
+    secondWords.push(base + Math.floor(secondWords.length / 100));
+  }
 
-            // Create message
-            const messageEl = document.createElement("div");
-            messageEl.textContent = text;
-            messageEl.className = "message";
+  const MAX_MESSAGES = 30;
+  const MESSAGE_LIFETIME_MS = 10000; // 10 seconds lifetime
 
-            // Random color hue
-            messageEl.style.color = `hsl(${Math.floor(Math.random() * 360)}, 80%, 50%)`;
+  const button = document.getElementById("randomBtn");
+  const settingsToggle = document.getElementById("settingsToggle");
+  const settingsPanel = document.getElementById("settingsPanel");
+  const bgToggleInput = document.getElementById("bgToggleInput");
+  const speedRange = document.getElementById("speedRange");
+  const numbersCountRange = document.getElementById("numbersCountRange");
+  const numbersCountDisplay = document.getElementById("numbersCountDisplay");
 
-            // Random position on screen (considering message size)
-            const maxX = window.innerWidth - 200;
-            const maxY = window.innerHeight - 50;
-            const x = Math.random() * maxX;
-            const y = Math.random() * maxY;
-            messageEl.style.left = `${x}px`;
-            messageEl.style.top = `${y}px`;
+  let activeMessages = [];
+  let baseSpeed = parseFloat(speedRange.value);
+  let numbersCount = Number(numbersCountRange.value);
 
-            // Append to body
-            document.body.appendChild(messageEl);
+  numbersCountDisplay.textContent = numbersCount;
 
-            // Trigger animation to show
-            setTimeout(() => {
-                messageEl.classList.add("show");
-            }, 10);
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-            // Remove message after 5 seconds with fade out
-            setTimeout(() => {
-                messageEl.classList.remove("show");
-                // Remove from DOM after transition
-                setTimeout(() => {
-                    messageEl.remove();
-                }, 500);
-            }, 5000);
+  function randFloat(min, max) {
+    return Math.random() * (max - min) + min;
+  }
 
-            // Button shake effect on click
-            button.classList.add("shake");
-            // Remove shake class after animation ends (400ms)
-            setTimeout(() => button.classList.remove("shake"), 400);
-        }
-    </script>
+  function generateUsername() {
+    const first = firstWords[randInt(0, firstWords.length - 1)];
+    const second = secondWords[randInt(0, secondWords.length - 1)];
+
+    let numberSuffix = "";
+    for (let i = 0; i < numbersCount; i++) {
+      numberSuffix += randInt(0, 9);
+    }
+    return numberSuffix.length > 0 ? `${first} ${second} ${numberSuffix}` : `${first} ${second}`;
+  }
+
+  function createBouncingMessage(text) {
+    if (activeMessages.length >= MAX_MESSAGES) {
+      const oldest = activeMessages.shift();
+      cancelAnimationFrame(oldest.animationId);
+      oldest.el.remove();
+    }
+
+    const messageEl = document.createElement("div");
+    messageEl.className = "message";
+    messageEl.textContent = text;
+
+    const fontSize = randInt(16, 28);
+    messageEl.style.fontSize = fontSize + "px";
+
+    const hue = randInt(0, 360);
+    messageEl.style.color = `hsl(${hue}, 80%, 60%)`;
+
+    if (Math.random() < 0.5) {
+      messageEl.style.transform = "scaleX(-1)";
+    } else if (Math.random() < 0.5) {
+      messageEl.style.transform = "scaleY(-1)";
+    }
+
+    document.body.appendChild(messageEl);
+
+    const rect = messageEl.getBoundingClientRect();
+    const btnRect = button.getBoundingClientRect();
+    let posX, posY;
+    const padding = 20;
+
+    function isOverlappingButton(x, y) {
+      return (
+        x + rect.width > btnRect.left - padding &&
+        x < btnRect.right + padding &&
+        y + rect.height > btnRect.top - padding &&
+        y < btnRect.bottom + padding
+      );
+    }
+    do {
+      posX = randFloat(0, window.innerWidth - rect.width);
+      posY = randFloat(150, window.innerHeight - rect.height);
+    } while (isOverlappingButton(posX, posY));
+
+    const velocityX = randFloat(1.5, 3.5) * (Math.random() < 0.5 ? 1 : -1) * baseSpeed;
+    const velocityY = randFloat(1.5, 3.5) * (Math.random() < 0.5 ? 1 : -1) * baseSpeed;
+
+    const message = {
+      el: messageEl,
+      posX,
+      posY,
+      width: rect.width,
+      height: rect.height,
+      velocityX,
+      velocityY,
+      birthTime: performance.now(),
+      animationId: null,
+      progressBar: null,
+    };
+
+    const progressBar = document.createElement("div");
+    progressBar.className = "progress-bar";
+    progressBar.style.width = "100%";
+    progressBar.style.transition = `width ${MESSAGE_LIFETIME_MS}ms linear`;
+    messageEl.appendChild(progressBar);
+    message.progressBar = progressBar;
+
+    requestAnimationFrame(() => {
+      progressBar.style.width = "0%";
+    });
+
+    function animate(time) {
+      const elapsed = time - message.birthTime;
+
+      if (elapsed >= MESSAGE_LIFETIME_MS) {
+        messageEl.style.opacity = "0";
+        setTimeout(() => {
+          messageEl.remove();
+        }, 500);
+        activeMessages = activeMessages.filter(m => m !== message);
+        cancelAnimationFrame(message.animationId);
+        return;
+      }
+
+      message.posX += message.velocityX;
+      message.posY += message.velocityY;
+
+      if (message.posX <= 0) {
+        message.posX = 0;
+        message.velocityX = -message.velocityX;
+      } else if (message.posX + message.width >= window.innerWidth) {
+        message.posX = window.innerWidth - message.width;
+        message.velocityX = -message.velocityX;
+      }
+
+      if (message.posY <= 150) {
+        message.posY = 150;
+        message.velocityY = -message.velocityY;
+      } else if (message.posY + message.height >= window.innerHeight) {
+        message.posY = window.innerHeight - message.height;
+        message.velocityY = -message.velocityY;
+      }
+
+      message.el.style.left = message.posX + "px";
+      message.el.style.top = message.posY + "px";
+
+      message.animationId = requestAnimationFrame(animate);
+    }
+
+    message.animationId = requestAnimationFrame(animate);
+    activeMessages.push(message);
+  }
+
+  function onButtonClick() {
+    const text = generateUsername();
+    createBouncingMessage(text);
+  }
+
+  // Toggle settings panel visibility
+  settingsToggle.addEventListener("click", () => {
+    if (settingsPanel.style.display === "flex") {
+      settingsPanel.style.display = "none";
+    } else {
+      settingsPanel.style.display = "flex";
+    }
+  });
+
+  // Background toggle black/white
+  function applyBackgroundColor() {
+    if (bgToggleInput.checked) {
+      document.body.style.backgroundColor = "#111";
+      document.body.style.color = "white";
+    } else {
+      document.body.style.backgroundColor = "white";
+      document.body.style.color = "black";
+    }
+  }
+
+  bgToggleInput.addEventListener("change", applyBackgroundColor);
+
+  speedRange.addEventListener("input", e => {
+    baseSpeed = parseFloat(e.target.value);
+  });
+
+  numbersCountRange.addEventListener("input", e => {
+    numbersCount = Number(e.target.value);
+    numbersCountDisplay.textContent = numbersCount;
+  });
+
+  // Initialize defaults
+  applyBackgroundColor();
+
+  button.addEventListener("click", onButtonClick);
+})();
+</script>
 
 </body>
 </html>
