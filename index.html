@@ -252,12 +252,19 @@
     "Helmet","Gauntlet","Boot","Cloak","Ring","Amulet","Talisman","Charm","Rune","Glyph",
     "Sigil","Mark","Seal","Symbol","Icon","Emblem","Badge","Banner","Flag","Standard",
     "Torch","Lantern","Light","Shadow","Dark","Void","Eclipse","Solar","Lunar","Star",
-    "Moon","Sun","Planet","Comet","Asteroid","Meteor","Orbit","Galaxy","Universe","Dimension",
-    "Portal","Gateway","Rift","Zone","Sector","Region","Territory","Empire","Kingdom","Realm",
-    "Domain","Land","Country","Nation","Tribe","Clan","Guild","Order","Legion","Faction",
-    "Alliance","Brotherhood","Syndicate","Cartel","Clan","Clan","Cult","Circle","Council","Assembly",
-    "Union","Congregation","Brotherhood","Order","Force","Fleet","Squadron","Division","Unit","Team",
-    "Crew","Band","Gang","Pack","Horde","Swarm","Colony","Hive","Nest","Empire"
+    "Moon","Sun","Sky","Cloud","Wind","Air","Fire","Water","Earth","Metal",
+    "Wood","Stone","Crystal","Spirit","Soul","Heart","Mind","Will","Power","Force",
+    "Energy","Life","Death","Chaos","Order","Balance","Harmony","Discord","Fury","Rage",
+    "Wrath","Vengeance","Justice","Mercy","Fear","Hope","Faith","Love","Hate","Glory",
+    "Honor","Pride","Greed","Envy","Lust","Sloth","Wrath","Gluttony","Charity","Fortitude",
+    "Temperance","Justice","Prudence","Courage","Valor","Strength","Wisdom","Knowledge","Insight","Clarity",
+    "Vision","Dream","Nightmare","Memory","History","Future","Destiny","Fate","Luck","Chance",
+    "Fortune","Gambit","Risk","Reward","Bounty","Treasure","Gold","Silver","Coins","Gems",
+    "Relic","Artifact","Scroll","Book","Map","Chart","Letter","Message","Signal","Code",
+    "Cipher","Data","Matrix","Neural","Circuit","Voltage","Current","Power","Core","Crystal",
+    "Gem","Stone","Rock","Ore","Metal","Alloy","Fiber","Thread","Wire","Gear",
+    "Cog","Bolt","Screw","Nail","Hammer","Blade","Sword","Knife","Dagger","Spear",
+    "Axe","Mace","Hammer","Staff","Wand","Orb","Scroll","Tome","Book","Seal"
   ];
 
   // State & config
@@ -359,7 +366,7 @@
   function addMessage() {
     const speed = parseFloat(speedInput.value);
     const text = generateUsername();
-    const message = new Message(text, speed * 100); // speed scaled for px/ms
+    const message = new Message(text, speed * 10); // 10x slower movement now
     messages.push(message);
   }
 
