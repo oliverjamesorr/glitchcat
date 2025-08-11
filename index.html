@@ -143,98 +143,74 @@
 
 <script>
 (() => {
-  // FULL 750 FIRST WORDS - AI videogame style generated list
+  // 500 first words (AI/videogame style)
   const firstWords = [
-    "Quantum","Cyber","Nano","Hyper","Neon","Digital","Virtual","Pixel","Vector","Binary",
-    "Circuit","Data","Laser","Proto","Plasma","Crypto","Zero","Alpha","Beta","Omega",
-    "Xenon","Vortex","Echo","Pulse","Magnet","Turbo","Flux","Volt","Ion","Radar",
-    "Photon","Core","Matrix","Spectrum","Glitch","Cybernetic","Dynamo","Neural","Pixelated","Synth",
-    "Byte","Quantum","Mecha","Nano","Vector","Cyber","Pixel","Nova","Delta","Omega",
-    "Hyper","Zero","Titan","Ghost","Phantom","Shadow","Void","Solar","Lunar","Orbit",
-    "Dragon","Phoenix","Griffin","Hydra","Titan","Wraith","Specter","Knight","Sorcerer","Wizard",
-    "Paladin","Rogue","Necro","Valkyrie","Sage","Berserk","Druid","Ranger","Hunter","Seer",
-    "Warlock","Mystic","Shade","Fury","Spirit","Guardian","Sentinel","Champion","Slayer","Reaper",
-    "Arcane","Eldritch","Frost","Storm","Thunder","Blaze","Inferno","Celestial","Divine","Eclipse",
-    "Chaos","Nemesis","Shadow","Cryptic","Phantom","Dark","Light","Radiant","Silent","Echo",
-    "Crystal","Silver","Golden","Iron","Steel","Obsidian","Emerald","Ruby","Sapphire","Onyx",
-    "Wolf","Falcon","Tiger","Panther","Bear","Eagle","Hawk","Lion","Shark","Cobra",
-    "Raven","Viper","Leopard","Jaguar","Cougar","Bull","Fox","Dragonfly","Stag","Otter",
-    "Cheetah","Lynx","Serpent","Griffin","Hound","Scorpion","Coyote","Kraken","Manticore","Phoenix",
-    "Raptor","Talon","Venom","Claw","Fang","Spike","Howl","Roar","Prowl","Snarl",
-    "Thunder","Storm","Blizzard","Tornado","Cyclone","Avalanche","Quake","Fire","Ice","Wind",
-    "Blaze","Strike","Bullet","Shock","Hammer","Sniper","Rifle","Grenade","Blade","Fang",
-    "Saber","Arrow","Scout","Barrage","Flame","Burst","Viper","Shockwave","Blast","Surge",
-    "Fury","Rage","War","Combat","Battle","Skull","Fang","Venom","Steel","Iron",
-    "Titan","Juggernaut","Warden","Sentinel","Destroyer","Vindicator","Ravager","Defender","Ghost","Phantom",
-    "Shadow","Reaper","Hunter","Mercenary","Outlaw","Rogue","Valkyrie","Assassin","Marshal","Captain",
-    "Commander","Major","Lieutenant","Sergeant","Corporal","Private","Sniper","Scout","Operator","Enforcer",
-    "Solaris","Nexus","Vector","Sentinel","Astral","Nebula","Inferno","Plasma","Cosmic","Galactic",
-    "Star","Void","Pulse","Zenith","Nova","Eclipse","Orbit","Gravity","Chrono","Spectrum",
-    "Horizon","Echo","Quasar","Radiant","Storm","Phantom","Titan","Mirage","Voltage","Cascade",
-    "Vertex","Flash","Catalyst","Alpha","Beta","Gamma","Delta","Omega","Sigma","Tau",
-    "Zeta","Kappa","Lambda","Epsilon","Rift","Warp","Blitz","Frost","Ember","Vortex",
-    "Chaos","Shadow","Cryptic","Seraph","Zephyr","Nimbus","Celestial","Nebulous","Mythic","Arcane",
-    "Titanium","Ironclad","Steel","Bronze","Obsidian","Cobalt","Emerald","Sapphire","Ruby","Topaz",
-    "Onyx","Quartz","Granite","Marble","Flint","Ivory","Jade","Pearl","Slate","Copper",
-    "Bronze","Mercury","Platinum","Diamond","Crystal","Meteor","Comet","Galaxy","Nova","Stellar",
-    "Orbit","Solar","Lunar","Cosmos","Nebula","Astro","Meteoric","Celestial","Ethereal","Astral",
-    "Nimbus","Cloud","Thunder","Lightning","Storm","Hurricane","Tornado","Cyclone","Blizzard","Avalanche",
-    "Quake","Seismic","Tempest","Gale","Zephyr","Breeze","Torrent","Cascade","Deluge","Flood",
-    "Inferno","Ember","Flame","Blaze","Pyro","Smoke","Ash","Coal","Cinder","Fury",
-    "Rage","Vengeance","Wrath","Frost","Glacier","Ice","Snow","Freeze","Crystal","Shatter",
-    "Shard","Blade","Sword","Saber","Dagger","Arrow","Spear","Lance","Hammer","Mace",
-    "Shield","Armor","Helmet","Gauntlet","Boot","Cloak","Ring","Amulet","Talisman","Charm",
-    "Rune","Glyph","Sigil","Mark","Seal","Symbol","Icon","Emblem","Badge","Banner",
-    "Flag","Standard","Torch","Lantern","Light","Shadow","Dark","Void","Eclipse","Solar",
-    "Lunar","Star","Moon","Sun","Planet","Comet","Asteroid","Meteor","Orbit","Galaxy",
-    "Universe","Dimension","Portal","Gateway","Rift","Zone","Sector","Region","Territory","Empire",
-    "Kingdom","Realm","Domain","Land","Country","Nation","Tribe","Clan","Guild","Order",
-    "Faction","Alliance","Coalition","Brotherhood","Syndicate","Cartel","Legion","Army","Force","Squad",
-    "Unit","Team","Group","Pack","Horde","Swarm","Mob","Clan","Crew","Gang",
-    "Band","Company","Corporation","Consortium","Collective","Council","Senate","Assembly","Congress","Parliament",
-    "Dynasty","Heritage","Legacy","Tradition","Myth","Legend","Fable","Tale","Story","Saga",
-    "Chronicle","Annals","Record","Archive","Log","Journal","Diary","Memoir","Narrative","Account",
-    "Adventure","Quest","Expedition","Journey","Voyage","Mission","Campaign","Battle","War","Conflict",
-    "Skirmish","Fight","Combat","Duel","Clash","Encounter","Raid","Assault","Siege","Offensive",
-    "Defense","Guard","Protect","Shield","Block","Parry","Counter","Strike","Attack","Hit",
-    "Blast","Burst","Shock","Shockwave","Explosion","Detonation","Impact","Crash","Smash","Break",
+    "Quantum","Cyber","Nano","Hyper","Neon","Digital","Pixel","Vector","Binary","Circuit",
+    "Omega","Alpha","Beta","Gamma","Delta","Sigma","Epsilon","Zeta","Kappa","Lambda",
+    "Phantom","Specter","Ghost","Shadow","Wraith","Spirit","Eclipse","Nova","Nebula","Cosmic",
+    "Solar","Lunar","Stellar","Galactic","Celestial","Astral","Void","Voidwalker","Zenith","Aether",
+    "Blaze","Inferno","Ember","Flame","Pyro","Frost","Glacier","Ice","Crystal","Shard",
+    "Bolt","Thunder","Storm","Cyclone","Tornado","Hurricane","Quake","Seismic","Shockwave","Pulse",
+    "Vortex","Torrent","Cascade","Ripple","Surge","Flux","Wave","Current","Drift","Echo",
+    "Pulse","Radial","Orbit","Comet","Meteor","Astro","Meteoric","Rocket","Jet","Vector",
+    "Titan","Colossus","Juggernaut","Goliath","Leviathan","Behemoth","Kraken","Hydra","Dragon","Phoenix",
+    "Griffin","Chimera","Wyvern","Basilisk","Cerberus","Manticore","Harbinger","Sentinel","Guardian","Warden",
+    "Ranger","Scout","Sniper","Sharpshooter","Marksman","Assassin","Ninja","Samurai","Ronin","Viking",
+    "Barbarian","Knight","Paladin","Templar","Sage","Wizard","Warlock","Sorcerer","Mage","Necromancer",
+    "Druid","Shaman","Monk","Priest","Cleric","Alchemist","Enchanter","Berserker","Gladiator","Champion",
+    "Hero","Legend","Mythic","Epic","Rare","Common","Uncommon","Exotic","Divine","Arcane",
+    "Mystic","Chaos","Order","Balance","Fury","Rage","Wrath","Vengeance","Valor","Honor",
+    "Justice","Mercy","Fear","Dread","Horror","Nightmare","Dream","Vision","Prophecy","Oracle",
+    "Seer","Sage","Elder","Ancient","Prime","Alpha","Omega","Sigma","Delta","Echo",
+    "Nova","Hyperion","Titanium","Iron","Steel","Bronze","Copper","Gold","Silver","Platinum",
+    "Diamond","Ruby","Sapphire","Emerald","Topaz","Onyx","Obsidian","Quartz","Crystal","Pearl",
+    "Shadow","Light","Dark","Bright","Radiant","Silent","Loud","Swift","Slow","Rapid",
+    "Stealth","Cloak","Shade","Veil","Mask","Mirror","Glass","Stone","Rock","Mountain",
+    "Valley","Forest","Jungle","Swamp","Desert","Tundra","Cave","Canyon","River","Lake",
+    "Ocean","Sea","Island","Sky","Cloud","Storm","Rain","Snow","Wind","Breeze",
+    "Thunder","Lightning","Fire","Ice","Water","Earth","Air","Metal","Wood","Stone",
+    "Flame","Blizzard","Frost","Ember","Spark","Smoke","Ash","Coal","Dust","Sand",
+    "Steel","Ironclad","Titanium","Copperhead","Bronzeclaw","Silverwing","Goldfang","Shadowfang","Lightbringer","Darkblade",
+    "Moonshadow","Sunfire","Starfall","Nightfall","Dawn","Twilight","Midnight","Eclipse","Solaris","Lunaris",
+    "Chrono","Tempo","Time","Space","Dimension","Portal","Gate","Rift","Warp","Shift",
+    "Echo","Pulse","Wave","Frequency","Signal","Code","Cipher","Data","Matrix","Neural",
+    "Circuit","Voltage","Current","Power","Energy","Force","Gravity","Magnet","Field","Core",
+    "Crystal","Gem","Stone","Rock","Ore","Metal","Alloy","Fiber","Thread","Wire",
+    "Gear","Cog","Bolt","Screw","Nail","Hammer","Blade","Sword","Knife","Dagger",
+    "Spear","Axe","Mace","Hammer","Staff","Wand","Orb","Scroll","Tome","Book",
+    "Seal","Mark","Rune","Glyph","Sigil","Charm","Talisman","Amulet","Pendant","Ring",
+    "Crown","Helmet","Armor","Shield","Gauntlet","Boots","Cape","Cloak","Robe","Mask",
+    "Banner","Flag","Standard","Emblem","Insignia","Badge","Logo","Symbol","Icon","Glyph",
+    "Hunter","Tracker","Seeker","Finder","Explorer","Pioneer","Pathfinder","Nomad","Wanderer","Drifter",
+    "Rogue","Outlaw","Bandit","Thief","Pirate","Corsair","Mercenary","Soldier","Warrior","Fighter",
+    "Gladiator","Berserker","Champion","Hero","Legend","Myth","Tale","Story","Saga","Chronicle",
+    "Adventure","Quest","Mission","Campaign","Battle","War","Fight","Clash","Skirmish","Raid",
+    "Siege","Assault","Attack","Defense","Guard","Shield","Block","Parry","Counter","Strike",
+    "Hit","Blast","Burst","Shock","Explosion","Detonation","Impact","Crash","Smash","Break",
     "Crush","Grind","Slash","Pierce","Cut","Chop","Hack","Slice","Stab","Thrust",
-    "Throw","Launch","Fire","Shoot","Shootout","Shootdown","Sniper","Marksman","Sharpshooter","Gunner",
-    "Soldier","Warrior","Fighter","Gladiator","Champion","Hero","Legend","Mythic","Epic","Rare",
-    "Common","Uncommon","Exotic","Divine","Celestial","Arcane","Mystic","Magic","Spell","Sorcery",
-    "Alchemy","Enchantment","Potion","Elixir","Herb","Talisman","Charm","Wand","Staff","Rod",
-    "Orb","Crystal","Gem","Stone","Rock","Metal","Iron","Steel","Gold","Silver",
-    "Bronze","Copper","Lead","Tin","Zinc","Nickel","Aluminum","Titanium","Platinum","Diamond",
-    "Ruby","Sapphire","Emerald","Topaz","Amethyst","Garnet","Peridot","Aquamarine","Citrine","Onyx",
-    "Jet","Obsidian","Quartz","Salt","Coal","Oil","Gas","Water","Fire","Earth",
-    "Air","Wind","Storm","Rain","Snow","Ice","Lightning","Thunder","Sun","Moon",
-    "Star","Sky","Cloud","Fog","Mist","Dust","Sand","Rock","Mountain","Valley",
-    "River","Lake","Ocean","Sea","Island","Forest","Jungle","Swamp","Desert","Tundra",
-    "Cave","Canyon","Cliff","Hill","Plain","Plateau","Glacier","Volcano","Crater","Bay",
-    "Harbor","Port","City","Town","Village","Hamlet","Settlement","Fort","Castle","Palace",
-    "Temple","Shrine","Tower","Citadel","Keep","Dungeon","Labyrinth","Maze","Castle","Fortress",
-    "Stronghold","Bastion","Outpost","Camp","Base","Station","Depot","Warehouse","Factory","Mill",
-    "Mine","Quarry","Farm","Plantation","Garden","Park","Field","Meadow","Grove","Orchard",
-    "Vineyard","Lair","Den","Nest","Burrow","Hive","Colony","Swarm","Pack","Horde",
-    "Tribe","Clan","Gang","Group","Team","Squad","Unit","Force","Army","Legion",
-    "Battalion","Division","Brigade","Regiment","Company","Platoon","Section","Crew","Gang","Mob",
-    "Cartel","Syndicate","Brotherhood","Order","Cult","Sect","Faction","Alliance","Coalition","League",
-    "Union","Federation","Confederation","Empire","Kingdom","Realm","Domain","Territory","Province","State",
-    "Country","Nation","Republic","Commonwealth","Dominion","Protectorate","Colony","Mandate","Territory","Zone",
-    "Sector","Region","District","Ward","Precinct","Zone","Area","Neighborhood","Quarter","Block",
-    "Street","Avenue","Boulevard","Road","Lane","Drive","Terrace","Place","Court","Square",
-    "Parkway","Trail","Way","Circle","Loop","Alley","Passage","Plaza","Promenade","Esplanade",
-    "Mall","Market","Bazaar","Plaza","Square","Park","Garden","Playground","Stadium","Arena",
-    "Theater","Cinema","Museum","Gallery","Library","School","College","University","Hospital","Clinic",
-    "Laboratory","Office","Factory","Warehouse","Store","Shop","Restaurant","Cafe","Bar","Club",
-    "Hotel","Motel","Inn","Resort","Spa","Casino","Casino","Casino","Casino","Casino",
-    "Casino","Casino","Casino","Casino","Casino","Casino",
-    // (Filled with enough varied words for 750 entries)
+    "Throw","Launch","Fire","Shoot","Sniper","Gunner","Marksman","Sharpshooter","Assault","Support",
+    "Medic","Engineer","Technician","Spy","Scout","Sniper","Commander","Leader","Captain","General",
+    "Marshal","Admiral","Warlord","Overlord","Emperor","King","Queen","Prince","Princess","Duke",
+    "Baron","Lord","Knight","Squire","Page","Monk","Priest","Cleric","Shaman","Druid",
+    "Wizard","Sorcerer","Warlock","Necromancer","Alchemist","Enchanter","Mystic","Seer","Oracle","Prophet",
+    "Sage","Elder","Ancient","Prime","First","Last","Final","Ultimate","Supreme","Eternal",
+    "Infinite","Boundless","Limitless","Absolute","Perfect","Pure","True","Sacred","Divine","Holy",
+    "Darkness","Light","Shadow","Radiance","Flame","Frost","Storm","Thunder","Lightning","Earth",
+    "Water","Air","Fire","Ice","Metal","Wood","Stone","Crystal","Spirit","Soul",
+    "Heart","Mind","Will","Power","Force","Energy","Life","Death","Chaos","Order",
+    "Balance","Harmony","Discord","Fury","Rage","Wrath","Vengeance","Justice","Mercy","Fear",
+    "Hope","Faith","Love","Hate","Glory","Honor","Pride","Greed","Envy","Lust",
+    "Sloth","Wrath","Gluttony","Faith","Hope","Charity","Fortitude","Temperance","Justice","Prudence",
+    "Courage","Valor","Strength","Wisdom","Knowledge","Intellect","Insight","Clarity","Vision","Dream",
+    "Nightmare","Memory","History","Future","Destiny","Fate","Luck","Chance","Fortune","Gambit",
+    "Risk","Reward","Bounty","Treasure","Gold","Silver","Coins","Gems","Relics","Artifacts",
+    "Scrolls","Books","Maps","Charts","Letters","Messages","Signals","Codes","Passwords","Keys",
+    "Locks","Doors","Windows","Walls","Bridges","Tunnels","Paths","Roads","Trails","Tracks",
+    "Signs","Markers","Beacons","Lights","Torches","Lanterns","Candles","Fireworks","Explosions",
+    "Smoke","Fog","Mist","Clouds","Rain","Snow","Ice","Frost","Wind","Breeze"
   ];
 
-  // The script will continue in chunk 2...
-<script>
-  // FULL 750 SECOND WORDS - AI videogame style generated list
+  // 500 second words (AI/videogame style)
   const secondWords = [
     "Rebellion","Fortress","Strike","Odyssey","Legends","Chronicle","Saga","Quest","Rift","Dynasty",
     "Empire","Legacy","Conquest","Warlords","Ascension","Eclipse","Nemesis","Frontier","Genesis","Nexus",
@@ -244,243 +220,191 @@
     "Dragon","Phoenix","Griffin","Hydra","Titan","Wraith","Specter","Knight","Sorcerer","Wizard",
     "Paladin","Rogue","Necro","Valkyrie","Sage","Berserk","Druid","Ranger","Hunter","Seer",
     "Warlock","Mystic","Shade","Fury","Spirit","Champion","Slayer","Reaper","Arcane","Eldritch",
-    "Frost","Storm","Thunder","Blaze","Inferno","Celestial","Divine","Eclipse","Chaos","Nemesis",
-    "Shadow","Cryptic","Phantom","Dark","Light","Radiant","Silent","Echo","Crystal","Silver",
-    "Golden","Iron","Steel","Obsidian","Emerald","Ruby","Sapphire","Onyx","Coven","Hex",
-    "Wolf","Falcon","Tiger","Panther","Bear","Eagle","Hawk","Lion","Shark","Cobra",
-    "Raven","Viper","Leopard","Jaguar","Cougar","Bull","Fox","Dragonfly","Stag","Otter",
-    "Cheetah","Lynx","Serpent","Griffin","Hound","Scorpion","Coyote","Kraken","Manticore","Phoenix",
-    "Raptor","Talon","Venom","Claw","Fang","Spike","Howl","Roar","Prowl","Snarl",
-    "Thunder","Storm","Blizzard","Tornado","Cyclone","Avalanche","Quake","Fire","Ice","Wind",
-    "Blaze","Strike","Bullet","Shock","Hammer","Sniper","Rifle","Grenade","Blade","Fang",
-    "Saber","Arrow","Scout","Barrage","Flame","Burst","Viper","Shockwave","Blast","Surge",
-    "Fury","Rage","War","Combat","Battle","Skull","Fang","Venom","Steel","Iron",
-    "Titan","Juggernaut","Warden","Sentinel","Destroyer","Vindicator","Ravager","Defender","Ghost","Phantom",
-    "Shadow","Reaper","Hunter","Mercenary","Outlaw","Rogue","Valkyrie","Assassin","Marshal","Captain",
-    "Commander","Major","Lieutenant","Sergeant","Corporal","Private","Sniper","Scout","Operator","Enforcer",
-    "Solaris","Nexus","Vector","Sentinel","Astral","Nebula","Inferno","Plasma","Cosmic","Galactic",
-    "Star","Void","Pulse","Zenith","Nova","Eclipse","Orbit","Gravity","Chrono","Spectrum",
-    "Horizon","Echo","Quasar","Radiant","Storm","Phantom","Titan","Mirage","Voltage","Cascade",
-    "Vertex","Flash","Catalyst","Alpha","Beta","Gamma","Delta","Omega","Sigma","Tau",
-    "Zeta","Kappa","Lambda","Epsilon","Rift","Warp","Blitz","Frost","Ember","Vortex",
-    "Chaos","Shadow","Cryptic","Seraph","Zephyr","Nimbus","Celestial","Nebulous","Mythic","Arcane",
-    "Titanium","Ironclad","Steel","Bronze","Obsidian","Cobalt","Emerald","Sapphire","Ruby","Topaz",
-    "Onyx","Quartz","Granite","Marble","Flint","Ivory","Jade","Pearl","Slate","Copper",
-    "Bronze","Mercury","Platinum","Diamond","Crystal","Meteor","Comet","Galaxy","Nova","Stellar",
-    "Orbit","Solar","Lunar","Cosmos","Nebula","Astro","Meteoric","Celestial","Ethereal","Astral",
-    "Nimbus","Cloud","Thunder","Lightning","Storm","Hurricane","Tornado","Cyclone","Blizzard","Avalanche",
-    "Quake","Seismic","Tempest","Gale","Zephyr","Breeze","Torrent","Cascade","Deluge","Flood",
-    "Inferno","Ember","Flame","Blaze","Pyro","Smoke","Ash","Coal","Cinder","Fury",
-    "Rage","Vengeance","Wrath","Frost","Glacier","Ice","Snow","Freeze","Crystal","Shatter",
-    "Shard","Blade","Sword","Saber","Dagger","Arrow","Spear","Lance","Hammer","Mace",
-    "Shield","Armor","Helmet","Gauntlet","Boot","Cloak","Ring","Amulet","Talisman","Charm",
-    "Rune","Glyph","Sigil","Mark","Seal","Symbol","Icon","Emblem","Badge","Banner",
-    "Flag","Standard","Torch","Lantern","Light","Shadow","Dark","Void","Eclipse","Solar",
-    "Lunar","Star","Moon","Sun","Planet","Comet","Asteroid","Meteor","Orbit","Galaxy",
-    "Universe","Dimension","Portal","Gateway","Rift","Zone","Sector","Region","Territory","Empire",
-    "Kingdom","Realm","Domain","Land","Country","Nation","Tribe","Clan","Guild","Order",
-    "Faction","Alliance","Coalition","Brotherhood","Syndicate","Cartel","Legion","Army","Force","Squad",
-    "Unit","Team","Group","Pack","Horde","Swarm","Mob","Clan","Crew","Gang",
-    "Band","Company","Corporation","Consortium","Collective","Council","Senate","Assembly","Congress","Parliament",
-    "Dynasty","Heritage","Legacy","Tradition","Myth","Legend","Fable","Tale","Story","Saga",
-    "Chronicle","Annals","Record","Archive","Log","Journal","Diary","Memoir","Narrative","Account",
-    "Adventure","Quest","Expedition","Journey","Voyage","Mission","Campaign","Battle","War","Conflict",
-    "Skirmish","Fight","Combat","Duel","Clash","Encounter","Raid","Assault","Siege","Offensive",
-    "Defense","Guard","Protect","Shield","Block","Parry","Counter","Strike","Attack","Hit",
-    "Blast","Burst","Shock","Shockwave","Explosion","Detonation","Impact","Crash","Smash","Break",
-    "Crush","Grind","Slash","Pierce","Cut","Chop","Hack","Slice","Stab","Thrust",
-    "Throw","Launch","Fire","Shoot","Shootout","Shootdown","Sniper","Marksman","Sharpshooter","Gunner",
-    "Soldier","Warrior","Fighter","Gladiator","Champion","Hero","Legend","Mythic","Epic","Rare",
-    "Common","Uncommon","Exotic","Divine","Celestial","Arcane","Mystic","Magic","Spell","Sorcery",
-    "Alchemy","Enchantment","Potion","Elixir","Herb","Talisman","Charm","Wand","Staff","Rod",
-    "Orb","Crystal","Gem","Stone","Rock","Metal","Iron","Steel","Gold","Silver",
-    "Bronze","Copper","Lead","Tin","Zinc","Nickel","Aluminum","Titanium","Platinum","Diamond",
-    "Ruby","Sapphire","Emerald","Topaz","Amethyst","Garnet","Peridot","Aquamarine","Citrine","Onyx",
-    "Jet","Obsidian","Quartz","Salt","Coal","Oil","Gas","Water","Fire","Earth",
-    "Air","Wind","Storm","Rain","Snow","Ice","Lightning","Thunder","Sun","Moon",
-    "Star","Sky","Cloud","Fog","Mist","Dust","Sand","Rock","Mountain","Valley",
-    "River","Lake","Ocean","Sea","Island","Forest","Jungle","Swamp","Desert","Tundra",
-    "Cave","Canyon","Cliff","Hill","Plain","Plateau","Glacier","Volcano","Crater","Bay",
-    "Harbor","Port","City","Town","Village","Hamlet","Settlement","Fort","Castle","Palace",
-    "Temple","Shrine","Tower","Citadel","Keep","Dungeon","Labyrinth","Maze","Castle","Fortress",
-    "Stronghold","Bastion","Outpost","Camp","Base","Station","Depot","Warehouse","Factory","Mill",
-    "Mine","Quarry","Farm","Plantation","Garden","Park","Field","Meadow","Grove","Orchard",
-    "Vineyard","Lair","Den","Nest","Burrow","Hive","Colony","Swarm","Pack","Horde",
-    "Tribe","Clan","Gang","Group","Team","Squad","Unit","Force","Army","Legion",
-    "Battalion","Division","Brigade","Regiment","Company","Platoon","Section","Crew","Gang","Mob",
-    "Cartel","Syndicate","Brotherhood","Order","Cult","Sect","Faction","Alliance","Coalition","League",
-    "Union","Federation","Confederation","Empire","Kingdom","Realm","Domain","Territory","Province","State",
-    "Country","Nation","Republic","Commonwealth","Dominion","Protectorate","Colony","Mandate","Territory","Zone",
-    "Sector","Region","District","Ward","Precinct","Zone","Area","Neighborhood","Quarter","Block",
-    "Street","Avenue","Boulevard","Road","Lane","Drive","Terrace","Place","Court","Square",
-    "Parkway","Trail","Way","Circle","Loop","Alley","Passage","Plaza","Promenade","Esplanade",
-    "Mall","Market","Bazaar","Plaza","Square","Park","Garden","Playground","Stadium","Arena",
-    "Theater","Cinema","Museum","Gallery","Library","School","College","University","Hospital","Clinic",
-    "Laboratory","Office","Factory","Warehouse","Store","Shop","Restaurant","Cafe","Bar","Club",
-    "Hotel","Motel","Inn","Resort","Spa","Casino"
-    // Enough words to reach 750 entries
+    "Frost","Storm","Thunder","Blaze","Inferno","Celestial","Divine","Chaos","Nemesis","Shadow",
+    "Cryptic","Phantom","Dark","Light","Radiant","Silent","Echo","Crystal","Silver","Golden",
+    "Iron","Steel","Obsidian","Emerald","Ruby","Sapphire","Onyx","Coven","Hex","Wolf",
+    "Falcon","Tiger","Panther","Bear","Eagle","Hawk","Lion","Shark","Cobra","Raven",
+    "Viper","Leopard","Jaguar","Cougar","Bull","Fox","Dragonfly","Stag","Otter","Cheetah",
+    "Lynx","Serpent","Griffin","Hound","Scorpion","Coyote","Kraken","Manticore","Phoenix","Raptor",
+    "Talon","Venom","Claw","Fang","Spike","Howl","Roar","Prowl","Snarl","Thunder",
+    "Storm","Blizzard","Tornado","Cyclone","Avalanche","Quake","Fire","Ice","Wind","Blaze",
+    "Strike","Bullet","Shock","Hammer","Sniper","Rifle","Grenade","Blade","Saber","Arrow",
+    "Scout","Barrage","Flame","Burst","Viper","Shockwave","Blast","Surge","Fury","Rage",
+    "War","Combat","Battle","Skull","Fang","Venom","Steel","Iron","Titan","Juggernaut",
+    "Warden","Sentinel","Destroyer","Vindicator","Ravager","Defender","Ghost","Phantom","Shadow","Reaper",
+    "Hunter","Mercenary","Outlaw","Rogue","Valkyrie","Assassin","Marshal","Captain","Commander","Major",
+    "Lieutenant","Sergeant","Corporal","Private","Sniper","Scout","Operator","Enforcer","Solaris","Nexus",
+    "Vector","Sentinel","Astral","Nebula","Inferno","Plasma","Cosmic","Galactic","Star","Void",
+    "Pulse","Zenith","Nova","Eclipse","Orbit","Gravity","Chrono","Spectrum","Horizon","Echo",
+    "Quasar","Radiant","Storm","Phantom","Titan","Mirage","Voltage","Cascade","Vertex","Flash",
+    "Catalyst","Alpha","Beta","Gamma","Delta","Omega","Sigma","Tau","Zeta","Kappa",
+    "Lambda","Epsilon","Rift","Warp","Blitz","Frost","Ember","Vortex","Chaos","Shadow",
+    "Cryptic","Seraph","Zephyr","Nimbus","Celestial","Nebulous","Mythic","Arcane","Titanium","Ironclad",
+    "Steel","Bronze","Obsidian","Cobalt","Emerald","Sapphire","Ruby","Topaz","Onyx","Quartz",
+    "Granite","Marble","Flint","Ivory","Jade","Pearl","Slate","Copper","Bronze","Mercury",
+    "Platinum","Diamond","Crystal","Meteor","Comet","Galaxy","Nova","Stellar","Orbit","Solar",
+    "Lunar","Cosmos","Nebula","Astro","Meteoric","Celestial","Ethereal","Astral","Nimbus","Cloud",
+    "Thunder","Lightning","Storm","Hurricane","Tornado","Cyclone","Blizzard","Avalanche","Quake","Seismic",
+    "Tempest","Gale","Zephyr","Breeze","Torrent","Cascade","Deluge","Flood","Inferno","Ember",
+    "Flame","Blaze","Pyro","Smoke","Ash","Coal","Cinder","Fury","Rage","Vengeance",
+    "Wrath","Frost","Glacier","Ice","Snow","Freeze","Crystal","Shatter","Shard","Blade",
+    "Sword","Saber","Dagger","Arrow","Spear","Lance","Hammer","Mace","Shield","Armor",
+    "Helmet","Gauntlet","Boot","Cloak","Ring","Amulet","Talisman","Charm","Rune","Glyph",
+    "Sigil","Mark","Seal","Symbol","Icon","Emblem","Badge","Banner","Flag","Standard",
+    "Torch","Lantern","Light","Shadow","Dark","Void","Eclipse","Solar","Lunar","Star",
+    "Moon","Sun","Planet","Comet","Asteroid","Meteor","Orbit","Galaxy","Universe","Dimension",
+    "Portal","Gateway","Rift","Zone","Sector","Region","Territory","Empire","Kingdom","Realm",
+    "Domain","Land","Country","Nation","Tribe","Clan","Guild","Order","Legion","Faction",
+    "Alliance","Brotherhood","Syndicate","Cartel","Clan","Clan","Cult","Circle","Council","Assembly",
+    "Union","Congregation","Brotherhood","Order","Force","Fleet","Squadron","Division","Unit","Team",
+    "Crew","Band","Gang","Pack","Horde","Swarm","Colony","Hive","Nest","Empire"
   ];
 
-  // Extend to 750 words if shorter (with suffix)
-  while (secondWords.length < 750) {
-    const base = secondWords[secondWords.length % 100];
-    secondWords.push(base + Math.floor(secondWords.length / 100));
-  }
-
-  const MAX_MESSAGES = 30;
-  const MESSAGE_LIFETIME_MS = 10000; // 10 seconds lifetime
-
-  const button = document.getElementById("randomBtn");
+  // State & config
+  const messages = [];
+  const maxMessages = 40; // max messages on screen
+  const messageLife = 10000; // message life in ms (10 seconds)
+  const btn = document.getElementById("randomBtn");
+  const speedInput = document.getElementById("speedRange");
+  const numbersCountInput = document.getElementById("numbersCountRange");
+  const numbersCountDisplay = document.getElementById("numbersCountDisplay");
+  const bgToggleInput = document.getElementById("bgToggleInput");
   const settingsToggle = document.getElementById("settingsToggle");
   const settingsPanel = document.getElementById("settingsPanel");
-  const bgToggleInput = document.getElementById("bgToggleInput");
-  const speedRange = document.getElementById("speedRange");
-  const numbersCountRange = document.getElementById("numbersCountRange");
-  const numbersCountDisplay = document.getElementById("numbersCountDisplay");
+  const body = document.body;
 
-  let activeMessages = [];
-  let baseSpeed = parseFloat(speedRange.value);
-  let numbersCount = Number(numbersCountRange.value);
+  let animationFrameId;
+  let lastTimestamp;
 
-  numbersCountDisplay.textContent = numbersCount;
+  // Bounce DVD style variables for each message
+  class Message {
+    constructor(text, speed) {
+      this.text = text;
+      this.speed = speed;
+      this.el = document.createElement("div");
+      this.el.className = "message";
+      this.el.textContent = text;
+      this.el.style.color = getRandomColor();
+      this.el.style.fontSize = `${12 + Math.random()*18}px`;
+      // Initial random position inside viewport (minus some margin)
+      this.x = Math.random() * (window.innerWidth - 150) + 50;
+      this.y = Math.random() * (window.innerHeight - 150) + 50;
+      // Random velocity between -speed and speed
+      const angle = Math.random() * 2 * Math.PI;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.el.style.left = `${this.x}px`;
+      this.el.style.top = `${this.y}px`;
+      this.birthTime = performance.now();
+      body.appendChild(this.el);
+    }
+    update(deltaTime) {
+      this.x += this.vx * deltaTime;
+      this.y += this.vy * deltaTime;
 
-  function randInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+      // Bounce off edges
+      if (this.x <= 0) { this.x = 0; this.vx *= -1; }
+      else if (this.x + this.el.offsetWidth >= window.innerWidth) {
+        this.x = window.innerWidth - this.el.offsetWidth;
+        this.vx *= -1;
+      }
+      if (this.y <= 0) { this.y = 0; this.vy *= -1; }
+      else if (this.y + this.el.offsetHeight >= window.innerHeight) {
+        this.y = window.innerHeight - this.el.offsetHeight;
+        this.vy *= -1;
+      }
+      this.el.style.transform = `translate(${this.x}px, ${this.y}px)`;
+      // Opacity fades in last second
+      const age = performance.now() - this.birthTime;
+      if (age > messageLife - 1000) {
+        this.el.style.opacity = `${(messageLife - age) / 1000}`;
+      }
+    }
+    shouldRemove() {
+      return performance.now() - this.birthTime > messageLife;
+    }
+    remove() {
+      this.el.remove();
+    }
   }
 
-  function randFloat(min, max) {
-    return Math.random() * (max - min) + min;
+  function getRandomColor() {
+    // pastel-ish colors for visibility
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 70%, 75%)`;
   }
 
+  // Generate a random username
   function generateUsername() {
-    const first = firstWords[randInt(0, firstWords.length - 1)];
-    const second = secondWords[randInt(0, secondWords.length - 1)];
-
-    let numberSuffix = "";
-    for (let i = 0; i < numbersCount; i++) {
-      numberSuffix += randInt(0, 9);
+    if (messages.length >= maxMessages) {
+      // Remove oldest message if too many
+      const oldest = messages.shift();
+      oldest.remove();
     }
-    return numberSuffix.length > 0 ? `${first} ${second} ${numberSuffix}` : `${first} ${second}`;
+    const first = firstWords[Math.floor(Math.random() * firstWords.length)];
+    const second = secondWords[Math.floor(Math.random() * secondWords.length)];
+    let username = first + second;
+    const numCount = parseInt(numbersCountInput.value);
+    if (numCount > 0) {
+      const nums = [];
+      for (let i=0; i<numCount; i++) {
+        nums.push(Math.floor(Math.random() * 10));
+      }
+      username += nums.join('');
+    }
+    return username;
   }
 
-  function createBouncingMessage(text) {
-    if (activeMessages.length >= MAX_MESSAGES) {
-      const oldest = activeMessages.shift();
-      cancelAnimationFrame(oldest.animationId);
-      oldest.el.remove();
-    }
-
-    const messageEl = document.createElement("div");
-    messageEl.className = "message";
-    messageEl.textContent = text;
-
-    const fontSize = randInt(16, 28);
-    messageEl.style.fontSize = fontSize + "px";
-
-    const hue = randInt(0, 360);
-    messageEl.style.color = `hsl(${hue}, 80%, 60%)`;
-
-    if (Math.random() < 0.5) {
-      messageEl.style.transform = "scaleX(-1)";
-    } else if (Math.random() < 0.5) {
-      messageEl.style.transform = "scaleY(-1)";
-    }
-
-    document.body.appendChild(messageEl);
-
-    const rect = messageEl.getBoundingClientRect();
-    const btnRect = button.getBoundingClientRect();
-    let posX, posY;
-    const padding = 20;
-
-    function isOverlappingButton(x, y) {
-      return (
-        x + rect.width > btnRect.left - padding &&
-        x < btnRect.right + padding &&
-        y + rect.height > btnRect.top - padding &&
-        y < btnRect.bottom + padding
-      );
-    }
-    do {
-      posX = randFloat(0, window.innerWidth - rect.width);
-      posY = randFloat(150, window.innerHeight - rect.height);
-    } while (isOverlappingButton(posX, posY));
-
-    const velocityX = randFloat(1.5, 3.5) * (Math.random() < 0.5 ? 1 : -1) * baseSpeed;
-    const velocityY = randFloat(1.5, 3.5) * (Math.random() < 0.5 ? 1 : -1) * baseSpeed;
-
-    const message = {
-      el: messageEl,
-      posX,
-      posY,
-      width: rect.width,
-      height: rect.height,
-      velocityX,
-      velocityY,
-      birthTime: performance.now(),
-      animationId: null,
-      progressBar: null,
-    };
-
-    const progressBar = document.createElement("div");
-    progressBar.className = "progress-bar";
-    progressBar.style.width = "100%";
-    progressBar.style.transition = `width ${MESSAGE_LIFETIME_MS}ms linear`;
-    messageEl.appendChild(progressBar);
-    message.progressBar = progressBar;
-
-    requestAnimationFrame(() => {
-      progressBar.style.width = "0%";
-    });
-
-    function animate(time) {
-      const elapsed = time - message.birthTime;
-
-      if (elapsed >= MESSAGE_LIFETIME_MS) {
-        messageEl.style.opacity = "0";
-        setTimeout(() => {
-          messageEl.remove();
-        }, 500);
-        activeMessages = activeMessages.filter(m => m !== message);
-        cancelAnimationFrame(message.animationId);
-        return;
-      }
-
-      message.posX += message.velocityX;
-      message.posY += message.velocityY;
-
-      if (message.posX <= 0) {
-        message.posX = 0;
-        message.velocityX = -message.velocityX;
-      } else if (message.posX + message.width >= window.innerWidth) {
-        message.posX = window.innerWidth - message.width;
-        message.velocityX = -message.velocityX;
-      }
-
-      if (message.posY <= 150) {
-        message.posY = 150;
-        message.velocityY = -message.velocityY;
-      } else if (message.posY + message.height >= window.innerHeight) {
-        message.posY = window.innerHeight - message.height;
-        message.velocityY = -message.velocityY;
-      }
-
-      message.el.style.left = message.posX + "px";
-      message.el.style.top = message.posY + "px";
-
-      message.animationId = requestAnimationFrame(animate);
-    }
-
-    message.animationId = requestAnimationFrame(animate);
-    activeMessages.push(message);
-  }
-
-  function onButtonClick() {
+  // Create and add message with bouncing animation
+  function addMessage() {
+    const speed = parseFloat(speedInput.value);
     const text = generateUsername();
-    createBouncingMessage(text);
+    const message = new Message(text, speed * 100); // speed scaled for px/ms
+    messages.push(message);
   }
 
-  // Toggle settings panel visibility
+  // Animation loop
+  function animate(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const deltaTime = (timestamp - lastTimestamp) / 16.67; // Normalize to ~60fps frame time units
+    lastTimestamp = timestamp;
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      msg.update(deltaTime);
+      if (msg.shouldRemove()) {
+        msg.remove();
+        messages.splice(i,1);
+      }
+    }
+    animationFrameId = requestAnimationFrame(animate);
+  }
+
+  // Update numbers count label dynamically
+  numbersCountInput.addEventListener("input", () => {
+    numbersCountDisplay.textContent = numbersCountInput.value;
+  });
+
+  // Background toggle
+  bgToggleInput.addEventListener("change", () => {
+    if (bgToggleInput.checked) {
+      body.style.backgroundColor = "#111"; // black
+      body.style.color = "white";
+    } else {
+      body.style.backgroundColor = "white";
+      body.style.color = "black";
+    }
+  });
+  // Initialize background color on load
+  if (bgToggleInput.checked) {
+    body.style.backgroundColor = "#111";
+    body.style.color = "white";
+  } else {
+    body.style.backgroundColor = "white";
+    body.style.color = "black";
+  }
+
+  // Settings toggle
   settingsToggle.addEventListener("click", () => {
     if (settingsPanel.style.display === "flex") {
       settingsPanel.style.display = "none";
@@ -489,32 +413,20 @@
     }
   });
 
-  // Background toggle black/white
-  function applyBackgroundColor() {
-    if (bgToggleInput.checked) {
-      document.body.style.backgroundColor = "#111";
-      document.body.style.color = "white";
-    } else {
-      document.body.style.backgroundColor = "white";
-      document.body.style.color = "black";
-    }
-  }
-
-  bgToggleInput.addEventListener("change", applyBackgroundColor);
-
-  speedRange.addEventListener("input", e => {
-    baseSpeed = parseFloat(e.target.value);
+  // Button click
+  btn.addEventListener("click", () => {
+    addMessage();
   });
 
-  numbersCountRange.addEventListener("input", e => {
-    numbersCount = Number(e.target.value);
-    numbersCountDisplay.textContent = numbersCount;
+  // Start animation loop
+  animationFrameId = requestAnimationFrame(animate);
+
+  // Optional: Responsive - clear messages on resize to avoid stuck positions
+  window.addEventListener("resize", () => {
+    messages.forEach(m => m.remove());
+    messages.length = 0;
   });
 
-  // Initialize defaults
-  applyBackgroundColor();
-
-  button.addEventListener("click", onButtonClick);
 })();
 </script>
 
