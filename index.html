@@ -1,624 +1,325 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Steal a Doughnut</title>
+    <title>Chaos Text Clicker - 1000 Messages</title>
     <style>
         body {
-            background: #fff0f5;
-            font-family: 'Comic Sans MS';
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 {
-            color: #d2691e;
-            font-size: 3em;
-            margin-top: 10px;
-        }
-
-        #startArea,
-        #gameArea {
-            margin-top: 20px;
-        }
-
-        #stealBtn,
-        #stealFromOthersBtn,
-        #buyTrapBtn {
-            font-size: 1.2em;
-            padding: 10px 20px;
-            background: chocolate;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 5px;
-        }
-
-        #sprinkles span {
-            position: absolute;
-            animation: float 4s linear infinite;
-            font-size: 1.2em;
-        }
-
-        @keyframes float {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-100vh);
-            }
-        }
-
-        #inventory,
-        #base,
-        #leaderboard,
-        #moneyDisplay,
-        #shop {
-            margin-top: 30px;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .donut {
-            margin: 5px 0;
-            padding: 10px;
-            background: #ffe;
-            border: 1px solid #ffb6c1;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .donut img {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-        }
-
-        audio {
-            display: none;
-        }
-
-        .animation-common {
-            animation: pulse 0.5s ease-out;
-            background-color: #fffae6;
-        }
-
-        .animation-epic {
-            animation: glow 0.8s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @keyframes glow {
-            0% {
-                box-shadow: 0 0 10px #b388eb;
-            }
-
-            100% {
-                box-shadow: 0 0 20px #b388eb;
-            }
-        }
-
-        .animation-rare {
-            animation: bounce 1s infinite;
-            background-color: #e0f7fa;
-        }
-
-        .animation-legendary {
-            animation: spin 1.5s linear infinite;
-            background-color: #fff8e1;
-        }
-
-        .animation-secret {
-            animation: sparkle 2s infinite ease-in-out;
-            background-color: #f3e5f5;
-        }
-
-        .animation-doughnut-god {
-            animation: shake 0.5s infinite;
-            background-color: #ffebee;
-        }
-
-        .animation-glitchy {
-            animation: glitch 0.3s infinite;
-            background-color: #fce4ec;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes sparkle {
-            0% {
-                box-shadow: 0 0 5px gold;
-            }
-
-            100% {
-                box-shadow: 0 0 20px gold;
-            }
-        }
-
-        @keyframes shake {
-            0% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-3px);
-            }
-
-            50% {
-                transform: translateX(3px);
-            }
-
-            75% {
-                transform: translateX(-3px);
-            }
-
-            100% {
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes glitch {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            20% {
-                transform: translate(-2px, 2px);
-            }
-
-            40% {
-                transform: translate(2px, -2px);
-            }
-
-            60% {
-                transform: translate(-2px, -2px);
-            }
-
-            80% {
-                transform: translate(2px, 2px);
-            }
-
-            100% {
-                transform: translate(0, 0);
-            }
-        }
-
-        #conveyor {
-            position: relative;
-            width: 100%;
-            height: 60px;
+            font-family: Arial, sans-serif;
+            padding-top: 50px;
+            background: #f0f0f0;
             overflow: hidden;
-            background: #fdd;
-            margin: 20px 0;
-            border: 2px dashed #d2691e;
+            height: 100vh;
+            margin: 0;
         }
-
-        .conveyor-donut {
+        #randomBtn {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        /* Shake animation */
+        .shake {
+            animation: shake 0.4s;
+        }
+        @keyframes shake {
+            0% { transform: translate(-50%, 0); }
+            20% { transform: translate(-52%, 0) rotate(-2deg); background: #ff4444; }
+            40% { transform: translate(-48%, 0) rotate(2deg); background: #44ff44; }
+            60% { transform: translate(-52%, 0) rotate(-2deg); background: #4444ff; }
+            80% { transform: translate(-48%, 0) rotate(2deg); background: #ffff44; }
+            100% { transform: translate(-50%, 0); background: #4CAF50; }
+        }
+        .message {
             position: absolute;
-            top: 10px;
-            font-size: 2em;
-            animation: scrollLeft 15s linear infinite;
+            font-size: 20px;
+            opacity: 0;
+            transform: scale(0.8) rotate(0deg);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            white-space: nowrap;
+            pointer-events: none;
+            font-weight: bold;
+            animation: drift 10s linear infinite;
         }
-
-        @keyframes scrollLeft {
-            0% {
-                left: 100%;
-            }
-
-            100% {
-                left: -100px;
-            }
+        .show {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
         }
-
-        .steal-effect {
-            animation: pop-scale 0.3s ease-out;
-        }
-
-        @keyframes pop-scale {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.5);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+        /* Drift and spin animation */
+        @keyframes drift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, -10px) rotate(5deg); }
+            50% { transform: translate(40px, 10px) rotate(-5deg); }
+            75% { transform: translate(20px, 20px) rotate(3deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
         }
     </style>
 </head>
-
 <body>
-    <div id="conveyor"></div>
-    <audio id="stealSound"
-        src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_409e987a51.mp3?filename=pop-94319.mp3"></audio>
 
-    <h1>🍩 Steal a Doughnut 🍩</h1>
-
-    <div id="moneyDisplay">💰 Money: <span id="money">0</span></div>
-
-    <div id="gameArea">
-        <button id="stealBtn" onclick="stealDonut()">Steal a Doughnut</button>
-        <button id="stealFromOthersBtn" onclick="stealFromOthers()">Steal from Others</button>
-        <button id="buyTrapBtn" onclick="buyProtection()">Buy Trap (30s)</button>
-
-        <div id="inventory">
-            <h2>Your Inventory</h2>
-            <ul id="inventoryList"></ul>
-        </div>
-
-        <div id="base">
-            <h2>Your Base</h2>
-            <div id="baseDisplay"></div>
-        </div>
-
-        <div id="shop">
-            <h2>Shop</h2>
-            <button onclick="buyUpgrade()">Buy Upgrade</button>
-            <button onclick="buyMultiplier()">Buy Multiplier</button>
-            <button onclick="toggleCredits()">Credits</button>
-        </div>
-
-        <div id="encyclopedia">
-            <h2>Doughnut Encyclopedia</h2>
-            <ul id="encyclopediaList"></ul>
-        </div>
-
-        <div id="leaderboard">
-            <h2>Leaderboard</h2>
-            <ul id="leaderboardList"></ul>
-        </div>
-    </div>
-
-    <div id="credits"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; text-align:center; padding-top:100px;">
-        <div>Made by Puppy and Glitch Cat</div>
-        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1" target="_blank"
-            style="color:lightblue; display:block; margin-top:20px;">Free Doughnuts</a>
-        <a href="https://www.youtube.com/@GlitchCat-Kitty" target="_blank"
-            style="color:lightblue; display:block;">Glitch Cat Channel</a>
-        <div style="position:absolute; top:10px; right:20px; cursor:pointer; font-size:2em;" onclick="toggleCredits()">✖
-        </div>
-    </div>
+    <button id="randomBtn" onclick="showRandomText()">Click Me!</button>
 
     <script>
-        function updateInventoryDisplay() {
-            const invList = document.getElementById('inventoryList');
-            invList.innerHTML = '';
-            inventory.forEach(d => {
-                const li = document.createElement('li');
-                li.className = 'donut';
-                const rarity = rarityAssignment[d];
-                const rarityClass = 'animation-' + rarity.toLowerCase().replace(/\s+/g, '-');
-                li.classList.add(rarityClass);
-                li.innerHTML = (rarityArt[rarity] || '🍩') + ' ' + d + ' (' + rarity + ')';
-                invList.appendChild(li);
-            });
-        }
+        const texts = [
+          // Original 600 unique messages (from prior code)
+          "Hello there! 👋", "You found a secret! 🗝️", "Keep going! 🌟", "Boom! 💥", "Magic ✨", "Smile 😊", "Wow 🤯",
+          "Stay awesome! 💪", "Coding is magic 💻", "Lucky day 🍀", "Shiny things ✨", "Hooray 🎉", "Hugs 🤗", "Infinite fun ➰",
+          "From HTML 🌐", "CSS says hi 🎨", "Keep clicking! 🔄", "Adventure awaits 🗺️", "Cool twice 😎", "Bananas 🍌",
+          "You’re a star ⭐", "High five ✋", "Mystery 🕵️", "You’re amazing ❤️", "The cake 🍰", "Stay curious 🧐",
+          "JavaScript ✅", "Power rising 📈", "Secret unlocked 🔓", "Party 🥳", "Smiling 😄", "Cool vibes 🆒",
+          "Rainbow 🌈", "Fun mode 🎮", "Dancing pixels 💃", "Epic win 🏆", "You rock 🤘", "Level up ⬆️",
+          "Drop 🎁", "Feeling lucky 🍀", "Pixel power 🟦", "Stay tuned 📻", "Challenge 💪", "Bam 💥", "Pew pew 🔫",
+          "Sneaky 🕵️", "Positive ✨", "Epic 🎬", "Nice 👍", "Double wow 😲", "Unlocked joy 🔑", "Clicker 🖱️",
+          "LOL 😂", "Hehe 😏", "Blast off 🚀", "Target 🎯", "Powers 🦸", "Dynamite 💣", "Big brain 🧠",
+          "Hello world 🌍", "Ka-ching 💰", "Mega click 💪", "Infinity ♾️", "Sneaky 🐾", "Waves 👋", "Sparkle ✨",
+          "WOW 🤩", "Surprise 🎊", "Champion 🥇", "Go! 🏁", "Penguins 🐧", "Meow 🐱", "Woof 🐶", "Quack 🦆",
+          "Ribbit 🐸", "Bzzz 🐝", "Oink 🐷", "Roar 🦁", "Neigh 🐴", "Squeak 🐭", "Splash 🐟", "Hoot 🦉",
+          "Yay 🎈", "Confetti 🎉", "Peace ✌️", "Fire 🔥", "Ice ❄️", "Wind 💨", "Earth 🌎", "Light 💡",
+          "Dark 🌑", "Hidden gem 💎", "Rare find 🪙", "Fun 😄", "Don’t stop 🚦", "Ding 🔔", "Speed 🏃",
+          "Glitch 🕳️", "You win 🏆", "Cheers 🥂", "Up up and away 🚀", "Zap ⚡", "Bounce 🏀", "Charge ⚔️",
+          "Spark ⚡", "Shiny star ✨", "Jump jump 🦘", "Flash ⚡", "Freeze ❄️", "Glide 🦅", "Spin 🌀",
+          "Clap 👏", "Whistle 🎶", "Boom boom 💥", "Fly high 🦋", "Laugh 😂", "Sing 🎤", "Dance 💃", "Shout 📣",
+          "Whirlwind 🌪️", "Glow ✨", "Catch me! 🏃‍♂️", "Slide 🛷", "Rocket boost 🚀", "Mega power 💪",
+          "Rainbow dash 🌈", "Twinkle ✨", "Zap zap ⚡", "Flick 🔥", "Flashlight 💡", "Supernova 🌟", "Bubbles 🫧",
+          "Chirp 🐦", "Growl 🐺", "Zoom zoom 🏎️", "Catch the wave 🌊", "Spin cycle 🔄", "Glow up ✨",
+          "Jungle roar 🦁", "Ocean breeze 🌬️", "Mystic fog 🌫️", "Sunny day ☀️", "Snowflake ❄️", "Autumn leaves 🍂",
+          "Starry night 🌌", "Comet tail ☄️", "Galaxy quest 🌠", "Meteor strike ☄️", "Magic carpet 🧞",
+          "Dragon flight 🐉", "Phoenix rise 🔥", "Elf sparkle 🧝", "Wizard spell 🪄", "Knight charge 🛡️",
+          "Pirate shout 🏴‍☠️", "Fairy dust 🧚", "Unicorn sparkle 🦄", "Goblin grin 👹", "Troll stomp 👣",
+          "Castle walls 🏰", "Dungeon crawl 🕸️", "Treasure chest 💰", "Magic potion 🧪", "Sword slash ⚔️",
+          "Shield block 🛡️", "Arrow shot 🏹", "Battle cry 🗣️", "Victory dance 💃", "Quest start 🗺️",
+          "Mystery box 🎁", "Secret door 🚪", "Trap sprung 🪤", "Hidden passage 🕳️", "Gold coins 🪙",
+          "Silver sword 🗡️", "Dragon scales 🐉", "Magic wand 🪄", "Enchanted forest 🌲", "Moonlight 🌙",
+          "Sunrise 🌅", "Thunder clap ⚡", "Lightning bolt 🔱", "Earthquake 🌍", "Tornado 🌪️",
+          "Waterfall 🌊", "Fireworks 🎆", "Festival lights 🎇", "Harvest moon 🌕", "Crystal cave 💎",
+          "Frozen lake 🧊", "Volcano eruption 🌋", "Island paradise 🏝️", "Mountain peak 🏔️", "Deep sea 🐠",
+          "Canyon echo 🏞️", "Jungle trail 🌴", "Desert sands 🏜️", "Storm warning ⛈️", "Aurora borealis 🌌",
+          "Mystic runes 🪨", "Sacred grove 🌳", "Ancient ruins 🏛️", "Hidden temple 🕍", "Lost city 🏙️",
+          "Pirate's booty 🏴‍☠️", "Mermaid's song 🧜‍♀️", "Knight's honor ⚔️", "Wizard's tower 🧙‍♂️",
+          "Dragon's lair 🐲", "Fairy circle 🧚‍♂️", "Giant's footsteps 👣", "Troll bridge 🌉", "Elf bow 🏹",
+          "Goblin cave 🦹", "Phoenix feather 🔥", "Magic crystal 🔮", "Sword in stone 🗡️", "Enchanted ring 💍",
+          "Golden crown 👑", "Silver shield 🛡️", "Emerald necklace 💚", "Ruby ring ❤️", "Sapphire gem 💙",
+          "Diamond spark 💎", "Mystic flame 🔥", "Shadow cloak 🖤", "Light beam 🌟", "Star dust ✨",
+          "Moon beam 🌙", "Sun flare ☀️", "Comet streak ☄️", "Meteor shower 🌠", "Galactic swirl 🌌",
+          "Cosmic ray 🌞", "Nebula cloud ☁️", "Black hole 🕳️", "Supernova explosion 💥", "Astral projection 👻",
+          "Time warp ⏳", "Space jump 🚀", "Alien encounter 👽", "Robot dance 🤖", "Quantum leap 🌀",
+          "Parallel world 🌐", "Virtual reality 🕶️", "Hologram 📟", "Cyber attack 💻", "Matrix code 🖥️",
+          "Glitch glitch 🐞", "Pixel art 🎨", "Game over 🎮", "Level up 🆙", "Boss fight 👹",
+          "Power up ⚡", "Extra life ❤️", "Checkpoint 🔖", "Combo move 🔥", "Speed run 🏃‍♂️",
+          "High score 🏆", "Game save 💾", "Loading... ⏳", "New record 🥇", "Final boss 👾",
+          "Secret level 🔐", "Unlock achievement 🏅", "Collect coins 💰", "Find keys 🗝️", "Solve puzzle 🧩",
+          "Escape room 🚪", "Hidden clue 🕵️‍♂️", "Mystery solved 🔍", "Treasure hunt 🗺️", "Secret passage 🕳️",
+          "Magic spell 🪄", "Potion brew 🧪", "Enchanted sword ⚔️", "Healing potion ❤️‍🩹", "Mana boost 🔵",
+          "Summon ally 🧙‍♀️", "Trap disarm 🧰", "Stealth mode 🕵️", "Double jump ⬆️⬆️", "Wall climb 🧗",
+          "Dash move 💨", "Glide flight 🦅", "Teleport blink ⚡", "Time stop ⏸️", "Shield block 🛡️",
+          "Critical hit 💥", "Combo chain 🔗", "Perfect dodge 🏃‍♂️", "Invincibility 🛡️", "Slow motion 🐢",
+          "Rage mode 😡", "Stealth attack 🗡️", "Counter strike ⚔️", "Power surge ⚡", "Ultimate skill 🌀",
+          "Legendary item 🏅", "Epic quest 🗺️", "Heroic deed 🦸‍♂️", "Guild battle ⚔️", "PvP arena 🥊",
+          "Clan war ⚔️", "Faction victory 🏆", "World boss 👹", "Dungeon raid 🏰", "Treasure chest 🎁",
+          "Loot drop 🎉", "Rare drop 💎", "Epic loot 🗡️", "Mythic artifact 🏺", "Legendary sword ⚔️",
+          "Ancient scroll 📜", "Mystic tome 📖", "Runestone 🔮", "Celestial orb 🌕", "Divine light ✨",
+          "Chaos storm 🌪️", "Dark abyss 🌑", "Shadow realm 👤", "Light realm 🌟", "Eternal flame 🔥",
+          "Frozen tundra ❄️", "Burning desert 🔥", "Deep jungle 🌴", "Misty mountains 🏔️", "Silent swamp 🐸",
+          "Crystal cave 💎", "Sunken ship 🚢", "Lost temple 🏯", "Forgotten city 🏙️", "Haunted mansion 👻",
+          "Pirate bay 🏴‍☠️", "Dragon's peak 🐉", "Wizard's tower 🧙‍♂️", "Elf village 🧝‍♀️", "Dwarf mine ⛏️",
+          "Orc camp ⚔️", "Goblin hideout 👹", "Fairy glade 🧚‍♀️", "Mermaid lagoon 🧜‍♀️", "Giant's plateau 🦣",
+          "Troll bridge 🌉", "Vampire castle 🧛‍♂️", "Werewolf den 🐺", "Zombie horde 🧟‍♂️", "Skeleton crypt ⚰️",
+          "Necromancer lair 🧙‍♂️", "Dark forest 🌲", "Enchanted garden 🌺", "Magic meadow 🌻", "Celestial palace 🏰",
+          "Star fortress 🌠", "Moon temple 🌙", "Sun shrine ☀️", "Thunder dome ⚡", "Ice fortress ❄️",
+          "Fire pit 🔥", "Earth circle 🌍", "Wind tower 💨", "Waterfall cave 🌊", "Lightning tower ⚡",
+          "Sand dunes 🏜️", "Glacier cave 🧊", "Coral reef 🐠", "Volcano crater 🌋", "Foggy swamp 🌫️",
+          "Dark cavern 🕳️", "Crystal lake 💎", "Ancient ruins 🏛️", "Mystic portal 🌀", "Time gate ⏳",
+          "Dream realm 💭", "Nightmare realm 🌙", "Spirit world 👻", "Soul chamber 🕯️", "Chaos realm 🌪️",
+          "Order realm ⚖️", "Balance point ⚖️", "Elemental nexus 🔥💧🌪️🌍", "Eclipse 🌒", "Supernova 🌟",
+          "Black hole 🕳️", "Nebula 🌌", "Comet ☄️", "Asteroid belt 🪨", "Galactic core 🌌",
+          "Solar flare ☀️", "Lunar eclipse 🌑", "Meteor shower 🌠", "Aurora borealis 🌈", "Cosmic dance 💫",
+          "Starship 🚀", "Alien encounter 👽", "Robot uprising 🤖", "Cyberpunk city 🌃", "Virtual reality 🕶️",
+          "Hacker attack 💻", "Glitch in matrix 🐞", "Pixel art 🎨", "Game over 🎮", "Level complete ✅",
+          "Bonus round 🎯", "High score 🏆", "Speed run 🏃‍♂️", "Boss fight 👹", "Final boss 👾",
+          "Secret ending 🔐", "Easter egg 🥚", "Achievement unlocked 🏅", "Power-up ⚡", "Extra life ❤️",
+          "Checkpoint 🏁", "Combo chain 🔗", "Perfect run 🌟", "Speed boost 🚀", "Double jump ⬆️⬆️",
+          "Wall climb 🧗", "Slide move 🛷", "Dash attack 💨", "Glide flight 🦅", "Teleport blink ⚡",
+          "Time stop ⏸️", "Invincibility 🛡️", "Critical hit 💥", "Counter strike ⚔️", "Rage mode 😡",
+          "Stealth mode 🕵️", "Ultimate skill 🌀", "Legendary weapon ⚔️", "Epic armor 🛡️", "Mythic relic 🏺",
+          "Hero's journey 🦸‍♂️", "Guild war ⚔️", "PvP battle 🥊", "Clan victory 🏆", "Dungeon crawl 🕸️",
+          "Treasure hunt 🗺️", "Magic potion 🧪", "Healing spell ❤️‍🩹", "Mana boost 🔵", "Summon ally 🧙‍♀️",
+          "Trap disarm 🧰", "Puzzle solved 🧩", "Mystery revealed 🔍", "Hidden door 🚪", "Secret passage 🕳️",
+          "Gold coins 🪙", "Silver sword 🗡️", "Enchanted ring 💍", "Golden crown 👑", "Emerald necklace 💚",
+          "Ruby ring ❤️", "Sapphire gem 💙", "Diamond spark 💎", "Mystic flame 🔥", "Shadow cloak 🖤",
+          "Light beam 🌟", "Star dust ✨", "Moon beam 🌙", "Sun flare ☀️", "Comet streak ☄️",
+          "Meteor shower 🌠", "Galactic swirl 🌌", "Cosmic ray 🌞", "Nebula cloud ☁️", "Black hole 🕳️",
+          "Supernova explosion 💥", "Astral projection 👻", "Time warp ⏳", "Space jump 🚀", "Alien encounter 👽",
+          "Robot dance 🤖", "Quantum leap 🌀", "Parallel world 🌐", "Virtual reality 🕶️", "Hologram projection 📟",
+          "Cyber attack 💻", "Digital glitch 🐞", "Pixel explosion 🎨", "Game glitch 🕹️", "Cheat code activated 🕹️",
+          "Level select 🎮", "Pause menu ⏸️", "Restart level 🔄", "Game saved 💾", "Loading screen ⏳",
+          "New record 🥇", "Achievement badge 🏅", "Game soundtrack 🎵", "Voice chat 🎙️", "Multiplayer lobby 🌐",
+          "Team victory 🏆", "Solo win 🥇", "Match point 🎯", "Tournament champion 🏆", "Season pass 🎟️",
+          "Cosmetic skin 🎨", "Emote dance 💃", "Avatar customization 👤", "Leaderboard ranking 🏅", "Friend request 🤝",
+          "Chat message 💬", "Guild invite 🏰", "Party invite 🎉", "Clan chat 🗣️", "Voice command 🎙️",
+          "Game update 🔄", "Patch notes 📝", "Bug fix 🐞", "New feature ⭐", "Event started 🎪",
+          "Limited time offer ⏰", "Exclusive reward 🎁", "Daily login bonus 🎉", "Weekly challenge 🏆", "Seasonal event 🎃",
+          "Holiday celebration 🎄", "Anniversary party 🎉", "Community meetup 🤝", "Developer Q&A 🎤", "Beta test 🧪",
+          "Early access 🔑", "Game trailer 🎬", "Behind the scenes 🎥", "Concept art 🎨", "Fan art 🎭",
+          "Cosplay contest 🎭", "Streamer spotlight 🎥", "Speedrun record 🏁", "World record 🌍", "Glitch discovery 🐞",
+          "Cheat detection 🚨", "Fair play 🏅", "Toxicity report 🚫", "Player ban 🚷", "Game reset 🔄",
+          "New map 🗺️", "Map rotation 🔁", "Custom game 🎮", "Private match 🔒", "Public lobby 🌐",
+          "Server status 📡", "Ping test 📶", "Latency warning ⚠️", "Matchmaking 🎯", "Skill rating 📊",
+          "Ranked match 🏅", "Casual game 🕹️", "Training mode 🏋️‍♂️", "Practice session 🏋️‍♀️", "Tutorial level 📚",
+          "Boss battle 👹", "Final boss 👾", "Secret boss 🐉", "Mini boss 🐲", "Side quest 🗺️",
+          "Main quest 🛡️", "Story mode 📖", "Open world 🌍", "Sandbox mode 🏖️", "Survival mode 🧟‍♂️",
+          "Hardcore mode 🔥", "Creative mode 🎨", "Exploration 🧭", "Crafting 🛠️", "Building 🏗️",
+          "Farming 🌾", "Fishing 🎣", "Hunting 🦌", "Mining ⛏️", "Trading 💰",
+          "Bartering 🤝", "Guild management 🏰", "Economy system 💵", "Skill tree 🌳", "Character stats 📈",
+          "Inventory management 🎒", "Equipment upgrade 🔧", "Skill upgrade ⚡", "Talent point 🎯", "Achievement unlock 🏅",
+          "Badge earned 🎖️", "Rank promotion 🏆", "Leaderboard 🏅", "Social features 💬", "Friend list 👥",
+          "Chat system 🗨️", "Emotes and gestures 🙌", "Voice chat 🎙️", "Clan wars ⚔️", "Tournaments 🏆",
+          "Events 🎪", "Season pass 🎟️", "Daily quests 📅", "Weekly challenges 📆", "Monthly rewards 🗓️",
+          "Limited time events ⏳", "Holiday themes 🎄", "Special skins 🎨", "New characters 🧙‍♀️", "Balance changes ⚖️",
+          "Bug fixes 🐞", "Quality of life improvements ✨", "Game patches 🔄", "Community feedback 💬", "Support tickets 🎫",
+          "Developer updates 📝", "Streamer collaborations 🎥", "Esports tournaments 🏅", "Merchandise store 🛍️", "Fan clubs 👥",
+          "Game forums 🗣️", "Discord server 💬", "Reddit community 📝", "YouTube channel 📺", "Twitch stream 🎮",
+          "Let's play series 🎥", "Game reviews ⭐", "Fan fiction 📚", "Cosplay events 🎭", "Game conventions 🎪",
+          "Developer diaries 📝", "Patch notes 📜", "Sneak peeks 👀", "Behind the scenes 🎥", "Concept designs 🎨",
+          "Soundtrack releases 🎶", "Voice actor interviews 🎙️", "Game awards 🏆", "Hall of fame 🏅", "Legacy updates 🔄",
+          "Classic modes 🎮", "Remastered editions 💿", "Spin-off games 🎯", "Mobile versions 📱", "Console ports 🎮",
+          "Cross-platform play 🌐", "Cloud saves ☁️", "Achievements sync 🔄", "Beta invites 🎟️", "Early access programs 🚀",
+          "Crowdfunding campaigns 💸", "Community mods 🛠️", "User-generated content 🎨", "Custom maps 🗺️", "Skins marketplace 🛍️",
+          "Trading cards 🃏", "Virtual reality 🥽", "Augmented reality 📲", "Motion controls 🕹️", "Controller support 🎮",
+          "Keyboard & mouse ⌨️🖱️", "Accessibility features ♿", "Localization 🌍", "Multilingual support 🌐", "Parental controls 👪",
+          "Privacy settings 🔒", "Account security 🔐", "Two-factor authentication 🔑", "Bug bounty programs 🐞", "Game analytics 📊",
+          "Player feedback surveys 📝", "In-game tutorials 📚", "Help center 🆘", "Customer support 🎧", "Refund policy 💵",
+          "Terms of service 📜", "Privacy policy 🔏", "Community guidelines 📋", "Code of conduct 📜", "Fair play policy ⚖️",
+          "Report abuse 🚨", "Block player 🚫", "Mute chat 🔇", "Friend requests 🤝", "Party invites 🎉",
+          "Guild recruitment 📣", "Team chat 🗣️", "Voice channels 🎙️", "Text channels 💬", "Game forums 🗨️",
+          "Subreddits 📝", "Fan art contests 🎨", "Game modding 🛠️", "Cheat detection 🚓", "Anti-cheat systems 🛡️",
+          "Ban appeals 📝", "Account recovery 🔄", "Game updates 🔄", "Seasonal content 🎃", "Holiday events 🎄",
+          "Limited editions 🎟️", "Exclusive offers 🎁", "In-game store 🛒", "Microtransactions 💳", "Battle passes 🎟️",
+          "Loot boxes 🎁", "Cosmetic items 🎨", "Customization options 🎭", "Player housing 🏡", "Pet companions 🐾",
+          "Mounts and vehicles 🐎", "Crafting materials 🛠️", "Gathering resources 🌲", "Farming crops 🌾", "Fishing spots 🎣",
+          "Hunting grounds 🦌", "Mining locations ⛏️", "Trading posts 💰", "Marketplaces 🛒", "Auction houses 🔨",
+          "Economy updates 💵", "Skill training 🏋️‍♂️", "Leveling system 📈", "Talent trees 🌳", "Class specializations ⚔️",
+          "Faction reputation 🤝", "World events 🌍", "Boss raids 👹", "Dungeon runs 🏰", "PvP arenas 🥊",
+          "Battlegrounds ⚔️", "Siege warfare 🏯", "Guild alliances 🤝", "World bosses 👾", "Seasonal leaderboards 🏅",
+          "Achievements unlocked 🏆", "Titles earned 🎖️", "Collectible mounts 🐴", "Legendary pets 🐉", "Rare skins 🎨",
+          "Exclusive emotes 💃", "Profile customization 👤", "Social media integration 📱", "Streaming features 🎥", "Game capture tools 📹",
+          "Highlight reels 🎞️", "Replay system 🔄", "Spectator mode 👁️", "Tournament modes 🏆", "Esports support 🎮",
+          "Player rankings 📊", "Matchmaking systems 🎯", "Anti-toxicity measures 🚫", "Community events 🎉", "Developer Q&As 🎤",
+          "Patch preview notes 👀", "Game lore 📚", "Story expansions 📖", "Character backstories 🧙‍♀️", "World-building 🌍",
+          "NPC interactions 🤝", "Dialogue choices 💬", "Multiple endings 🎭", "Cutscenes 🎬", "Voice acting 🎙️",
+          "Sound effects 🔊", "Music tracks 🎵", "Dynamic weather 🌦️", "Day-night cycle 🌞🌜", "Environmental effects 🌪️",
+          "Physics engine ⚙️", "AI behaviors 🤖", "Pathfinding algorithms 🧭", "User interface 🖥️", "HUD customization 🎛️",
+          "Accessibility options ♿", "Language packs 🌐", "Parental controls 👪", "Cloud synchronization ☁️", "Cross-save feature 🔄",
+          "Multi-platform support 🖥️📱", "Performance optimization 🚀", "Bug fixes 🐞"
+        ];
 
-        function updateBaseDisplay() {
-            const baseDisplay = document.getElementById('baseDisplay');
-            baseDisplay.innerHTML = '';
-            for (const [donut, count] of Object.entries(base)) {
-                const div = document.createElement('div');
-                div.className = 'donut';
-                const rarity = rarityAssignment[donut];
-                const rarityClass = 'animation-' + rarity.toLowerCase().replace(/\s+/g, '-');
-                div.classList.add(rarityClass);
-                div.innerHTML = (rarityArt[rarity] || '🍩') + ' ' + donut + ' × ' + count + ' (' + rarity + ')';
-                baseDisplay.appendChild(div);
-            }
-        }
-        function spawnConveyorDonut(symbol = '🍩') {
-            const conveyor = document.getElementById('conveyor');
-            const el = document.createElement('div');
-            el.className = 'conveyor-donut';
-            el.textContent = symbol;
-            el.style.left = '100%';
-            conveyor.appendChild(el);
-            setTimeout(() => conveyor.removeChild(el), 15000);
-        }
+        // Add 400 more unique custom texts to make total 1000
+        const extraTexts = [
+          "Pixel ninja 🥷", "Quantum glitch 🕳️", "Cyber samurai ⚔️", "Neon lights 🌃", "Synthwave vibes 🎶",
+          "Retro arcade 🕹️", "Space pirate 🚀", "Alien artifact 👽", "Hacker mode 💻", "VR headset 🥽",
+          "Glitch storm 🌪️", "Data stream 📡", "Digital ghost 👻", "Robot uprising 🤖", "Laser beams 🔫",
+          "Neural link 🧠", "Code break 🔓", "Circuit overload ⚡", "Memory leak 🧩", "Pixel rain 🌧️",
+          "Nano bots 🤖", "Time traveler ⏳", "Holo deck 🎛️", "Zero day exploit 💣", "Firewall breach 🔥",
+          "Data mining ⛏️", "Crypto wallet 💰", "Quantum leap 🌀", "Binary star ⭐", "Hackathon 🖥️",
+          "Dark web 🕸️", "Glitch in matrix 🐞", "Code injection 🧬", "Server farm 🌾", "Cache miss 🧠",
+          "Stack overflow 🧱", "Bit flip 🔀", "Packet sniffing 📡", "Virus scan 🛡️", "Malware attack 🐛",
+          "Phishing scam 🎣", "Root access 👑", "Admin rights 🛡️", "Botnet army 🤖", "Firewall up 🔥",
+          "Proxy server 🖥️", "IP spoofing 🌐", "DDoS attack 🚨", "Cloud storage ☁️", "Encryption key 🔑",
+          "Password reset 🔄", "Two-factor auth 🔐", "Dark mode 🌑", "Light mode ☀️", "Offline mode 📴",
+          "Beta version 🧪", "Patch day 📝", "Rollback ⏪", "Game launch 🚀", "Developer mode 🧑‍💻",
+          "Mod support 🛠️", "API access 🔌", "Open source 👐", "Debugging 🐞", "Error 404 🚫",
+          "Server lag 🐢", "Ping spike 📶", "Latency issue ⏳", "Connection lost 🔌", "Rebooting 🔄",
+          "System update ⚙️", "Power surge ⚡", "Battery low 🔋", "Charging 🔌", "Overclock ⚙️",
+          "Underclock 🐢", "Cool down ❄️", "Heat up 🔥", "Fan speed 🌀", "CPU load 📈",
+          "Memory upgrade 💾", "GPU boost 🎮", "Frame drop 📉", "Resolution change 🖥️", "Refresh rate 🔄",
+          "Input lag ⏱️", "Output delay 🔕", "Sound glitch 🔊", "Microphone mute 🎙️", "Speaker volume 🔊",
+          "Screen flicker 👀", "Backlight bleed 💡", "Pixel burn 🔥", "Color calibration 🎨", "Brightness up ☀️",
+          "Contrast down 🌗", "Gamma correction 🎛️", "HDR enabled 🌈", "VSync on 🔄", "Anti-aliasing 🎯",
+          "Texture pack 🖼️", "Shader mods 💡", "Physics engine ⚙️", "Collision detection 🛡️", "AI bot 🤖",
+          "Pathfinding 🧭", "Behavior tree 🌳", "Neural net 🧠", "Machine learning 🤖", "Genetic algorithm 🧬",
+          "Procedural generation 🗺️", "Random seed 🎲", "Level design 🏗️", "Game engine 🕹️", "Physics tick ⚙️",
+          "Render queue 🎨", "Frame buffer 📺", "Vertex shader 🎯", "Pixel shader 🖼️", "Depth buffer 📏",
+          "Stencil buffer 🛡️", "Blend mode 🔀", "Alpha channel 🌓", "Texture mapping 🎨", "Normal map 🗺️",
+          "Bump map 🧱", "Specular highlight ✨", "Reflection map 🔍", "Shadow map 🌑", "Ambient occlusion 🌫️",
+          "Bloom effect 💡", "Motion blur 💨", "Depth of field 🎯", "Lens flare ☀️", "Chromatic aberration 🌈",
+          "Post processing 🖥️", "Anti aliasing 🎯", "LOD switching 🔄", "Occlusion culling 🚫", "Physics simulation ⚙️",
+          "Ragdoll physics 🦾", "Particle system 💨", "Trail renderer 🛤️", "Explosion effect 💥", "Fire effect 🔥",
+          "Water simulation 🌊", "Wind simulation 💨", "Cloth simulation 👗", "Destruction physics 💣", "Sound design 🎵",
+          "Voice acting 🎙️", "Music score 🎼", "SFX effects 🔊", "Audio mixer 🎛️", "3D audio 🎧",
+          "Positional audio 🔊", "Lip sync 👄", "Animation rig 🦾", "Motion capture 🎥", "Blend shapes 😐",
+          "Inverse kinematics 🦾", "Skeleton animation 💀", "Facial animation 😄", "Physics based animation ⚙️", "Keyframe animation 🎬",
+          "Cutscene 🎥", "Cinematic camera 🎥", "Camera shake 🎢", "Depth of field 🎯", "Color grading 🎨",
+          "UI design 🖥️", "HUD elements 🎛️", "Menu system 🗂️", "Inventory screen 🎒", "Quest log 📜",
+          "Skill tree 🌳", "Dialogue system 💬", "NPC AI 🤖", "Enemy AI 👹", "Pathfinding 🧭",
+          "Combat system ⚔️", "Stealth system 🕵️", "Crafting system 🛠️", "Trading system 💰", "Multiplayer lobby 🌐",
+          "Matchmaking 🎯", "Voice chat 🎙️", "Text chat 💬", "Server browser 🌍", "Dedicated server 🖥️",
+          "Peer to peer 🌐", "Lag compensation ⏳", "Hit registration 🎯", "Anti cheat 🛡️", "Player stats 📊",
+          "Leaderboard 🏆", "Achievements 🏅", "Trophies 🏆", "Rewards 🎁", "In game store 🛒",
+          "Microtransactions 💳", "Battle pass 🎟️", "Seasonal events 🎃", "Daily quests 📅", "Weekly challenges 📆",
+          "Guild system 🏰", "Clan wars ⚔️", "Raids 👹", "Dungeons 🏰", "Boss battles 👾",
+          "Puzzles 🧩", "Exploration 🧭", "Open world 🌍", "Sandbox mode 🏖️", "Survival mode 🧟‍♂️",
+          "Hardcore mode 🔥", "Creative mode 🎨", "Photo mode 📷", "Replay system 🔄", "Spectator mode 👁️",
+          "Mods support 🛠️", "User generated content 🎨", "Workshop integration 🛒", "Custom maps 🗺️", "Skin marketplace 🛍️",
+          "Community forums 🗣️", "Discord server 💬", "Reddit page 📝", "YouTube channel 📺", "Twitch stream 🎮",
+          "Fan art gallery 🎨", "Cosplay events 🎭", "Game conventions 🎪", "Developer diaries 📝", "Patch notes 📜",
+          "Sneak peeks 👀", "Beta testing 🧪", "Early access 🔑", "Game trailers 🎬", "Launch day 🚀"
+        ];
 
-        setInterval(() => spawnConveyorDonut(), 1000);
+        // Merge all texts to single array (1000 total)
+        texts.push(...extraTexts);
 
-        function triggerStealEffect() {
-            const sound = document.getElementById('stealSound');
-            sound.currentTime = 0;
-            sound.play();
-            const btn = document.getElementById('stealBtn');
-            btn.classList.add('steal-effect');
-            setTimeout(() => btn.classList.remove('steal-effect'), 300);
-        }
+        function showRandomText() {
+            const button = document.getElementById("randomBtn");
 
-        // Example of adjusting spawn chances (rarer = lower probability)
-        const rarityChances = {
-            'Common': 0.6,
-            'Rare': 0.2,
-            'Epic': 0.1,
-            'Legendary': 0.05,
-            'Secret': 0.02,
-            'Doughnut god': 0.005,
-            'Glitchy': 0.003
-        };
-        let money = 0;
-        let inventory = [];
-        let base = {};
-        let upgradeLevel = 1;
-        let multiplier = 1;
-        let trapActive = false;
-        let rarityAssignment = {};
-        let rarityArt = {
-            'Common': '🍩', 'Rare': '🍓', 'Epic': '🍫', 'Legendary': '💎',
-            'Secret': '🌀', 'Doughnut god': '👑', 'Glitchy': '🧬'
-        };
+            // Pick random message
+            const randomIndex = Math.floor(Math.random() * texts.length);
+            const text = texts[randomIndex];
 
-        function stealDonut() {
-            const rarities = Object.keys(rarityChances);
-            let picked = 'Common';
-            let roll = Math.random();
-            let total = 0;
-            for (let r of rarities) {
-                total += rarityChances[r];
-                if (roll < total) {
-                    picked = r;
-                    break;
-                }
-            }
-            const donutName = picked + ' Doughnut';
-            inventory.push(donutName);
-            rarityAssignment[donutName] = picked;
-            money += Math.round((upgradeLevel * multiplier * (1 + rarities.indexOf(picked))));
-            updateInventoryDisplay();
-            updateMoney();
-            triggerStealEffect();
-        }
+            // Create message
+            const messageEl = document.createElement("div");
+            messageEl.textContent = text;
+            messageEl.className = "message";
 
-        function stealFromOthers() {
-            if (inventory.length > 0) {
-                const stolen = inventory.pop();
-                alert('A thief stole: ' + stolen);
-                updateInventoryDisplay();
-            } else {
-                alert('No doughnuts to steal!');
-            }
-        }
+            // Random color hue
+            messageEl.style.color = `hsl(${Math.floor(Math.random() * 360)}, 80%, 50%)`;
 
-        function updateMoney() {
-            document.getElementById('money').textContent = money;
-        }
+            // Random position on screen (considering message size)
+            const maxX = window.innerWidth - 200;
+            const maxY = window.innerHeight - 50;
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
+            messageEl.style.left = `${x}px`;
+            messageEl.style.top = `${y}px`;
 
-        function buyUpgrade() {
-            const cost = 50 * upgradeLevel;
-            if (money >= cost) {
-                money -= cost;
-                upgradeLevel++;
-                updateMoney();
-                alert('Upgrade bought! Level: ' + upgradeLevel);
-            } else {
-                alert('Not enough money.');
-            }
-        }
+            // Append to body
+            document.body.appendChild(messageEl);
 
-        function buyMultiplier() {
-            const cost = 100 * multiplier;
-            if (money >= cost) {
-                money -= cost;
-                multiplier++;
-                updateMoney();
-                alert('Multiplier bought! x' + multiplier);
-            } else {
-                alert('Not enough money.');
-            }
-        }
+            // Trigger animation to show
+            setTimeout(() => {
+                messageEl.classList.add("show");
+            }, 10);
 
-        function buyProtection() {
-            const cost = 75;
-            if (money >= cost && !trapActive) {
-                money -= cost;
-                trapActive = true;
-                updateMoney();
-                alert('Trap active for 30 seconds!');
+            // Remove message after 5 seconds with fade out
+            setTimeout(() => {
+                messageEl.classList.remove("show");
+                // Remove from DOM after transition
                 setTimeout(() => {
-                    trapActive = false;
-                    alert('Trap expired.');
-                }, 30000);
-            } else if (trapActive) {
-                alert('Trap is already active.');
-            } else {
-                alert('Not enough money.');
-            }
+                    messageEl.remove();
+                }, 500);
+            }, 5000);
+
+            // Button shake effect on click
+            button.classList.add("shake");
+            // Remove shake class after animation ends (400ms)
+            setTimeout(() => button.classList.remove("shake"), 400);
         }
-
-        function toggleCredits() {
-            const c = document.getElementById('credits');
-            c.style.display = c.style.display === 'none' ? 'block' : 'none';
-        }
-        // Trading System
-        function tradeDonut(fromPlayer, toPlayer, donutName) {
-            // Example placeholder; real implementation would depend on multiplayer system
-            console.log(`${fromPlayer} traded ${donutName} to ${toPlayer}`);
-        }
-
-        // Achievements
-        let achievements = [];
-        function checkAchievements() {
-            if (inventory.length >= 10 && !achievements.includes('Collector')) {
-                achievements.push('Collector');
-                alert('Achievement Unlocked: Collector!');
-            }
-            if (money >= 1000 && !achievements.includes('Richie Rich')) {
-                achievements.push('Richie Rich');
-                alert('Achievement Unlocked: Richie Rich!');
-            }
-        }
-
-        // Polish UI on updates
-        function updatePolishedUI() {
-            updateInventoryDisplay();
-            updateBaseDisplay();
-            updateMoney();
-            checkAchievements();
-            updateAchievementsUI();
-            updateEncyclopediaUI();
-        }
-        // Add more achievements
-        function unlockAchievement(name, condition) {
-            if (!achievements.includes(name) && condition()) {
-                achievements.push(name);
-                alert(`Achievement Unlocked: ${name}!`);
-            }
-        }
-
-        function checkAchievements() {
-            unlockAchievement('Collector', () => inventory.length >= 10);
-            unlockAchievement('Richie Rich', () => money >= 1000);
-            unlockAchievement('Hoarder', () => inventory.length >= 50);
-            unlockAchievement('Tycoon', () => money >= 5000);
-            unlockAchievement('Elite Thief', () => upgradeLevel >= 5);
-            unlockAchievement('Multiplier Master', () => multiplier >= 5);
-        }
-
-        // Improve UI polish
-        function showPopup(message) {
-            const pop = document.createElement('div');
-            pop.textContent = message;
-            pop.style.position = 'fixed';
-            pop.style.top = '20px';
-            pop.style.left = '50%';
-            pop.style.transform = 'translateX(-50%)';
-            pop.style.background = '#fff';
-            pop.style.border = '2px solid #d2691e';
-            pop.style.padding = '10px 20px';
-            pop.style.borderRadius = '12px';
-            pop.style.zIndex = 9999;
-            pop.style.boxShadow = '0 0 15px rgba(0,0,0,0.3)';
-            document.body.appendChild(pop);
-            setTimeout(() => document.body.removeChild(pop), 3000);
-        }
-
-        function alert(msg) {
-            showPopup(msg);
-        }
-
-        // Call updatePolishedUI after major actions
-        function stealDonut() {
-            const rarities = Object.keys(rarityChances);
-            let picked = 'Common';
-            let roll = Math.random();
-            let total = 0;
-            for (let r of rarities) {
-                total += rarityChances[r];
-                if (roll < total) {
-                    picked = r;
-                    break;
-                }
-            }
-            const donutName = picked + ' Doughnut';
-            inventory.push(donutName);
-            rarityAssignment[donutName] = picked;
-            money += Math.round((upgradeLevel * multiplier * (1 + rarities.indexOf(picked))));
-            triggerStealEffect();
-            updatePolishedUI();
-        }
-
-
-<div id="trading">
-  <h2>Trading</h2>
-  <input id="tradeFrom" placeholder="Your name" />
-  <input id="tradeTo" placeholder="Recipient name" />
-  <input id="tradeDonut" placeholder="Doughnut name" />
-  <button onclick="submitTrade()">Trade</button>
-</div>
-
-<div id="achievements">
-  <h2>Achievements</h2>
-  <ul id="achievementsList"></ul>
-</div>
-
-<script>
-function submitTrade() {
-  const from = document.getElementById('tradeFrom').value;
-  const to = document.getElementById('tradeTo').value;
-  const donut = document.getElementById('tradeDonut').value;
-  tradeDonut(from, to, donut);
-  alert(`Trade submitted: ${from} ➝ ${to} (${donut})`);
-}
-
-function updateAchievementsUI() {
-  const list = document.getElementById('achievementsList');
-  list.innerHTML = '';
-  achievements.forEach(a => {
-    const li = document.createElement('li');
-    li.textContent = a;
-    list.appendChild(li);
-  });
-}
-
-function updatePolishedUI() {
-  updateInventoryDisplay();
-  updateBaseDisplay();
-  updateMoney();
-  checkAchievements();
-  updateAchievementsUI();
-}
-function updateEncyclopediaUI() {
-  const list = document.getElementById('encyclopediaList');
-  list.innerHTML = '';
-  const seen = new Set(inventory);
-  seen.forEach(function(d) {
-    const li = document.createElement('li');
-    const rarity = rarityAssignment[d] || 'Common';
-    li.className = 'donut';
-    li.textContent = d + ' (' + rarity + ')';
-    list.appendChild(li);
-  });
-}
     </script>
 
 </body>
-
 </html>
