@@ -103,20 +103,11 @@
       user-select: none;
       cursor: default;
       transition: opacity 0.5s ease;
-      will-change: transform;
+      will-change: left, top, opacity;
     }
     .message:hover {
-      transform: scale(1.15) !important;
+      transform: scale(1.15);
       z-index: 99999;
-    }
-    .progress-bar {
-      position: absolute;
-      bottom: -6px;
-      left: 0;
-      height: 4px;
-      background: white;
-      opacity: 0.8;
-      border-radius: 2px;
     }
   </style>
 </head>
@@ -270,7 +261,7 @@
   // State & config
   const messages = [];
   const maxMessages = 40; // max messages on screen
-  const messageLife = 10000; // message life in ms (10 seconds)
+  const messageLife = 10000; // 10 seconds
   const btn = document.getElementById("randomBtn");
   const speedInput = document.getElementById("speedRange");
   const numbersCountInput = document.getElementById("numbersCountRange");
@@ -283,7 +274,7 @@
   let animationFrameId;
   let lastTimestamp;
 
-  // Bounce DVD style variables for each message
+  // Message class with bounce inside viewport using left/top positioning
   class Message {
     constructor(text, speed) {
       this.text = text;
@@ -292,59 +283,72 @@
       this.el.className = "message";
       this.el.textContent = text;
       this.el.style.color = getRandomColor();
-      this.el.style.fontSize = `${12 + Math.random()*18}px`;
-      // Initial random position inside viewport (minus some margin)
+      this.el.style.fontSize = `${12 + Math.random() * 18}px`;
+
+      // Initial position inside viewport with margin
       this.x = Math.random() * (window.innerWidth - 150) + 50;
       this.y = Math.random() * (window.innerHeight - 150) + 50;
-      // Random velocity between -speed and speed
+
+      // Random velocity vector scaled by speed
       const angle = Math.random() * 2 * Math.PI;
       this.vx = Math.cos(angle) * speed;
       this.vy = Math.sin(angle) * speed;
+
       this.el.style.left = `${this.x}px`;
       this.el.style.top = `${this.y}px`;
+      document.body.appendChild(this.el);
+
       this.birthTime = performance.now();
-      body.appendChild(this.el);
     }
+
     update(deltaTime) {
       this.x += this.vx * deltaTime;
       this.y += this.vy * deltaTime;
 
-      // Bounce off edges
-      if (this.x <= 0) { this.x = 0; this.vx *= -1; }
-      else if (this.x + this.el.offsetWidth >= window.innerWidth) {
+      // Bounce off left/right edges
+      if (this.x <= 0) {
+        this.x = 0;
+        this.vx *= -1;
+      } else if (this.x + this.el.offsetWidth >= window.innerWidth) {
         this.x = window.innerWidth - this.el.offsetWidth;
         this.vx *= -1;
       }
-      if (this.y <= 0) { this.y = 0; this.vy *= -1; }
-      else if (this.y + this.el.offsetHeight >= window.innerHeight) {
+
+      // Bounce off top/bottom edges
+      if (this.y <= 0) {
+        this.y = 0;
+        this.vy *= -1;
+      } else if (this.y + this.el.offsetHeight >= window.innerHeight) {
         this.y = window.innerHeight - this.el.offsetHeight;
         this.vy *= -1;
       }
-      this.el.style.transform = `translate(${this.x}px, ${this.y}px)`;
-      // Opacity fades in last second
+
+      this.el.style.left = `${this.x}px`;
+      this.el.style.top = `${this.y}px`;
+
+      // Fade out in last second
       const age = performance.now() - this.birthTime;
       if (age > messageLife - 1000) {
         this.el.style.opacity = `${(messageLife - age) / 1000}`;
       }
     }
+
     shouldRemove() {
       return performance.now() - this.birthTime > messageLife;
     }
+
     remove() {
       this.el.remove();
     }
   }
 
   function getRandomColor() {
-    // pastel-ish colors for visibility
     const hue = Math.floor(Math.random() * 360);
     return `hsl(${hue}, 70%, 75%)`;
   }
 
-  // Generate a random username
   function generateUsername() {
     if (messages.length >= maxMessages) {
-      // Remove oldest message if too many
       const oldest = messages.shift();
       oldest.remove();
     }
@@ -354,7 +358,7 @@
     const numCount = parseInt(numbersCountInput.value);
     if (numCount > 0) {
       const nums = [];
-      for (let i=0; i<numCount; i++) {
+      for (let i = 0; i < numCount; i++) {
         nums.push(Math.floor(Math.random() * 10));
       }
       username += nums.join('');
@@ -362,18 +366,16 @@
     return username;
   }
 
-  // Create and add message with bouncing animation
   function addMessage() {
     const speed = parseFloat(speedInput.value);
     const text = generateUsername();
-    const message = new Message(text, speed * 10); // 10x slower movement now
+    const message = new Message(text, speed);
     messages.push(message);
   }
 
-  // Animation loop
   function animate(timestamp) {
     if (!lastTimestamp) lastTimestamp = timestamp;
-    const deltaTime = (timestamp - lastTimestamp) / 16.67; // Normalize to ~60fps frame time units
+    const deltaTime = (timestamp - lastTimestamp) / 16.67;
     lastTimestamp = timestamp;
 
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -381,27 +383,29 @@
       msg.update(deltaTime);
       if (msg.shouldRemove()) {
         msg.remove();
-        messages.splice(i,1);
+        messages.splice(i, 1);
       }
     }
+
     animationFrameId = requestAnimationFrame(animate);
   }
 
-  // Update numbers count label dynamically
+  // Event Listeners
+
   numbersCountInput.addEventListener("input", () => {
     numbersCountDisplay.textContent = numbersCountInput.value;
   });
 
-  // Background toggle
   bgToggleInput.addEventListener("change", () => {
     if (bgToggleInput.checked) {
-      body.style.backgroundColor = "#111"; // black
+      body.style.backgroundColor = "#111";
       body.style.color = "white";
     } else {
       body.style.backgroundColor = "white";
       body.style.color = "black";
     }
   });
+
   // Initialize background color on load
   if (bgToggleInput.checked) {
     body.style.backgroundColor = "#111";
@@ -411,7 +415,6 @@
     body.style.color = "black";
   }
 
-  // Settings toggle
   settingsToggle.addEventListener("click", () => {
     if (settingsPanel.style.display === "flex") {
       settingsPanel.style.display = "none";
@@ -420,20 +423,18 @@
     }
   });
 
-  // Button click
   btn.addEventListener("click", () => {
     addMessage();
   });
 
-  // Start animation loop
-  animationFrameId = requestAnimationFrame(animate);
-
-  // Optional: Responsive - clear messages on resize to avoid stuck positions
   window.addEventListener("resize", () => {
+    // Remove all messages on resize to avoid weird positions
     messages.forEach(m => m.remove());
     messages.length = 0;
   });
 
+  // Start animation loop
+  animationFrameId = requestAnimationFrame(animate);
 })();
 </script>
 
