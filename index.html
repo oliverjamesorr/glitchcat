@@ -1,159 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Shadow Lantern</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: black; }
-    canvas { display: block; margin: auto; background: #111; }
-    #ui { position: absolute; top: 10px; left: 10px; color: white; font: 16px monospace; }
-    button { margin: 5px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level-Up Chaos Square</title>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    flex-direction: column;
+  }
+  #gameArea {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    background-color: #222;
+    border: 3px solid #fff;
+    overflow: hidden;
+  }
+  #square {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: red;
+    cursor: pointer;
+  }
+  #score {
+    margin-top: 20px;
+    font-size: 24px;
+  }
+  #level {
+    margin-top: 10px;
+    font-size: 20px;
+  }
+</style>
 </head>
 <body>
-  <canvas id="game" width="800" height="600"></canvas>
-  <div id="ui">
-    <div>Score: <span id="score">0</span></div>
-    <div>Level: <span id="level">1</span></div>
-    <div>Flame: <span id="flame">100</span>%</div>
-    <button onclick="restartGame()">Restart</button>
-    <button onclick="toggleMute()">Mute</button>
-    <button onclick="toggleDebug()">Toggle Debug</button>
-  </div>
-  <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
+<div id="gameArea">
+  <div id="square"></div>
+</div>
+<div id="score">Score: 0</div>
+<div id="level">Level: 1</div>
 
-    let keys = {}, mouse = {x: W/2, y: H/2};
-    let state = {};
-    let debug = false;
+<script>
+const square = document.getElementById('square');
+const gameArea = document.getElementById('gameArea');
+const scoreDisplay = document.getElementById('score');
+const levelDisplay = document.getElementById('level');
 
-    const levels = [
-      {
-        platforms: [
-          {x:0,y:550,w:800,h:50},
-          {x:200,y:450,w:120,h:20},
-          {x:400,y:350,w:120,h:20},
-          {x:600,y:250,w:120,h:20},
-        ],
-        orbs: [
-          {x:220,y:420,collected:false},
-          {x:420,y:320,collected:false},
-          {x:620,y:220,collected:false}
-        ],
-        enemies: [
-          {x:300,y:510,w:30,h:40,dir:1}
-        ]
-      },
-      {
-        platforms: [
-          {x:0,y:550,w:800,h:50},
-          {x:150,y:470,w:120,h:20},
-          {x:350,y:390,w:120,h:20},
-          {x:550,y:310,w:120,h:20},
-          {x:700,y:230,w:80,h:20},
-        ],
-        orbs: [
-          {x:170,y:440,collected:false},
-          {x:370,y:360,collected:false},
-          {x:720,y:200,collected:false}
-        ],
-        enemies: [
-          {x:450,y:510,w:30,h:40,dir:-1},
-          {x:200,y:510,w:30,h:40,dir:1}
-        ]
-      }
-    ];
+let score = 0;
+let level = 1;
 
-    function initGame(){
-      state = {
-        player: {x:100,y:100,vx:0,vy:0,w:30,h:40,onGround:false},
-        score: 0,
-        flame: 100,
-        level: 0,
-        muted: false,
-        lightRadius: 600
-      };
-      loadLevel(0);
-      updateUI();
-    }
+// Square position and size
+let x = 100;
+let y = 100;
+let squareSize = 50;
 
-    function loadLevel(idx){
-      let data = JSON.parse(JSON.stringify(levels[idx])); // clone
-      state.platforms = data.platforms;
-      state.orbs = data.orbs;
-      state.enemies = data.enemies;
-      state.level = idx+1;
-    }
+// Square speed
+let speedX = (Math.random() * 6 - 3);
+let speedY = (Math.random() * 6 - 3);
 
-    function updateUI(){
-      document.getElementById('score').textContent = state.score;
-      document.getElementById('level').textContent = state.level;
-      document.getElementById('flame').textContent = Math.max(0,Math.floor(state.flame));
-    }
+function updatePosition() {
+  const maxX = gameArea.clientWidth - squareSize;
+  const maxY = gameArea.clientHeight - squareSize;
 
-    function restartGame(){ initGame(); }
-    function toggleMute(){ state.muted = !state.muted; }
-    function toggleDebug(){ debug = !debug; }
+  // Chaos movement
+  speedX += (Math.random() - 0.5) * 0.5;
+  speedY += (Math.random() - 0.5) * 0.5;
 
-    document.addEventListener('keydown',e=>keys[e.key]=true);
-    document.addEventListener('keyup',e=>keys[e.key]=false);
-    document.addEventListener('mousemove',e=>{ mouse.x=e.offsetX; mouse.y=e.offsetY; });
+  speedX = Math.max(Math.min(speedX, 12), -12);
+  speedY = Math.max(Math.min(speedY, 12), -12);
 
-    function physics(){
-      let p = state.player;
-      p.vy += 0.5; // gravity
+  x += speedX;
+  y += speedY;
 
-      if(keys['ArrowLeft']||keys['a']) p.vx = -3;
-      else if(keys['ArrowRight']||keys['d']) p.vx = 3;
-      else p.vx *= 0.8;
+  // Bounce off walls
+  if (x <= 0) { x = 0; speedX *= -1; }
+  if (x >= maxX) { x = maxX; speedX *= -1; }
+  if (y <= 0) { y = 0; speedY *= -1; }
+  if (y >= maxY) { y = maxY; speedY *= -1; }
 
-      if((keys['ArrowUp']||keys['w']||keys[' ']) && p.onGround){
-        p.vy = -10;
-        p.onGround = false;
-      }
+  square.style.left = x + 'px';
+  square.style.top = y + 'px';
 
-      p.x += p.vx;
-      p.y += p.vy;
+  requestAnimationFrame(updatePosition);
+}
 
-      // collisions
-      p.onGround = false;
-      for(let plat of state.platforms){
-        if(p.x < plat.x+plat.w && p.x+p.w > plat.x && p.y < plat.y+plat.h && p.y+p.h > plat.y){
-          if(p.vy > 0 && p.y+p.h-plat.y < 20){
-            p.y = plat.y-p.h;
-            p.vy = 0;
-            p.onGround = true;
-          }
-        }
-      }
+square.addEventListener('click', () => {
+  score++;
+  scoreDisplay.textContent = "Score: " + score;
 
-      // collect orbs
-      for(let orb of state.orbs){
-        if(!orb.collected &&
-           p.x < orb.x+20 && p.x+p.w > orb.x &&
-           p.y < orb.y+20 && p.y+p.h > orb.y){
-          orb.collected = true;
-          state.score += 10;
-        }
-      }
+  // Chaos boost
+  speedX += (Math.random() * 4 - 2);
+  speedY += (Math.random() * 4 - 2);
 
-      // enemy movement
-      for(let e of state.enemies){
-        e.x += e.dir*2;
-        if(e.x<0||e.x+e.w>W) e.dir*=-1;
-        // collision with player
-        if(p.x < e.x+e.w && p.x+p.w > e.x &&
-           p.y < e.y+e.h && p.y+p.h > e.y){
-          restartGame(); // reset if hit
-        }
-      }
+  // Level up every 5 clicks
+  if (score % 5 === 0) {
+    level++;
+    levelDisplay.textContent = "Level: " + level;
+    // Make square smaller and faster
+    squareSize = Math.max(10, squareSize - 5);
+    square.style.width = squareSize + 'px';
+    square.style.height = squareSize + 'px';
+    speedX *= 1.2;
+    speedY *= 1.2;
+  }
+});
 
-      // check if all orbs collected
-      if(state.orbs.every(o=>o.collected)){
-        if(state.level < levels.length){
-          loadLevel(state.level); // next level
-        } else {
-          alert(\"You win! Final Score: \"+state.score);\n          restartGame();\n        }\n      }\n    }\n\n    function render(){\n      ctx.clearRect(0,0,W,H);\n\n      // Dim background\n      ctx.fillStyle = 'rgba(2,2,4,0.6)';\n      ctx.fillRect(0,0,W,H);\n\n      // Platforms\n      ctx.fillStyle = '#444';\n      for(let plat of state.platforms){\n        ctx.fillRect(plat.x,plat.y,plat.w,plat.h);\n      }\n\n      // Orbs\n      for(let orb of state.orbs){\n        if(!orb.collected){\n          ctx.fillStyle = 'yellow';\n          ctx.beginPath();\n          ctx.arc(orb.x+10,orb.y+10,10,0,Math.PI*2);\n          ctx.fill();\n        }\n      }\n\n      // Enemies\n      ctx.fillStyle = 'red';\n      for(let e of state.enemies){\n        ctx.fillRect(e.x,e.y,e.w,e.h);\n      }\n\n      // Lantern mask\n      ctx.save();\n      ctx.globalCompositeOperation = 'destination-out';\n      let p = state.player;\n      let angle = Math.atan2(mouse.y-(p.y+p.h/2), mouse.x-(p.x+p.w/2));\n      let grad = ctx.createRadialGradient(p.x+p.w/2, p.y+p.h/2, 50, p.x+p.w/2, p.y+p.h/2, state.lightRadius);\n      grad.addColorStop(0,'rgba(0,0,0,1)');\n      grad.addColorStop(1,'rgba(0,0,0,0)');\n      ctx.fillStyle = grad;\n      ctx.beginPath();\n      ctx.arc(p.x+p.w/2, p.y+p.h/2, state.lightRadius, angle-0.5, angle+0.5);\n      ctx.lineTo(p.x+p.w/2, p.y+p.h/2);\n      ctx.closePath();\n      ctx.fill();\n      ctx.restore();\n\n      // Player\n      ctx.fillStyle = 'orange';\n      ctx.fillRect(p.x,p.y,p.w,p.h);\n\n      if(debug){\n        ctx.fillStyle='white';\n        ctx.fillText(`x:${Math.round(p.x)}, y:${Math.round(p.y)}`,10,590);\n      }\n    }\n\n    function loop(){\n      physics();\n      render();\n      updateUI();\n      requestAnimationFrame(loop);\n    }\n\n    initGame();\n    loop();\n  </script>\n</body>\n</html>\n```\n\n🎮 **Gameplay now:**\n- Move with **arrow keys / A D**\n- Jump with **W / ↑ / Space**\n- Aim lantern with mouse\n- Collect all glowing orbs → unlock next level\n- Avoid red enemies → touching one restarts game\n- Win after finishing all levels\n\nDo you want me to also add **a start screen + level selection menu**, so it feels like a full packaged game?
-
+// Start the game
+updatePosition();
+</script>
+</body>
+</html>
