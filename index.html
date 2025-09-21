@@ -1,443 +1,229 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Username/Pokémon Generator</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cat Game Hub</title>
 <style>
-    body {
-        margin: 0;
-        background-color: white;
-        font-family: Arial, sans-serif;
-        overflow: hidden;
-    }
-    #settings {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        cursor: pointer;
-        user-select: none;
-        z-index: 999;
-    }
-    #settingsPanel {
-        display: none;
-        position: fixed;
-        top: 50px;
-        right: 10px;
-        background: rgba(255,255,255,0.9);
-        color: black;
-        padding: 15px;
-        border-radius: 8px;
-        width: 200px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        z-index: 999;
-    }
-    .setting-option {
-        margin-bottom: 10px;
-    }
-    #generateBtn {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 15px 25px;
-        font-size: 18px;
-        cursor: pointer;
-        border: none;
-        border-radius: 8px;
-        background: #007BFF;
-        color: white;
-        z-index: 500;
-    }
-    .generatedText {
-        position: absolute;
-        font-weight: bold;
-        font-size: 20px;
-        pointer-events: none;
-        white-space: nowrap;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  body{
+    margin:0;
+    font-family:'Press Start 2P',cursive;
+    background:#111;
+    color:#fff;
+    overflow:hidden;
+    text-align:center;
+  }
+  h1,h2,p,button{ font-family:'Press Start 2P',cursive; }
+
+  /* Hub */
+  #hub{ display:grid; place-items:center; height:100vh; }
+  #catBtn{
+    width:128px; height:128px;
+    image-rendering:pixelated;
+    cursor:pointer;
+  }
+
+  /* Modal menu */
+  #modal{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.9);
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  #gameLinks{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,100px);
+    gap:20px; margin-top:20px;
+  }
+  .gameLink{
+    width:100px; height:100px;
+    background:#333;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:4px;
+    cursor:pointer;
+    image-rendering:pixelated;
+  }
+  .gameLink img{ width:100%; height:100%; object-fit:cover; }
+
+  /* Game */
+  #pixelGame{
+    position:fixed; inset:0;
+    background:#000;
+    display:none;
+  }
+  #hud{
+    position:absolute; top:10px; left:50%;
+    transform:translateX(-50%);
+    display:flex; gap:30px;
+    font-size:14px;
+  }
+  #difficultySelect{
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    background:#222; padding:20px;
+    border:2px solid #fff;
+    display:none;
+  }
+  button{
+    margin:5px; padding:10px 16px;
+    background:#ffcc00; border:2px solid #000;
+    cursor:pointer;
+    font-weight:bold;
+    font-family:'Press Start 2P',cursive;
+  }
+  #exitGame{ position:absolute; top:10px; right:10px; }
+  #gameOver{
+    position:absolute; inset:0;
+    display:none; align-items:center; justify-content:center;
+    flex-direction:column;
+    background:rgba(0,0,0,0.85);
+    font-size:20px;
+  }
+  canvas{ width:100%; height:100%; image-rendering:pixelated; }
 </style>
 </head>
 <body>
-
-<div id="settings">⚙ Settings</div>
-<div id="settingsPanel">
-    <div class="setting-option">
-        <label>
-            Mode:
-            <select id="modeSelect">
-                <option value="username">Usernames</option>
-                <option value="pokemon">Pokémon Names</option>
-            </select>
-        </label>
-    </div>
-    <div class="setting-option">
-        <label>Speed:
-            <input type="range" id="speedControl" min="1" max="20" value="5">
-        </label>
-    </div>
-    <div class="setting-option">
-        <label>Max Numbers in Username:
-            <input type="range" id="numberAmount" min="0" max="5" value="3">
-        </label>
-    </div>
-    <div class="setting-option">
-        <label>Theme:
-            <select id="themeSelect">
-                <option value="white">White</option>
-                <option value="black">Black</option>
-            </select>
-        </label>
-    </div>
+<div id="hub">
+  <h1>🐱 Cat Game Hub</h1>
+  <img id="catBtn" src="https://opengameart.org/sites/default/files/cat_1.png" alt="Cat Hub">
+  <p>Click the cat to enter!</p>
 </div>
 
-<button id="generateBtn">Generate</button>
+<div id="modal">
+  <h2>Select a Game</h2>
+  <div id="gameLinks">
+    <div class="gameLink" id="link1">
+      <img src="https://opengameart.org/sites/default/files/catfood.png" alt="Cat Speedrun">
+    </div>
+    <div class="gameLink">
+      <img src="https://placekitten.com/100/100" alt="Placeholder">
+    </div>
+  </div>
+  <button onclick="closeModal()">Back</button>
+</div>
 
-<!-- CHUNK 2 will go here for JS -->
+<!-- Cat Speedrun Game -->
+<div id="pixelGame">
+  <div id="hud">
+    <div>⏱️ <span id="time">30</span></div>
+    <div>🍲 <span id="score">0</span></div>
+  </div>
+  <button id="exitGame">Exit</button>
+  <canvas id="gameCanvas"></canvas>
+  <div id="difficultySelect">
+    <p>DIFFICULTY</p>
+    <button onclick="startGame('easy')">EASY</button>
+    <button onclick="startGame('medium')">MEDIUM</button>
+    <button onclick="startGame('hard')">HARD</button>
+  </div>
+  <div id="gameOver">
+    <div id="finalText"></div>
+    <button onclick="showDifficulty()">RETRY</button>
+  </div>
+</div>
+
+<!-- Sounds -->
+<audio id="sfxCoin" src="https://freesound.org/data/previews/341/341695_6261199-lq.mp3"></audio>
+<audio id="sfxTick" src="https://freesound.org/data/previews/198/198841_285997-lq.mp3"></audio>
+<audio id="sfxOver" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
+
 <script>
-/* ========= CHUNK 2 - JS logic + word arrays ========= */
+/* Hub logic */
+const catBtn=document.getElementById("catBtn");
+const modal=document.getElementById("modal");
+function closeModal(){ modal.style.display="none"; }
+catBtn.onclick=()=>{ modal.style.display="flex"; };
 
-/* 500 firstWords */
-const firstWords = [
-"Quantum","Cyber","Nano","Hyper","Neon","Digital","Pixel","Vector","Binary","Circuit",
-"Omega","Alpha","Beta","Gamma","Delta","Sigma","Epsilon","Zeta","Kappa","Lambda",
-"Phantom","Specter","Ghost","Shadow","Wraith","Spirit","Eclipse","Nova","Nebula","Cosmic",
-"Solar","Lunar","Stellar","Galactic","Celestial","Astral","Void","Aether","Blaze","Inferno",
-"Ember","Flame","Pyro","Frost","Glacier","Crystal","Shard","Bolt","Thunder","Storm",
-"Cyclone","Tornado","Hurricane","Quake","Seismic","Shockwave","Pulse","Vortex","Torrent","Cascade",
-"Ripple","Surge","Flux","Wave","Current","Drift","Echo","Radial","Orbit","Comet",
-"Meteor","Astro","Rocket","Jet","Titan","Colossus","Juggernaut","Goliath","Leviathan","Behemoth",
-"Kraken","Hydra","Dragon","Phoenix","Griffin","Chimera","Wyvern","Basilisk","Cerberus","Manticore",
-"Harbinger","Sentinel","Guardian","Warden","Ranger","Scout","Sniper","Sharpshooter","Marksman","Assassin",
-"Ninja","Samurai","Ronin","Viking","Barbarian","Knight","Paladin","Templar","Sage","Wizard",
-"Warlock","Sorcerer","Mage","Necromancer","Druid","Shaman","Monk","Priest","Cleric","Alchemist",
-"Enchanter","Berserker","Gladiator","Champion","Hero","Legend","Mythic","Epic","Rare","Common",
-"Uncommon","Exotic","Divine","Arcane","Mystic","Chaos","Order","Balance","Fury","Rage",
-"Wrath","Vengeance","Valor","Honor","Justice","Mercy","Fear","Dread","Horror","Nightmare",
-"Dream","Vision","Prophecy","Oracle","Seer","Elder","Ancient","Prime","Hyperion","Titanium",
-"Iron","Steel","Bronze","Copper","Gold","Silver","Platinum","Diamond","Ruby","Sapphire",
-"Emerald","Topaz","Onyx","Obsidian","Quartz","Pearl","Shadow","Light","Dark","Bright",
-"Radiant","Silent","Loud","Swift","Rapid","Stealth","Cloak","Shade","Veil","Mask",
-"Mirror","Glass","Stone","Rock","Mountain","Valley","Forest","Jungle","Swamp","Desert",
-"Tundra","Cave","Canyon","River","Lake","Ocean","Sea","Island","Sky","Cloud",
-"Rain","Snow","Wind","Breeze","Thunder","Lightning","Fire","Ice","Water","Earth",
-"Air","Metal","Wood","Stone","Flame","Blizzard","Spark","Smoke","Ash","Coal",
-"Dust","Sand","Steel","Ironclad","Copperhead","Bronzeclaw","Silverwing","Goldfang","Shadowfang","Lightbringer",
-"Darkblade","Moonshadow","Sunfire","Starfall","Nightfall","Dawn","Twilight","Midnight","Chrono","Tempo",
-"Time","Space","Dimension","Portal","Gate","Rift","Warp","Shift","Frequency","Signal",
-"Code","Cipher","Data","Matrix","Neural","Circuit","Voltage","Current","Power","Energy",
-"Force","Gravity","Magnet","Field","Core","Gem","Ore","Alloy","Fiber","Thread",
-"Wire","Gear","Cog","Bolt","Screw","Hammer","Blade","Sword","Knife","Dagger",
-"Spear","Axe","Mace","Staff","Wand","Orb","Scroll","Tome","Book","Seal",
-"Mark","Rune","Glyph","Sigil","Charm","Talisman","Amulet","Pendant","Ring","Crown",
-"Helmet","Armor","Shield","Gauntlet","Boots","Cape","Cloak","Robe","Mask","Banner",
-"Flag","Standard","Emblem","Insignia","Badge","Logo","Icon","Hunter","Tracker","Seeker",
-"Finder","Explorer","Pioneer","Pathfinder","Nomad","Wanderer","Drifter","Rogue","Outlaw","Bandit",
-"Thief","Pirate","Corsair","Mercenary","Soldier","Warrior","Fighter","Gladiator2","Berserker2","Champion2",
-"Hero2","Legend2","Myth2","Tale2","Story2","Saga2","Chronicle2","Adventure2","Quest2","Mission2",
-"Campaign2","Battle2","War2","Fight2","Clash2","Skirmish2","Raid2","Siege2","Assault2","Attack2",
-"Defense2","Guard2","Shield2","Block2","Parry2","Counter2","Strike2","Hit2","Blast2","Burst2",
-"Shock2","Explosion2","Impact2","Crash2","Smash2","Break2","Crush2","Grind2","Slash2","Pierce2",
-"Cut2","Chop2","Hack2","Slice2","Stab2","Thrust2","Throw2","Launch2","Fire2","Shoot2",
-"Sniper2","Gunner2","Marksman2","Assault3","Support3","Medic3","Engineer3","Technician3","Spy3","Scout3",
-"Commander3","Leader3","Captain3","General3","Marshal3","Admiral3","Warlord3","Overlord3","Emperor3","King3",
-"Queen3","Prince3","Princess3","Duke3","Baron3","Lord3","Squire3","Page3","Monk3","Priest3",
-"Cleric3","Shaman3","Druid3","Wizard3","Sorcerer3","Warlock3","Necromancer3","Alchemist3","Enchanter3","Mystic3",
-"Seer3","Oracle3","Prophet3","Sage3","Elder3","Infinite3","Boundless3","Limitless3","Absolute3","Perfect3",
-"Pure3","True3","Sacred3","Holy3","Darkness3","Radiance3","Flame3","Frost3","Storm3","Thunder3",
-"Lightning3","Quake3","Volcano3","Lava3","Magma3","Ash3","Coal3","Pebble3","Gravel3","Mud3",
-"Swamp3","Marsh3","Bog3","Forest3a","Grove3","Orchard3","Meadow3","Field3","Plain3","Savannah3",
-"Steppe3","Oasis3","Coast3","Beach3","Cliff3","Harbor3","Port3","Dock3","Ship3","Boat3",
-"Submarine3","Plane3","Helicopter3","Vehicle3","Car3","Truck3","Bike3","Train3","Rocket3","Spaceship3",
-"Satellite3","Probe3","Drone3","Robot3","Android3","Cyborg3","Machine3","Computer3","Terminal3","Console3",
-"Screen3","Monitor3","Camera3","Lens3","Projector3","Sensor3","Detector3","Scanner3","Transmitter3","Receiver3",
-"Antenna3","Radio3","Frequency3","Channel3","Network3","System3","Program3","Software3","Hardware3","Gadget3",
-"Tool3","Weapon3","Gun3","Rifle3","Pistol3","Laser3","Plasma3","Cannon3","Missile3","Bomb3",
-"Grenade3","Mine3","Trap3","Turret3","Suit3","Uniform3","Clothes3","Boots3","Gloves3","Hat3",
-"Visor3","Glass3","Lens3","Jewel3","Amulet3","Token3","Credit3","Point3","Score3","Level3",
-"Rank3","Title3","Name3","Alias3","Handle3","Tag3","Label3","Mark3","Sign3","Symbol3",
-"Icon3","Seal3","Stamp3","Signature3","Autograph3","Trace3","Track3","Route3","Journey3","Trip3",
-"Voyage3","Expedition3","Odyssey3","Pilgrim3","Seeker3","Finder3","Path3","Trail3","Road3","Lane3",
-"Drive3","Terrace3","Place3","Court3","Square3","Plaza3","Market3","Bazaar3","Park3","Garden3",
-"Stadium3","Arena3","Theater3","Cinema3","Museum3","Gallery3","Library3","School3","College3","University3",
-"Hospital3","Clinic3","Lab3","Factory3","Warehouse3","Store3","Shop3","Restaurant3","Cafe3","Bar3"
-];
-while (firstWords.length < 500) firstWords.push('First'+firstWords.length);
+const link1=document.getElementById("link1");
+const pixelGame=document.getElementById("pixelGame");
+const difficultyBox=document.getElementById("difficultySelect");
+const gameOver=document.getElementById("gameOver");
+const finalText=document.getElementById("finalText");
+const scoreEl=document.getElementById("score");
+const timeEl=document.getElementById("time");
+const exitBtn=document.getElementById("exitGame");
 
-/* 500 secondWords */
-const secondWords = [
-"Rebellion","Fortress","Strike","Odyssey","Legends","Chronicle","Saga","Quest","Rift","Dynasty",
-"Empire","Legacy","Conquest","Warlords","Ascension","Eclipse","Nemesis","Frontier","Genesis","Nexus",
-"Protocol","Exodus","Vanguard","Dominion","Catalyst","Sentinel","Phantom","Guardian","Harbinger","Paradox",
-"Matrix","Vertex","Spectrum","Cryptic","Cyber","Nebula","Quantum","Pixel","Nano","Turbo",
-"Echo","Pulse","Flux","Volt","Radar","Photon","Core","Dynamo","Synth","Glitch",
-"Dragon","Phoenix","Griffin","Hydra","Titan","Wraith","Specter","Knight","Sorcerer","Wizard",
-"Paladin","Rogue","Necro","Valkyrie","Sage","Berserk","Druid","Ranger","Hunter","Seer",
-"Warlock","Mystic","Shade","Fury","Spirit","Champion","Slayer","Reaper","Arcane","Eldritch",
-"Frost","Storm","Thunder","Blaze","Inferno","Celestial","Divine","Chaos","Shadow","Dark",
-"Light","Radiant","Silent","Crystal","Silver","Golden","Iron","Steel","Obsidian","Emerald",
-"Ruby","Sapphire","Onyx","Coven","Hex","Wolf","Falcon","Tiger","Panther","Bear",
-"Eagle","Hawk","Lion","Shark","Cobra","Raven","Viper","Leopard","Jaguar","Cougar",
-"Bull","Fox","Dragonfly","Stag","Otter","Cheetah","Lynx","Serpent","Hound","Scorpion",
-"Coyote","Kraken","Manticore","Raptor","Talon","Venom","Claw","Fang","Spike","Howl",
-"Roar","Prowl","Snarl","Blizzard","Tornado","Cyclone","Avalanche","Quake","Fire","Ice",
-"Wind","Blaze","Strike","Bullet","Shock","Hammer","Sniper","Rifle","Grenade","Blade",
-"Saber","Arrow","Scout","Barrage","Flame","Burst","Viper","Shockwave","Blast","Surge",
-"Fury","Rage","War","Combat","Battle","Skull","Vindicator","Ravager","Defender","Ghost",
-"Outlaw","Assassin","Marshal","Captain","Commander","Major","Lieutenant","Sergeant","Corporal","Private",
-"Operator","Enforcer","Solaris","Vector","Astral","Plasma","Cosmic","Galactic","Star","Void",
-"Zenith","Nova","Orbit","Gravity","Chrono","Horizon","Quasar","Radiant2","Mirage","Voltage",
-"Cascade","Vertex","Flash","Alpha","Beta","Gamma","Delta","Omega","Sigma","Tau",
-"Zeta","Kappa","Lambda","Epsilon","Rift2","Warp","Blitz","Vortex2","Seraph","Zephyr",
-"Nimbus","Mythic","Arcane2","Titanium","Ironclad","Cobalt","Granite","Marble","Flint","Ivory",
-"Jade","Pearl","Slate","Copper","Mercury","Platinum","Diamond","Meteor","Comet","Galaxy",
-"Stellar","Solar","Lunar","Cosmos","Ethereal","Astral2","Nimbus2","Cloud","Hurricane2","Gale",
-"Zephyr2","Breeze","Torrent2","Deluge","Flood","Pyro","Smoke","Ash2","Coal2","Cinder",
-"Wrath2","Vengeance2","Fury2","Rage2","Shatter","Shard","Saber2","Dagger2","Spear2","Lance",
-"Mace","Shield2","Armor2","Helmet2","Gauntlet2","Boot2","Cloak2","Robe2","Mask2","Banner2",
-"Emblem2","Badge2","Torch","Lantern","Beacon","Light2","Shadow2","Void2","Solar2","Lunar2",
-"Star2","Moon2","Sun2","Planet","Asteroid","Orbit2","Dimension2","Portal2","Gateway2","Zone",
-"Sector","Region","Territory","Kingdom","Realm","Domain","Nation","Tribe","Clan","Guild2",
-"Order2","Legion","Alliance","Brotherhood","Syndicate","Cartel","Collective","Council","Assembly","Federation",
-"Confederation","Dynasty2","Heritage2","Legacy2","Annals","Record","Archive","Log","Journal","Diary",
-"Memoir","Narrative","Account","Expedition2","Voyage2","Journey2","Mission2","Campaign2","Skirmish2","Siege2",
-"Assault2","Offensive","Defense2","Guard2","Protect2","Block2","Parry2","Counter2","Strike2","Hit2",
-"Smash2","Crush2","Slash2","Pierce2","Cut2","Chop2","Hack2","Slice2","Stab2","Thrust2",
-"Throw2","Launch2","Fire3","Shoot3","Blast2","Burst2","Shock3","Explosion2","Impact2","Crash2",
-"Grind2","Slash3","Pierce3","Flame2","Blaze2","Frost3","Glacier2","Ice2","Snow2","Freeze2",
-"Crystal2","Shard2","Blade2","Edge2","Saber3","Strike3","Bullet2","Sniper2","Marksman3","Gunner2",
-"Archer","Fletcher","Scout2","Ranger2","Hunter2","Tracker2","Seeker2","Finder2","Watcher","Observer",
-"Sentinel2","Warden2","Defender2","Vindicator2","Ravager2","Destroyer","Obliterator","Annihilator","Vanquisher","Conqueror",
-"Overlord2","Emperor2","Monarch","Sovereign","Regent","Viceroy","Victor","Swordsman","Spearman","Axeman",
-"Lancer","Dragoon","Paladin2","Crusader","Templar2","Inquisitor","Oracle2","Seer2","Prophet2","Sage2",
-"Elder2","Ancestor","Founding","Prototype","Prime2","Alpha2","Beta2","Omega2","Sigma2","Prototype2"
-];
-while (secondWords.length < 500) secondWords.push('Second'+secondWords.length);
+/* Game setup */
+link1.onclick=()=>{ modal.style.display="none"; pixelGame.style.display="block"; showDifficulty(); };
+exitBtn.onclick=()=>{ pixelGame.style.display="none"; clearInterval(timer); };
 
-/* ========= app state & helpers ========= */
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 
-const SETTINGS = {
-  maxMessages: 45,
-  lifeMs: 10000, // 10s
-};
+let cat={x:100,y:100,size:32,img:new Image()};
+cat.img.src="https://opengameart.org/sites/default/files/cat_1.png";
+let bowlImg=new Image();
+bowlImg.src="https://opengameart.org/sites/default/files/catfood.png";
 
-let activeMsgs = [];
-let lastFrame = 0;
-let pokemonNames = null;
-let fetchingPokemon = false;
+let keys={};
+document.addEventListener("keydown",e=>keys[e.key]=true);
+document.addEventListener("keyup",e=>keys[e.key]=false);
 
-// utility
-function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-function randFloat(min,max){ return Math.random()*(max-min)+min; }
+let bowl={x:200,y:200,size:32};
+let score=0,time=30,timer,playing=false,difficulty="easy";
 
-/* fetch up-to-date pokemon list from PokéAPI */
-async function loadPokemonNames(){
-  if (pokemonNames || fetchingPokemon) return;
-  fetchingPokemon = true;
-  try {
-    const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=2000');
-    if (!res.ok) throw new Error('network');
-    const json = await res.json();
-    pokemonNames = json.results.map(r => {
-      // capitalize each hyphen-separated chunk: e.g. "mr-mime" -> "Mr-Mime"
-      return r.name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('-');
-    });
-  } catch(err){
-    console.error('Pokemon fetch failed, using fallback list.', err);
-    pokemonNames = ["Pikachu","Charmander","Bulbasaur","Squirtle","Eevee","Mew","Mewtwo"];
-  } finally {
-    fetchingPokemon = false;
-  }
+const sfxCoin=document.getElementById("sfxCoin");
+const sfxTick=document.getElementById("sfxTick");
+const sfxOver=document.getElementById("sfxOver");
+
+function showDifficulty(){
+  gameOver.style.display="none";
+  difficultyBox.style.display="block";
+}
+function startGame(diff){
+  difficulty=diff;
+  score=0; time=(diff==="easy"?40:diff==="medium"?30:20);
+  scoreEl.textContent=score; timeEl.textContent=time;
+  cat.x=100; cat.y=100;
+  spawnBowl();
+  difficultyBox.style.display="none";
+  playing=true;
+  timer=setInterval(()=>{
+    time--; timeEl.textContent=time;
+    if(time<=0){ endGame(); }
+    else sfxTick.play();
+  },1000);
+  requestAnimationFrame(gameLoop);
 }
 
-/* generate username from arrays */
-function generateUsername(){
-  const first = firstWords[randInt(0, firstWords.length-1)];
-  const second = secondWords[randInt(0, secondWords.length-1)];
-  const nums = parseInt(document.getElementById('numberAmount').value,10) || 0;
-  let suffix = '';
-  for (let i=0;i<nums;i++) suffix += randInt(0,9);
-  // format: First Second [123]
-  return `${first} ${second}${suffix?(' '+suffix):''}`.trim();
+function spawnBowl(){
+  bowl.x=Math.random()*(canvas.width-32);
+  bowl.y=Math.random()*(canvas.height-32);
 }
 
-/* generate pokemon name */
-async function generatePokemonName(){
-  if (!pokemonNames) await loadPokemonNames();
-  return pokemonNames[randInt(0, pokemonNames.length-1)];
+function gameLoop(){
+  if(!playing) return;
+  ctx.fillStyle="#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // move cat
+  let sp=(difficulty==="easy"?3: difficulty==="medium"?4:5);
+  if(keys["ArrowUp"]) cat.y-=sp;
+  if(keys["ArrowDown"]) cat.y+=sp;
+  if(keys["ArrowLeft"]) cat.x-=sp;
+  if(keys["ArrowRight"]) cat.x+=sp;
+  // draw bowl
+  ctx.drawImage(bowlImg,bowl.x,bowl.y,bowl.size,bowl.size);
+  // draw cat
+  ctx.drawImage(cat.img,cat.x,cat.y,cat.size,cat.size);
+  // check collision
+  if(Math.abs(cat.x-bowl.x)<28 && Math.abs(cat.y-bowl.y)<28){
+    score++; scoreEl.textContent=score;
+    sfxCoin.play();
+    spawnBowl();
+  }
+  requestAnimationFrame(gameLoop);
 }
 
-/* spawn function (handles sync & async) */
-async function spawnName(){
-  const mode = document.getElementById('modeSelect').value;
-  let text;
-  if (mode === 'pokemon') {
-    text = await generatePokemonName();
-  } else {
-    text = generateUsername();
-  }
-  spawnMessage(text);
+function endGame(){
+  playing=false;
+  clearInterval(timer);
+  sfxOver.play();
+  finalText.textContent=`GAME OVER\nFINAL SCORE: ${score}`;
+  gameOver.style.display="flex";
 }
-
-/* Message class */
-class Bounced {
-  constructor(text, speedFactor){
-    this.text = text;
-    this.el = document.createElement('div');
-    this.el.className = 'generatedText';
-    this.el.textContent = text;
-    this.el.style.background = 'rgba(255,255,255,0.06)';
-    this.el.style.color = `hsl(${randInt(0,360)},70%,75%)`;
-    this.el.style.padding = '4px 8px';
-    this.el.style.borderRadius = '6px';
-    this.el.style.fontWeight = '700';
-    document.body.appendChild(this.el);
-
-    // measure after adding to DOM
-    const w = this.el.offsetWidth;
-    const h = this.el.offsetHeight;
-
-    // position fully on screen (respect top UI area)
-    const margin = 8;
-    const topArea = 120; // keep below header/controls
-    this.x = randFloat(margin, Math.max(margin, window.innerWidth - w - margin));
-    this.y = randFloat(topArea + margin, Math.max(topArea + margin, window.innerHeight - h - margin));
-
-    // velocity: speedFactor controlled by slider (1..20); scale to comfortable px/frame-unit
-    const angle = Math.random() * Math.PI * 2;
-    const base = 0.2 * (speedFactor || 1); // tuned to look good
-    this.vx = Math.cos(angle) * base;
-    this.vy = Math.sin(angle) * base;
-
-    this.w = w; this.h = h;
-    this.birth = performance.now();
-
-    this.el.style.left = `${this.x}px`;
-    this.el.style.top = `${this.y}px`;
-    this.el.style.position = 'absolute';
-    this.el.style.zIndex = 1000;
-  }
-
-  update(deltaUnits){
-    this.x += this.vx * deltaUnits;
-    this.y += this.vy * deltaUnits;
-
-    // bounce left/right
-    if (this.x <= 0) { this.x = 0; this.vx *= -1; }
-    else if (this.x + this.w >= window.innerWidth) { this.x = window.innerWidth - this.w; this.vx *= -1; }
-    // bounce top/bottom (respect top UI area)
-    const topLimit = 120;
-    if (this.y <= topLimit) { this.y = topLimit; this.vy *= -1; }
-    else if (this.y + this.h >= window.innerHeight) { this.y = window.innerHeight - this.h; this.vy *= -1; }
-
-    this.el.style.left = `${this.x}px`;
-    this.el.style.top = `${this.y}px`;
-
-    // fade near end
-    const age = performance.now() - this.birth;
-    if (age > SETTINGS.lifeMs - 800){
-      const opacity = Math.max(0, (SETTINGS.lifeMs - age) / 800);
-      this.el.style.opacity = opacity;
-    }
-  }
-
-  expired(){ return (performance.now() - this.birth) > SETTINGS.lifeMs; }
-  remove(){ this.el.remove(); }
-}
-
-/* spawn message and manage limit */
-function spawnMessage(text){
-  // maintain count
-  if (activeMsgs.length >= SETTINGS.maxMessages){
-    const old = activeMsgs.shift();
-    old.remove();
-  }
-  // speed slider value
-  const rawSpeed = parseFloat(document.getElementById('speedControl').value) || 5;
-  // map slider (1..20) to a nicer speed factor: divide by 5 to keep things not insane
-  const speedFactor = rawSpeed / 5;
-  const msg = new Bounced(text, speedFactor);
-  activeMsgs.push(msg);
-}
-
-/* animation loop */
-function loop(ts){
-  if (!lastFrame) lastFrame = ts;
-  const delta = (ts - lastFrame) / 16.67; // ~1 per 16.67ms
-  lastFrame = ts;
-
-  for (let i = activeMsgs.length - 1; i >= 0; i--){
-    const m = activeMsgs[i];
-    m.update(delta);
-    if (m.expired()){
-      m.remove();
-      activeMsgs.splice(i,1);
-    }
-  }
-  requestAnimationFrame(loop);
-}
-
-/* ========== wire UI from Chunk 1 ========== */
-document.getElementById('generateBtn').addEventListener('click', () => spawnName());
-
-// Settings panel open/close
-document.getElementById('settings').addEventListener('click', () => {
-  const panel = document.getElementById('settingsPanel');
-  panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
-});
-
-// Theme switch
-document.getElementById('themeSelect').addEventListener('change', (e)=>{
-  const val = e.target.value;
-  if (val === 'black'){
-    document.body.style.background = '#111';
-    document.body.style.color = '#fff';
-  } else {
-    document.body.style.background = '#fff';
-    document.body.style.color = '#000';
-  }
-});
-
-// Mode: hide/show number control for pokemon mode
-document.getElementById('modeSelect').addEventListener('change', (e)=>{
-  const mode = e.target.value;
-  const numRow = document.getElementById('numberAmount').parentElement;
-  if (mode === 'pokemon') {
-    numRow.style.display = 'none';
-    // preload pokemon names
-    loadPokemonNames();
-  } else {
-    numRow.style.display = '';
-  }
-});
-
-// keyboard: Space to spawn (unless focused on input/select)
-window.addEventListener('keydown', (ev)=>{
-  const tag = document.activeElement.tagName;
-  if (ev.code === 'Space' && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA'){
-    ev.preventDefault();
-    spawnName();
-  }
-});
-
-// update UI numeric display for numberAmount (if you want)
-const numberAmountEl = document.getElementById('numberAmount');
-numberAmountEl.addEventListener('input', ()=> {
-  // we don't display a numeric label in this simple chunk; could be added if desired
-});
-
-// initialize: hide numbers if starting in pokemon, start loop
-if (document.getElementById('modeSelect').value === 'pokemon'){
-  document.getElementById('numberAmount').parentElement.style.display = 'none';
-  loadPokemonNames(); // preload
-}
-requestAnimationFrame(loop);
-
-/* end CHUNK 2 */
 </script>
-
 </body>
 </html>
