@@ -3,227 +3,129 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cat Game Hub</title>
+<title>Up Down Puzzle Cat</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
   body{
     margin:0;
-    font-family:'Press Start 2P',cursive;
     background:#111;
     color:#fff;
+    font-family:'Press Start 2P',cursive;
     overflow:hidden;
-    text-align:center;
   }
-  h1,h2,p,button{ font-family:'Press Start 2P',cursive; }
-
-  /* Hub */
-  #hub{ display:grid; place-items:center; height:100vh; }
-  #catBtn{
-    width:128px; height:128px;
+  #gameCanvas{
+    display:block;
+    margin:0 auto;
+    background:#222;
     image-rendering:pixelated;
-    cursor:pointer;
-  }
-
-  /* Modal menu */
-  #modal{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,0.9);
-    display:none; flex-direction:column;
-    align-items:center; justify-content:center;
-  }
-  #gameLinks{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,100px);
-    gap:20px; margin-top:20px;
-  }
-  .gameLink{
-    width:100px; height:100px;
-    background:#333;
-    display:flex; align-items:center; justify-content:center;
-    border-radius:4px;
-    cursor:pointer;
-    image-rendering:pixelated;
-  }
-  .gameLink img{ width:100%; height:100%; object-fit:cover; }
-
-  /* Game */
-  #pixelGame{
-    position:fixed; inset:0;
-    background:#000;
-    display:none;
   }
   #hud{
     position:absolute; top:10px; left:50%;
     transform:translateX(-50%);
-    display:flex; gap:30px;
     font-size:14px;
   }
-  #difficultySelect{
-    position:absolute; top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    background:#222; padding:20px;
-    border:2px solid #fff;
+  #msg{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.7);
+    font-size:20px;
+    text-align:center;
     display:none;
   }
   button{
-    margin:5px; padding:10px 16px;
+    margin-top:20px; padding:10px 16px;
     background:#ffcc00; border:2px solid #000;
     cursor:pointer;
-    font-weight:bold;
     font-family:'Press Start 2P',cursive;
   }
-  #exitGame{ position:absolute; top:10px; right:10px; }
-  #gameOver{
-    position:absolute; inset:0;
-    display:none; align-items:center; justify-content:center;
-    flex-direction:column;
-    background:rgba(0,0,0,0.85);
-    font-size:20px;
-  }
-  canvas{ width:100%; height:100%; image-rendering:pixelated; }
 </style>
 </head>
 <body>
-<div id="hub">
-  <h1>🐱 Cat Game Hub</h1>
-  <img id="catBtn" src="https://opengameart.org/sites/default/files/cat_1.png" alt="Cat Hub">
-  <p>Click the cat to enter!</p>
-</div>
-
-<div id="modal">
-  <h2>Select a Game</h2>
-  <div id="gameLinks">
-    <div class="gameLink" id="link1">
-      <img src="https://opengameart.org/sites/default/files/catfood.png" alt="Cat Speedrun">
-    </div>
-    <div class="gameLink">
-      <img src="https://placekitten.com/100/100" alt="Placeholder">
-    </div>
-  </div>
-  <button onclick="closeModal()">Back</button>
-</div>
-
-<!-- Cat Speedrun Game -->
-<div id="pixelGame">
-  <div id="hud">
-    <div>⏱️ <span id="time">30</span></div>
-    <div>🍲 <span id="score">0</span></div>
-  </div>
-  <button id="exitGame">Exit</button>
-  <canvas id="gameCanvas"></canvas>
-  <div id="difficultySelect">
-    <p>DIFFICULTY</p>
-    <button onclick="startGame('easy')">EASY</button>
-    <button onclick="startGame('medium')">MEDIUM</button>
-    <button onclick="startGame('hard')">HARD</button>
-  </div>
-  <div id="gameOver">
-    <div id="finalText"></div>
-    <button onclick="showDifficulty()">RETRY</button>
+<canvas id="gameCanvas" width="400" height="600"></canvas>
+<div id="hud">🐱 Up/Down to move</div>
+<div id="msg">
+  <div>
+    <div id="msgText"></div>
+    <button onclick="restart()">Retry</button>
   </div>
 </div>
-
-<!-- Sounds -->
-<audio id="sfxCoin" src="https://freesound.org/data/previews/341/341695_6261199-lq.mp3"></audio>
-<audio id="sfxTick" src="https://freesound.org/data/previews/198/198841_285997-lq.mp3"></audio>
-<audio id="sfxOver" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
 
 <script>
-/* Hub logic */
-const catBtn=document.getElementById("catBtn");
-const modal=document.getElementById("modal");
-function closeModal(){ modal.style.display="none"; }
-catBtn.onclick=()=>{ modal.style.display="flex"; };
-
-const link1=document.getElementById("link1");
-const pixelGame=document.getElementById("pixelGame");
-const difficultyBox=document.getElementById("difficultySelect");
-const gameOver=document.getElementById("gameOver");
-const finalText=document.getElementById("finalText");
-const scoreEl=document.getElementById("score");
-const timeEl=document.getElementById("time");
-const exitBtn=document.getElementById("exitGame");
-
-/* Game setup */
-link1.onclick=()=>{ modal.style.display="none"; pixelGame.style.display="block"; showDifficulty(); };
-exitBtn.onclick=()=>{ pixelGame.style.display="none"; clearInterval(timer); };
-
 const canvas=document.getElementById("gameCanvas");
 const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
 
-let cat={x:100,y:100,size:32,img:new Image()};
+let cat={x:180,y:550,size:32,img:new Image()};
 cat.img.src="https://opengameart.org/sites/default/files/cat_1.png";
-let bowlImg=new Image();
-bowlImg.src="https://opengameart.org/sites/default/files/catfood.png";
+
+let goal={x:180,y:20,size:32,img:new Image()};
+goal.img.src="https://opengameart.org/sites/default/files/fish_sprite.png";
+
+let obstacles=[
+  {x:100,y:150,w:200,h:20},
+  {x:50,y:300,w:300,h:20},
+  {x:120,y:450,w:160,h:20}
+];
 
 let keys={};
 document.addEventListener("keydown",e=>keys[e.key]=true);
 document.addEventListener("keyup",e=>keys[e.key]=false);
 
-let bowl={x:200,y:200,size:32};
-let score=0,time=30,timer,playing=false,difficulty="easy";
-
-const sfxCoin=document.getElementById("sfxCoin");
-const sfxTick=document.getElementById("sfxTick");
-const sfxOver=document.getElementById("sfxOver");
-
-function showDifficulty(){
-  gameOver.style.display="none";
-  difficultyBox.style.display="block";
-}
-function startGame(diff){
-  difficulty=diff;
-  score=0; time=(diff==="easy"?40:diff==="medium"?30:20);
-  scoreEl.textContent=score; timeEl.textContent=time;
-  cat.x=100; cat.y=100;
-  spawnBowl();
-  difficultyBox.style.display="none";
-  playing=true;
-  timer=setInterval(()=>{
-    time--; timeEl.textContent=time;
-    if(time<=0){ endGame(); }
-    else sfxTick.play();
-  },1000);
-  requestAnimationFrame(gameLoop);
-}
-
-function spawnBowl(){
-  bowl.x=Math.random()*(canvas.width-32);
-  bowl.y=Math.random()*(canvas.height-32);
-}
+let playing=true;
 
 function gameLoop(){
-  if(!playing) return;
-  ctx.fillStyle="#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#222"; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // draw goal
+  ctx.drawImage(goal.img,goal.x,goal.y,goal.size,goal.size);
+
   // move cat
-  let sp=(difficulty==="easy"?3: difficulty==="medium"?4:5);
-  if(keys["ArrowUp"]) cat.y-=sp;
-  if(keys["ArrowDown"]) cat.y+=sp;
-  if(keys["ArrowLeft"]) cat.x-=sp;
-  if(keys["ArrowRight"]) cat.x+=sp;
-  // draw bowl
-  ctx.drawImage(bowlImg,bowl.x,bowl.y,bowl.size,bowl.size);
+  if(playing){
+    if(keys["ArrowUp"]) cat.y-=3;
+    if(keys["ArrowDown"]) cat.y+=3;
+  }
+
+  // constrain
+  if(cat.y<0) cat.y=0;
+  if(cat.y>canvas.height-cat.size) cat.y=canvas.height-cat.size;
+
+  // draw obstacles
+  ctx.fillStyle="#b33";
+  obstacles.forEach(o=>ctx.fillRect(o.x,o.y,o.w,o.h));
+
   // draw cat
   ctx.drawImage(cat.img,cat.x,cat.y,cat.size,cat.size);
-  // check collision
-  if(Math.abs(cat.x-bowl.x)<28 && Math.abs(cat.y-bowl.y)<28){
-    score++; scoreEl.textContent=score;
-    sfxCoin.play();
-    spawnBowl();
+
+  // check collisions
+  obstacles.forEach(o=>{
+    if(cat.x<o.x+o.w && cat.x+cat.size>o.x &&
+       cat.y<o.y+o.h && cat.y+cat.size>o.y){
+      endGame(false);
+    }
+  });
+
+  // check win
+  if(cat.y<=goal.y+goal.size && cat.x<goal.x+goal.size && cat.x+cat.size>goal.x){
+    endGame(true);
   }
+
+  if(playing) requestAnimationFrame(gameLoop);
+}
+
+function endGame(win){
+  playing=false;
+  document.getElementById("msgText").textContent=win?"🎉 You Win!":"💀 You Lost!";
+  document.getElementById("msg").style.display="flex";
+}
+
+function restart(){
+  cat.y=550;
+  playing=true;
+  document.getElementById("msg").style.display="none";
   requestAnimationFrame(gameLoop);
 }
 
-function endGame(){
-  playing=false;
-  clearInterval(timer);
-  sfxOver.play();
-  finalText.textContent=`GAME OVER\nFINAL SCORE: ${score}`;
-  gameOver.style.display="flex";
-}
+gameLoop();
 </script>
 </body>
 </html>
+
