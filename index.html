@@ -1,131 +1,90 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Up Down Puzzle Cat</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-  body{
-    margin:0;
-    background:#111;
-    color:#fff;
-    font-family:'Press Start 2P',cursive;
-    overflow:hidden;
-  }
-  #gameCanvas{
-    display:block;
-    margin:0 auto;
-    background:#222;
-    image-rendering:pixelated;
-  }
-  #hud{
-    position:absolute; top:10px; left:50%;
-    transform:translateX(-50%);
-    font-size:14px;
-  }
-  #msg{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    background:rgba(0,0,0,0.7);
-    font-size:20px;
-    text-align:center;
-    display:none;
-  }
-  button{
-    margin-top:20px; padding:10px 16px;
-    background:#ffcc00; border:2px solid #000;
-    cursor:pointer;
-    font-family:'Press Start 2P',cursive;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Pixel Cat Yarn Collector</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      font-family: "Press Start 2P", cursive, monospace;
+    }
+    canvas {
+      background: #444;
+      image-rendering: pixelated;
+      border: 5px solid #fff;
+    }
+    #score {
+      position: absolute;
+      top: 20px;
+      font-size: 20px;
+    }
+  </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
-<div id="hud">🐱 Up/Down to move</div>
-<div id="msg">
-  <div>
-    <div id="msgText"></div>
-    <button onclick="restart()">Retry</button>
-  </div>
-</div>
+  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreText = document.getElementById("score");
 
-<script>
-const canvas=document.getElementById("gameCanvas");
-const ctx=canvas.getContext("2d");
+    let cat = { x: 200, y: 200, size: 20, speed: 20 };
+    let yarn = spawnYarn();
+    let score = 0;
 
-let cat={x:180,y:550,size:32,img:new Image()};
-cat.img.src="https://opengameart.org/sites/default/files/cat_1.png";
-
-let goal={x:180,y:20,size:32,img:new Image()};
-goal.img.src="https://opengameart.org/sites/default/files/fish_sprite.png";
-
-let obstacles=[
-  {x:100,y:150,w:200,h:20},
-  {x:50,y:300,w:300,h:20},
-  {x:120,y:450,w:160,h:20}
-];
-
-let keys={};
-document.addEventListener("keydown",e=>keys[e.key]=true);
-document.addEventListener("keyup",e=>keys[e.key]=false);
-
-let playing=true;
-
-function gameLoop(){
-  ctx.fillStyle="#222"; ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  // draw goal
-  ctx.drawImage(goal.img,goal.x,goal.y,goal.size,goal.size);
-
-  // move cat
-  if(playing){
-    if(keys["ArrowUp"]) cat.y-=3;
-    if(keys["ArrowDown"]) cat.y+=3;
-  }
-
-  // constrain
-  if(cat.y<0) cat.y=0;
-  if(cat.y>canvas.height-cat.size) cat.y=canvas.height-cat.size;
-
-  // draw obstacles
-  ctx.fillStyle="#b33";
-  obstacles.forEach(o=>ctx.fillRect(o.x,o.y,o.w,o.h));
-
-  // draw cat
-  ctx.drawImage(cat.img,cat.x,cat.y,cat.size,cat.size);
-
-  // check collisions
-  obstacles.forEach(o=>{
-    if(cat.x<o.x+o.w && cat.x+cat.size>o.x &&
-       cat.y<o.y+o.h && cat.y+cat.size>o.y){
-      endGame(false);
+    function spawnYarn() {
+      return {
+        x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
+        y: Math.floor(Math.random() * (canvas.height / 20)) * 20,
+        size: 20
+      };
     }
-  });
 
-  // check win
-  if(cat.y<=goal.y+goal.size && cat.x<goal.x+goal.size && cat.x+cat.size>goal.x){
-    endGame(true);
-  }
+    function drawCat() {
+      ctx.fillStyle = "orange";
+      ctx.fillRect(cat.x, cat.y, cat.size, cat.size);
+      ctx.fillStyle = "black";
+      ctx.fillRect(cat.x + 4, cat.y + 4, 4, 4); // eyes
+      ctx.fillRect(cat.x + 12, cat.y + 4, 4, 4);
+    }
 
-  if(playing) requestAnimationFrame(gameLoop);
-}
+    function drawYarn() {
+      ctx.fillStyle = "pink";
+      ctx.beginPath();
+      ctx.arc(yarn.x + yarn.size/2, yarn.y + yarn.size/2, yarn.size/2, 0, Math.PI*2);
+      ctx.fill();
+    }
 
-function endGame(win){
-  playing=false;
-  document.getElementById("msgText").textContent=win?"🎉 You Win!":"💀 You Lost!";
-  document.getElementById("msg").style.display="flex";
-}
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCat();
+      drawYarn();
 
-function restart(){
-  cat.y=550;
-  playing=true;
-  document.getElementById("msg").style.display="none";
-  requestAnimationFrame(gameLoop);
-}
+      // check collision
+      if (cat.x === yarn.x && cat.y === yarn.y) {
+        score++;
+        scoreText.textContent = "Score: " + score;
+        yarn = spawnYarn();
+      }
 
-gameLoop();
-</script>
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp" && cat.y > 0) cat.y -= cat.speed;
+      if (e.key === "ArrowDown" && cat.y < canvas.height - cat.size) cat.y += cat.speed;
+      if (e.key === "ArrowLeft" && cat.x > 0) cat.x -= cat.speed;
+      if (e.key === "ArrowRight" && cat.x < canvas.width - cat.size) cat.x += cat.speed;
+    });
+
+    update();
+  </script>
 </body>
 </html>
 
