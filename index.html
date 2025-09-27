@@ -1,125 +1,533 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-  <title>10 Second Click Race</title>
+  <meta charset="utf-8" />
+  <title>Click Race — Live Meters</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body { text-align: center; font-family: Arial; }
-    #timer { font-size: 24px; margin: 10px; }
-    .scores { display: flex; justify-content: center; gap: 50px; margin-top: 20px; flex-wrap: wrap; }
-    .player { font-size: 20px; }
-    button { padding: 10px 20px; margin: 10px; font-size: 18px; }
+    :root{--bg:#071028;--card:#0b1220;--accent:#10b981;--muted:#94a3b8;--txt:#e6eef8}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:linear-gradient(180deg,#071028,#071734);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .app{width:100%;max-width:980px;background:linear-gradient(180deg,var(--card),rgba(8,12,20,0.9));border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    header h1{font-size:18px;margin:0} header p{margin:0;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:14px}
+    @media (max-width:920px){.grid{grid-template-columns:1fr}}
+    .card{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+    label{font-size:13px;color:var(--muted)}
+    input,select,button{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--txt)}
+    .btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#012;cursor:pointer;font-weight:700}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    .mode-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .players-inputs{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+    .scoreboard{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .player-card{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:10px;border-radius:10px;min-width:150px;text-align:center}
+    .small{font-size:12px;color:var(--muted)}
+    .center{display:flex;flex-direction:column;align-items:center}
+    #timer{font-size:20px;font-weight:700;margin-top:8px}
+    .result{font-size:16px;margin-top:8px}
+    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
+    .key-btn{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;cursor:pointer}
+    .remap-row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+    canvas#confetti{position:fixed;left:0;top:0;pointer-events:none;z-index:9999}
+
+    /* Meters */
+    .meter-wrap{width:220px;margin-top:10px}
+    .meter-label{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+    .meter-bar{height:12px;background:rgba(255,255,255,0.04);border-radius:8px;overflow:hidden;margin-top:6px}
+    .meter-fill{height:100%;width:0%;background:linear-gradient(90deg,#10b981,#3b82f6);transition:width 120ms linear}
+    .cps-number{font-weight:700;margin-left:8px}
   </style>
 </head>
 <body>
-  <h1>10 Second Click Race</h1>
+  <canvas id="confetti"></canvas>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Click Race — Live Meters</h1>
+        <p class="small">Live CPS meters added. Remap keys, change names, and play solo or with friends.</p>
+      </div>
+      <div class="small">Tip: press your assigned key to start. Holding keys won't spam — only fresh presses count.</div>
+    </header>
 
-  <!-- Mode selection -->
-  <div id="menu">
-    <h2>Select Mode</h2>
-    <button onclick="startGame(1)">Solo (1 Player)</button>
-    <button onclick="startGame(2)">2 Players</button>
-    <button onclick="startGame(3)">3 Players</button>
-    <button onclick="startGame(4)">4 Players</button>
+    <div class="grid">
+      <main>
+        <div id="menu" class="card">
+          <div class="small">Round length</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+            <select id="timeSelect">
+              <option value="5">5s</option>
+              <option value="10" selected>10s</option>
+              <option value="20">20s</option>
+              <option value="30">30s</option>
+            </select>
+            <button class="ghost" id="clearAllBtn">Clear Storage</button>
+          </div>
+
+          <div style="margin-top:12px" class="small">Usernames</div>
+          <div class="players-inputs">
+            <input id="name1" placeholder="Player 1 (P1)" maxlength="20" />
+            <input id="name2" placeholder="Player 2 (P2)" maxlength="20" />
+            <input id="name3" placeholder="Player 3 (P3)" maxlength="20" />
+            <input id="name4" placeholder="Player 4 (P4)" maxlength="20" />
+          </div>
+
+          <div style="margin-top:12px" class="small">Key remapping</div>
+          <div class="remap-row" id="remapRow"></div>
+
+          <div class="mode-buttons" style="margin-top:12px">
+            <button class="btn" onclick="startGame(1)">Solo</button>
+            <button class="btn" onclick="startGame(2)">2 Players</button>
+            <button class="btn" onclick="startGame(3)">3 Players</button>
+            <button class="btn" onclick="startGame(4)">4 Players</button>
+            <button class="ghost" onclick="showLeaderboard()">Show Leaderboard</button>
+          </div>
+        </div>
+
+        <div id="game" class="card" style="display:none;margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Round length: <span id="roundInfo">10</span>s</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="ghost" onclick="backToMenu()">Back</button>
+              <button class="ghost" onclick="restartRound()">Restart</button>
+            </div>
+          </div>
+
+          <div class="center">
+            <div id="timer">Time Left: 10</div>
+            <div class="scoreboard" id="scoreboard"></div>
+            <div id="result" class="result"></div>
+            <div class="small" style="margin-top:8px">Controls: press your mapped key to play.</div>
+          </div>
+        </div>
+      </main>
+
+      <aside>
+        <div class="card">
+          <div class="small" style="font-weight:700">Leaderboard (Wins)</div>
+          <div id="winsList" style="margin-top:8px"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="ghost" onclick="clearWins()">Reset Wins</button>
+            <button class="ghost" onclick="exportData()">Export</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="small" style="font-weight:700">World Best — Solo</div>
+          <div style="margin-top:8px" id="worldBest">
+            <div id="worldName">—</div>
+            <div class="small" id="worldScore">No solo runs yet</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="small" style="font-weight:700">How to</div>
+          <ol style="padding-left:18px;margin:6px 0 0 0;color:var(--muted);font-size:13px">
+            <li>Pick mode & length. Optional: change names or remap keys.</li>
+            <li>Press your key to start and mash for the timer.</li>
+            <li>Wins are tracked; Solo top updates World Best. Meters show clicks-per-second live.</li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+
+    <footer>All data saved in your browser. Enjoy!</footer>
   </div>
 
-  <!-- Game section -->
-  <div id="game" style="display:none;">
-    <p id="timer">Time Left: 10</p>
-    <div class="scores" id="scoreboard"></div>
-    <p id="result"></p>
-    <button onclick="restartGame()">Restart</button>
-  </div>
+<script>
+/* ---------------- Storage keys & helpers ---------------- */
+const STORAGE = {
+  NAMES: 'clickrace_names_v3',
+  WINS: 'clickrace_wins_v3',
+  WORLD: 'clickrace_world_v3',
+  KEYS: 'clickrace_keys_v3'
+};
+function loadJSON(key, fallback){ try { const r=localStorage.getItem(key); return r?JSON.parse(r):fallback; } catch(e){return fallback;} }
+function saveJSON(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
 
-  <script>
-    let scores = [];
-    let keys = [];
-    let timeLeft = 10;
-    let timerStarted = false;
-    let countdown;
-    let players = 0;
+/* ---------------- State ---------------- */
+let playerNames = loadJSON(STORAGE.NAMES, ["P1","P2","P3","P4"]);
+let wins = loadJSON(STORAGE.WINS, [0,0,0,0]);
+let worldBest = loadJSON(STORAGE.WORLD, {score:0,name:null});
+let mappedKeys = loadJSON(STORAGE.KEYS, ["a","l"," ","Enter"]);
+let players = 0;
+let keys = [];
+let scores = [];
+let roundLength = parseInt(document.getElementById('timeSelect').value,10);
+let timeLeft = roundLength;
+let timerStarted = false;
+let countdown = null;
+let heldKeys = new Set();
+let remapListening = null;
 
-    const timerDisplay = document.getElementById("timer");
-    const resultDisplay = document.getElementById("result");
-    const scoreboard = document.getElementById("scoreboard");
-    const menu = document.getElementById("menu");
-    const game = document.getElementById("game");
+/* For CPS meters: keep arrays of timestamps for each player */
+let clickTimestamps = []; // per-player array of timestamps in ms
+let currentCPS = [];      // last computed CPS per player
+let meterUpdateInterval = null;
 
-    function startGame(numPlayers) {
-      players = numPlayers;
-      scores = Array(players).fill(0);
+/* ---------------- UI refs ---------------- */
+const nameInputs = [document.getElementById('name1'),document.getElementById('name2'),document.getElementById('name3'),document.getElementById('name4')];
+const timeSelect = document.getElementById('timeSelect');
+const remapRow = document.getElementById('remapRow');
+const menuEl = document.getElementById('menu');
+const gameEl = document.getElementById('game');
+const scoreboardEl = document.getElementById('scoreboard');
+const timerEl = document.getElementById('timer');
+const resultEl = document.getElementById('result');
+const roundInfoEl = document.getElementById('roundInfo');
+const winsListEl = document.getElementById('winsList');
+const worldNameEl = document.getElementById('worldName');
+const worldScoreEl = document.getElementById('worldScore');
+const clearAllBtn = document.getElementById('clearAllBtn');
 
-      // assign keys depending on number of players
-      if (players === 1) keys = [" "];              // Space
-      if (players === 2) keys = ["a", "l"];         // A, L
-      if (players === 3) keys = ["a", "l", " "];    // A, L, Space
-      if (players === 4) keys = ["a", "l", " ", "Enter"]; // A, L, Space, Enter
-
-      // build scoreboard
-      scoreboard.innerHTML = "";
-      keys.forEach((key, i) => {
-        let div = document.createElement("div");
-        div.className = "player";
-        div.innerHTML = `<h2>Player ${i+1} (${key.toUpperCase()})</h2><p id="score${i}">Score: 0</p>`;
-        scoreboard.appendChild(div);
-      });
-
-      menu.style.display = "none";
-      game.style.display = "block";
-      resetTimer();
-    }
-
-    function resetTimer() {
-      timeLeft = 10;
-      timerStarted = false;
-      timerDisplay.textContent = "Time Left: 10";
-      resultDisplay.textContent = "";
-      if (countdown) clearInterval(countdown);
-    }
-
-    function restartGame() {
-      resetTimer();
-      scores = Array(players).fill(0);
-      keys.forEach((_, i) => {
-        document.getElementById("score"+i).textContent = "Score: 0";
-      });
-    }
-
-    document.addEventListener("keydown", (e) => {
-      if (!keys.includes(e.key) && e.key !== "Enter") return;
-
-      if (!timerStarted) {
-        timerStarted = true;
-        countdown = setInterval(() => {
-          timeLeft--;
-          timerDisplay.textContent = "Time Left: " + timeLeft;
-          if (timeLeft <= 0) {
-            clearInterval(countdown);
-            endGame();
-          }
-        }, 1000);
-      }
-
-      if (timeLeft > 0) {
-        let idx = keys.findIndex(k => k.toLowerCase() === e.key.toLowerCase() || k === e.key);
-        if (idx !== -1) {
-          scores[idx]++;
-          document.getElementById("score"+idx).textContent = "Score: " + scores[idx];
-        }
-      }
+/* ---------------- Confetti ---------------- */
+const confettiCanvas = document.getElementById('confetti');
+const ctx = confettiCanvas.getContext('2d');
+let confettiParts = [];
+function resizeCanvas(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+function spawnConfetti(x,y){
+  const count = 80;
+  for(let i=0;i<count;i++){
+    confettiParts.push({
+      x: x || confettiCanvas.width/2 + (Math.random()-0.5)*200,
+      y: y || confettiCanvas.height*0.3 + (Math.random()-0.5)*100,
+      vx: (Math.random()-0.5)*8,
+      vy: (Math.random()*-6)-2,
+      size: Math.random()*6+4,
+      rot: Math.random()*360,
+      vr: (Math.random()-0.5)*10,
+      color: ['#ef4444','#f97316','#f59e0b','#10b981','#3b82f6','#8b5cf6'][Math.floor(Math.random()*6)],
+      life: 120 + Math.floor(Math.random()*60)
     });
+  }
+}
+function updateConfetti(){
+  ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  for(let i=confettiParts.length-1;i>=0;i--){
+    const p = confettiParts[i];
+    p.vy += 0.2; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.rot*Math.PI/180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+    ctx.restore();
+    if(p.life<=0 || p.y>confettiCanvas.height+50) confettiParts.splice(i,1);
+  }
+  requestAnimationFrame(updateConfetti);
+}
+requestAnimationFrame(updateConfetti);
 
-    function endGame() {
-      let maxScore = Math.max(...scores);
-      let winners = [];
-      scores.forEach((s, i) => {
-        if (s === maxScore) winners.push("Player " + (i+1));
-      });
-      if (winners.length === 1) {
-        resultDisplay.textContent = "🎉 " + winners[0] + " Wins with " + maxScore + " clicks!";
-      } else {
-        resultDisplay.textContent = "🤝 It's a tie! " + winners.join(" & ") + " with " + maxScore + " clicks!";
+/* ---------------- Init ---------------- */
+function init(){
+  // populate name inputs
+  for(let i=0;i<4;i++){
+    nameInputs[i].value = playerNames[i] && playerNames[i].startsWith('P') ? '' : playerNames[i];
+    nameInputs[i].placeholder = `Player ${i+1} (default: ${playerNames[i] || 'P'+(i+1)})`;
+    nameInputs[i].addEventListener('change', onNameChange);
+    nameInputs[i].addEventListener('blur', onNameChange);
+  }
+  timeSelect.addEventListener('change', ()=>{ roundLength = parseInt(timeSelect.value,10); roundInfoEl.textContent = roundLength; });
+  clearAllBtn.addEventListener('click', clearAllStorage);
+  buildRemapUI();
+  refreshWinsUI();
+  refreshWorldUI();
+}
+init();
+
+/* ---------------- Remap UI ---------------- */
+function displayKeyLabel(k){
+  if(k === " ") return "Space";
+  if(k === "Enter") return "Enter";
+  return k.length===1 ? k.toUpperCase() : k;
+}
+function buildRemapUI(){
+  remapRow.innerHTML = '';
+  for(let i=0;i<4;i++){
+    const btn = document.createElement('button');
+    btn.className = 'key-btn';
+    btn.id = `remapBtn${i}`;
+    btn.textContent = `${displayKeyLabel(mappedKeys[i])} ⤴`;
+    btn.title = `Remap Player ${i+1} key`;
+    btn.onclick = ()=>beginRemap(i);
+    remapRow.appendChild(btn);
+  }
+}
+function beginRemap(index){
+  remapListening = index;
+  const btn = document.getElementById(`remapBtn${index}`);
+  btn.textContent = 'Press any key...';
+  btn.style.opacity = '0.8';
+}
+document.addEventListener('keydown', (e)=>{
+  if(remapListening !== null){
+    const k = e.key === ' ' ? ' ' : (e.key === 'Enter' ? 'Enter' : e.key);
+    mappedKeys[remapListening] = k;
+    saveJSON(STORAGE.KEYS, mappedKeys);
+    buildRemapUI();
+    remapListening = null;
+    e.preventDefault();
+    return;
+  }
+});
+
+/* ---------------- Names ---------------- */
+function onNameChange(){
+  for(let i=0;i<4;i++){
+    const v = nameInputs[i].value.trim();
+    playerNames[i] = v === '' ? `P${i+1}` : v;
+  }
+  saveJSON(STORAGE.NAMES, playerNames);
+  refreshWinsUI();
+}
+
+/* ---------------- Start game ---------------- */
+function startGame(numPlayers){
+  players = numPlayers;
+  roundLength = parseInt(timeSelect.value,10);
+  roundInfoEl.textContent = roundLength;
+  keys = mappedKeys.slice(0,players);
+  scores = Array(players).fill(0);
+  timeLeft = roundLength;
+  timerStarted = false;
+  heldKeys.clear();
+  resultEl.textContent = '';
+  onNameChange();
+
+  // init timestamp arrays and CPS
+  clickTimestamps = [];
+  currentCPS = [];
+  for(let i=0;i<players;i++){ clickTimestamps.push([]); currentCPS.push(0); }
+
+  // build scoreboard with meter section
+  scoreboardEl.innerHTML = '';
+  for(let i=0;i<players;i++){
+    const label = displayKeyLabel(keys[i] || '?');
+    const displayName = playerNames[i] || `P${i+1}`;
+    const div = document.createElement('div');
+    div.className = 'player-card';
+    div.id = `playerCard${i}`;
+    div.innerHTML = `
+      <h3>${displayName} <span class="small">(${label})</span></h3>
+      <p id="score${i}">Score: 0</p>
+      <div class="meter-wrap">
+        <div class="meter-label"><div class="small">CPS</div><div class="cps-number" id="cps${i}">0.00</div></div>
+        <div class="meter-bar"><div class="meter-fill" id="meter${i}"></div></div>
+      </div>
+      <p class="small">Wins: ${wins[i] || 0}</p>
+    `;
+    scoreboardEl.appendChild(div);
+  }
+
+  // start meter update loop
+  if(meterUpdateInterval) clearInterval(meterUpdateInterval);
+  meterUpdateInterval = setInterval(updateMeters, 100); // update 10x per second
+
+  menuEl.style.display = 'none';
+  gameEl.style.display = 'block';
+  updateTimerDisplay();
+}
+
+/* ---------------- Meter calculation ---------------- */
+/* Compute CPS as count of timestamps within 1000 ms window */
+function updateMeters(){
+  const now = performance.now();
+  let maxObservedCPS = 0;
+  for(let i=0;i<players;i++){
+    // remove old timestamps older than 1s
+    clickTimestamps[i] = clickTimestamps[i].filter(ts => now - ts <= 1000);
+    const cps = clickTimestamps[i].length;
+    currentCPS[i] = cps;
+    if(cps > maxObservedCPS) maxObservedCPS = cps;
+  }
+  // determine scale for filling meter (dynamic but not less than 5 cps)
+  const scaleMax = Math.max(5, maxObservedCPS, 1);
+  for(let i=0;i<players;i++){
+    const pct = Math.min(100, (currentCPS[i] / scaleMax) * 100);
+    const fill = document.getElementById(`meter${i}`);
+    const cpsNum = document.getElementById(`cps${i}`);
+    if(fill) fill.style.width = pct + '%';
+    if(cpsNum) cpsNum.textContent = currentCPS[i].toFixed(2);
+  }
+}
+
+/* ---------------- Timer UI ---------------- */
+function updateTimerDisplay(){ timerEl.textContent = `Time Left: ${timeLeft}`; }
+
+/* ---------------- Key handling (gameplay) ---------------- */
+document.addEventListener('keydown', (e)=>{
+  if(remapListening !== null) return;
+  if(gameEl.style.display === 'none') return;
+
+  const k = e.key;
+  // only relevant keys
+  const valid = keys.includes(k) || (k === 'Enter' && keys.includes('Enter')) || (k === ' ' && keys.includes(' '));
+  if(!valid) return;
+
+  // ignore repeats while held
+  if(heldKeys.has(k)) return;
+  heldKeys.add(k);
+
+  // start timer on first valid press
+  if(!timerStarted){
+    timerStarted = true;
+    countdown = setInterval(()=>{
+      timeLeft--;
+      if(timeLeft<0) timeLeft=0;
+      updateTimerDisplay();
+      if(timeLeft<=0){
+        clearInterval(countdown);
+        endGame();
       }
+    },1000);
+  }
+
+  if(timeLeft>0){
+    // find player index
+    let idx = keys.findIndex(km=>{
+      if(km === "Enter" || km === " ") return km === k;
+      return km.toLowerCase() === k.toLowerCase();
+    });
+    if(idx !== -1){
+      scores[idx]++;
+      // record timestamp (performance.now for sub-ms precision)
+      clickTimestamps[idx].push(performance.now());
+      const scoreEl = document.getElementById(`score${idx}`);
+      if(scoreEl) scoreEl.textContent = `Score: ${scores[idx]}`;
+      // update meters immediately for snappier UI
+      updateMeters();
     }
-  </script>
+  }
+});
+document.addEventListener('keyup', (e) => { heldKeys.delete(e.key); });
+
+/* ---------------- End game & update wins/world ---------------- */
+function endGame(){
+  timerStarted = false;
+  if(meterUpdateInterval){ clearInterval(meterUpdateInterval); meterUpdateInterval = null; }
+  const maxScore = scores.length ? Math.max(...scores) : 0;
+  const winners = [];
+  scores.forEach((s,i)=>{ if(s===maxScore) winners.push(i); });
+
+  if(winners.length===1){
+    const wname = playerNames[winners[0]] || `P${winners[0]+1}`;
+    resultEl.textContent = `🎉 ${wname} wins with ${maxScore} clicks!`;
+    spawnConfetti();
+  } else {
+    const names = winners.map(i => playerNames[i]||`P${i+1}`).join(' & ');
+    resultEl.textContent = winners.length ? `🤝 Tie: ${names} with ${maxScore} clicks` : 'No clicks recorded.';
+    if(winners.length) spawnConfetti();
+  }
+
+  // update wins
+  winners.forEach(i => { wins[i] = (wins[i]||0) + 1; });
+  saveJSON(STORAGE.WINS, wins);
+  refreshWinsUI();
+
+  // update wins numbers on cards
+  for(let i=0;i<players;i++){
+    const card = document.getElementById(`playerCard${i}`);
+    if(card){
+      const pNodes = card.querySelectorAll('p');
+      if(pNodes.length>=2) pNodes[1].textContent = `Wins: ${wins[i] || 0}`;
+    }
+  }
+
+  // world best for solo
+  if(players===1){
+    const soloScore = scores[0] || 0;
+    const soloName = playerNames[0] || 'P1';
+    if(!worldBest || typeof worldBest.score!=='number' || soloScore > worldBest.score){
+      worldBest = {score: soloScore, name: soloName};
+      saveJSON(STORAGE.WORLD, worldBest);
+      refreshWorldUI();
+      resultEl.textContent += ' 🏆 New World Best Solo!';
+      spawnConfetti();
+    }
+  }
+}
+
+/* ---------------- Restart/back ---------------- */
+function restartRound(){
+  if(players<=0) return;
+  scores = Array(players).fill(0);
+  timeLeft = roundLength;
+  timerStarted = false;
+  heldKeys.clear();
+  if(countdown){ clearInterval(countdown); countdown=null; }
+  clickTimestamps = [];
+  currentCPS = [];
+  for(let i=0;i<players;i++){ clickTimestamps.push([]); currentCPS.push(0); }
+  if(meterUpdateInterval) clearInterval(meterUpdateInterval);
+  meterUpdateInterval = setInterval(updateMeters, 100);
+  for(let i=0;i<players;i++){
+    const scoreEl = document.getElementById(`score${i}`);
+    if(scoreEl) scoreEl.textContent = `Score: 0`;
+    const fill = document.getElementById(`meter${i}`);
+    const cpsNum = document.getElementById(`cps${i}`);
+    if(fill) fill.style.width = '0%';
+    if(cpsNum) cpsNum.textContent = '0.00';
+  }
+  resultEl.textContent = '';
+  updateTimerDisplay();
+}
+function backToMenu(){
+  if(countdown){ clearInterval(countdown); countdown=null; }
+  if(meterUpdateInterval){ clearInterval(meterUpdateInterval); meterUpdateInterval=null; }
+  players = 0; keys = []; scores = []; clickTimestamps = [];
+  heldKeys.clear(); timerStarted=false;
+  roundLength = parseInt(timeSelect.value,10);
+  menuEl.style.display = 'block'; gameEl.style.display = 'none';
+  resultEl.textContent = '';
+}
+
+/* ---------------- Wins & World UI ---------------- */
+function refreshWinsUI(){
+  const arr = [];
+  for(let i=0;i<4;i++) arr.push({name: playerNames[i] || `P${i+1}`, wins: wins[i]||0});
+  arr.sort((a,b) => b.wins - a.wins || a.name.localeCompare(b.name));
+  winsListEl.innerHTML = '';
+  arr.forEach((r,idx)=>{
+    const row = document.createElement('div');
+    row.className = 'small';
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.padding = '6px 8px';
+    row.style.borderRadius = '6px';
+    row.style.background = 'rgba(255,255,255,0.01)';
+    row.innerHTML = `<div>${idx+1}. ${r.name}</div><div style="color:var(--muted)">${r.wins} wins</div>`;
+    winsListEl.appendChild(row);
+  });
+}
+function refreshWorldUI(){
+  if(worldBest && worldBest.name && worldBest.score>0){
+    worldNameEl.textContent = `${worldBest.name}`;
+    worldScoreEl.textContent = `${worldBest.score} clicks (Solo)`;
+  } else {
+    worldNameEl.textContent = '—';
+    worldScoreEl.textContent = 'No solo runs yet';
+  }
+}
+
+/* ---------------- Utilities ---------------- */
+function clearWins(){ if(!confirm('Reset wins for all players?')) return; wins=[0,0,0,0]; saveJSON(STORAGE.WINS,wins); refreshWinsUI(); }
+function clearAllStorage(){ if(!confirm('Clear all saved data (names, wins, keys, world best)?')) return; localStorage.removeItem(STORAGE.NAMES); localStorage.removeItem(STORAGE.WINS); localStorage.removeItem(STORAGE.KEYS); localStorage.removeItem(STORAGE.WORLD); playerNames = ["P1","P2","P3","P4"]; wins=[0,0,0,0]; mappedKeys=["a","l"," ","Enter"]; worldBest={score:0,name:null}; for(let i=0;i<4;i++) nameInputs[i].value=''; buildRemapUI(); refreshWinsUI(); refreshWorldUI(); }
+function exportData(){ const data={names:playerNames,wins:wins,world:worldBest,keys:mappedKeys}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='click-race-data.json'; a.click(); URL.revokeObjectURL(url); }
+function showLeaderboard(){ onNameChange(); refreshWinsUI(); refreshWorldUI(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ---------------- Save initial mapping & names ---------------- */
+saveJSON(STORAGE.NAMES, playerNames);
+saveJSON(STORAGE.WINS, wins);
+saveJSON(STORAGE.KEYS, mappedKeys);
+saveJSON(STORAGE.WORLD, worldBest);
+buildRemapUI();
+refreshWinsUI();
+refreshWorldUI();
+
+</script>
 </body>
 </html>
