@@ -1,120 +1,432 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Level-Up Chaos Square</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Feed the Cats — Simple 2D Overcooked-style</title>
 <style>
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #111;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    flex-direction: column;
+  :root{
+    --bg:#f3e9e1;
+    --panel:#fff;
+    --accent:#e67e22;
+    --text:#222;
   }
-  #gameArea {
-    position: relative;
-    width: 500px;
-    height: 500px;
-    background-color: #222;
-    border: 3px solid #fff;
-    overflow: hidden;
-  }
-  #square {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    background-color: red;
-    cursor: pointer;
-  }
-  #score {
-    margin-top: 20px;
-    font-size: 24px;
-  }
-  #level {
-    margin-top: 10px;
-    font-size: 20px;
-  }
+  html,body{height:100%;margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  .wrap{display:flex;gap:16px;padding:18px;box-sizing:border-box;height:100%;}
+  canvas{background:linear-gradient(#cfe8ff,#f9f6f2);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);}
+  .ui{width:300px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--panel);padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+  h1{margin:0;font-size:18px;color:var(--text)}
+  p.small{margin:6px 0 0;font-size:13px;color:#444}
+  .meter{height:14px;background:#eee;border-radius:10px;overflow:hidden}
+  .meter > i{display:block;height:100%;}
+  .btn{display:inline-block;padding:8px 10px;border-radius:8px;background:var(--accent);color:white;text-decoration:none;cursor:pointer}
+  .footer{margin-top:auto;font-size:12px;color:#666}
+  .kbd{display:inline-block;padding:2px 6px;border-radius:6px;background:#eee;margin-left:6px;font-weight:600}
 </style>
 </head>
 <body>
-<div id="gameArea">
-  <div id="square"></div>
+<div class="wrap">
+  <canvas id="game" width="700" height="480"></canvas>
+  <div class="ui">
+    <div class="card">
+      <h1>Feed the Cats</h1>
+      <p class="small">Pick up food at the counter and deliver to hungry cats. Keep them fed until the timer runs out!</p>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>Score:</strong><span id="score">0</span>
+      </div>
+      <div style="margin-top:8px">
+        <strong>Time left:</strong> <span id="time">60</span>s
+      </div>
+      <div style="margin-top:8px">
+        <strong>Player holds:</strong> <span id="holding">Nothing</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <strong>Cats</strong>
+      <div id="catsList" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <div class="card">
+      <strong>Controls</strong>
+      <p class="small">Move: <span class="kbd">W A S D</span> or <span class="kbd">↑ ← ↓ →</span></p>
+      <p class="small">Pick up / Drop / Feed: <span class="kbd">Space</span></p>
+      <p class="small">Restart: <span class="kbd">R</span></p>
+    </div>
+
+    <div class="card footer">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>Difficulty: <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+        </select></div>
+        <button id="startBtn" class="btn">Start</button>
+      </div>
+      <p class="small" style="margin-top:8px">Made with canvas — tweak or expand as you like.</p>
+    </div>
+  </div>
 </div>
-<div id="score">Score: 0</div>
-<div id="level">Level: 1</div>
 
 <script>
-const square = document.getElementById('square');
-const gameArea = document.getElementById('gameArea');
-const scoreDisplay = document.getElementById('score');
-const levelDisplay = document.getElementById('level');
+(() => {
+  // --- Settings ---
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const scoreEl = document.getElementById('score');
+  const timeEl = document.getElementById('time');
+  const holdingEl = document.getElementById('holding');
+  const catsListEl = document.getElementById('catsList');
+  const startBtn = document.getElementById('startBtn');
+  const difficultySelect = document.getElementById('difficulty');
 
-let score = 0;
-let level = 1;
+  let keys = {};
+  addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key==='r' || e.key==='R') initGame(); e.preventDefault && e.preventDefault(); }, {passive:false});
+  addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
-// Square position and size
-let x = 100;
-let y = 100;
-let squareSize = 50;
+  // Game variables
+  let player, cats, foods, counter, timer, score, running, holdItem, spawnTimer, difficulty;
 
-// Square speed
-let speedX = (Math.random() * 6 - 3);
-let speedY = (Math.random() * 6 - 3);
+  function initGame(){
+    difficulty = difficultySelect.value;
+    // base time and cat count by difficulty
+    const baseTime = difficulty === 'easy' ? 90 : difficulty === 'hard' ? 45 : 60;
+    const catCount = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4;
 
-function updatePosition() {
-  const maxX = gameArea.clientWidth - squareSize;
-  const maxY = gameArea.clientHeight - squareSize;
-
-  // Chaos movement
-  speedX += (Math.random() - 0.5) * 0.5;
-  speedY += (Math.random() - 0.5) * 0.5;
-
-  speedX = Math.max(Math.min(speedX, 12), -12);
-  speedY = Math.max(Math.min(speedY, 12), -12);
-
-  x += speedX;
-  y += speedY;
-
-  // Bounce off walls
-  if (x <= 0) { x = 0; speedX *= -1; }
-  if (x >= maxX) { x = maxX; speedX *= -1; }
-  if (y <= 0) { y = 0; speedY *= -1; }
-  if (y >= maxY) { y = maxY; speedY *= -1; }
-
-  square.style.left = x + 'px';
-  square.style.top = y + 'px';
-
-  requestAnimationFrame(updatePosition);
-}
-
-square.addEventListener('click', () => {
-  score++;
-  scoreDisplay.textContent = "Score: " + score;
-
-  // Chaos boost
-  speedX += (Math.random() * 4 - 2);
-  speedY += (Math.random() * 4 - 2);
-
-  // Level up every 5 clicks
-  if (score % 5 === 0) {
-    level++;
-    levelDisplay.textContent = "Level: " + level;
-    // Make square smaller and faster
-    squareSize = Math.max(10, squareSize - 5);
-    square.style.width = squareSize + 'px';
-    square.style.height = squareSize + 'px';
-    speedX *= 1.2;
-    speedY *= 1.2;
+    player = { x: 120, y: H/2, size: 30, speed: 2.6, color: '#2c3e50' };
+    counter = { x: 40, y: 50, w: 80, h: 120 };
+    foods = []; // placed on counter
+    cats = [];
+    for (let i=0;i<catCount;i++){
+      cats.push({
+        x: 420 + (i%2)*140,
+        y: 90 + Math.floor(i/2)*120,
+        size: 42,
+        hunger: 1.0, // 1 full -> 0 hungry. We'll invert: hungerMeter where 0 = full, 1 = starved
+        hungerRate: 0.004 + Math.random()*0.004, // per frame
+        name: "Cat " + (i+1),
+        waitTimer: 0 // brief animation on feeding
+      });
+    }
+    score = 0;
+    timer = baseTime;
+    holdItem = null;
+    spawnTimer = 0;
+    running = true;
+    updateUI();
   }
-});
 
-// Start the game
-updatePosition();
+  function updateUI(){
+    scoreEl.textContent = score;
+    timeEl.textContent = Math.max(0, Math.ceil(timer));
+    holdingEl.textContent = holdItem ? holdItem.type : 'Nothing';
+    // update cats panel
+    catsListEl.innerHTML = '';
+    cats.forEach((c, i) => {
+      const div = document.createElement('div');
+      div.style.display='flex';
+      div.style.flexDirection='column';
+      div.style.gap='6px';
+      div.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:13px"><strong>${c.name}</strong><span>${Math.max(0,Math.ceil((1-c.hunger)*100))}%</span></div>
+      <div class="meter"><i style="width:${Math.min(100, (1-c.hunger)*100)}%;background:${c.hunger>0.7? '#e74c3c' : c.hunger>0.4? '#f39c12' : '#2ecc71'};"></i></div>`;
+      catsListEl.appendChild(div);
+    });
+  }
+
+  // Utility helpers
+  function rectsOverlap(a,b){
+    return !(a.x+a.w < b.x || a.x > b.x+b.w || a.y+a.h < b.y || a.y > b.y+b.h);
+  }
+
+  // Main loop
+  let last = performance.now();
+  function loop(now){
+    const dt = (now-last)/1000;
+    last = now;
+    if (running){
+      tick(dt);
+      draw();
+      requestAnimationFrame(loop);
+    } else {
+      draw(); // draw final frame
+    }
+  }
+
+  function tick(dt){
+    // timer
+    timer -= dt;
+    if (timer <= 0) {
+      running = false;
+      showEnd();
+    }
+
+    // spawn food occasionally on counter (max 3)
+    spawnTimer -= dt;
+    if (spawnTimer <= 0){
+      spawnTimer = 1.6 + Math.random()*1.6;
+      if (foods.length < 3){
+        foods.push({ x: counter.x + 12 + foods.length*26, y: counter.y + 12, w:22, h:18, type:'fish' });
+      }
+    }
+
+    // player movement
+    const speed = player.speed * (keys['shift'] ? 1.2 : 1);
+    let dx=0, dy=0;
+    if (keys['w']||keys['arrowup']) dy -= speed;
+    if (keys['s']||keys['arrowdown']) dy += speed;
+    if (keys['a']||keys['arrowleft']) dx -= speed;
+    if (keys['d']||keys['arrowright']) dx += speed;
+    // normalize diagonal
+    if (dx!==0 && dy!==0) { dx *= 0.7071; dy *= 0.7071; }
+    player.x = Math.min(W- player.size - 4, Math.max(4, player.x + dx));
+    player.y = Math.min(H- player.size - 4, Math.max(4, player.y + dy));
+
+    // interaction (space): pick up / drop / feed
+    if (keys[' '] || keys['spacebar']) {
+      // to prevent holding space triggering repeatedly, check a small cooldown
+      if (!player._spaceDown) {
+        player._spaceDown = true;
+        handleAction();
+      }
+    } else {
+      player._spaceDown = false;
+    }
+
+    // cats hunger
+    cats.forEach(c => {
+      c.hunger += c.hungerRate * (difficulty === 'hard' ? 1.3 : difficulty === 'easy' ? 0.85 : 1) * dt * 60;
+      c.hunger = Math.min(1.0, c.hunger);
+      if (c.waitTimer > 0) c.waitTimer -= dt;
+    });
+
+    // if any cat hits full hunger -> lose immediately
+    if (cats.some(c => c.hunger >= 1.0)) {
+      running = false;
+      showEnd(true);
+    }
+
+    updateUI();
+  }
+
+  function handleAction(){
+    // If holding nothing and near counter with food -> pick up
+    const px = player.x + player.size/2, py = player.y + player.size/2;
+    const nearCounter = px > counter.x && px < counter.x + counter.w && py > counter.y && py < counter.y + counter.h;
+    if (!holdItem && nearCounter && foods.length>0){
+      holdItem = foods.pop();
+      return;
+    }
+    // If holding something and near a cat -> feed
+    if (holdItem){
+      for (let c of cats){
+        const dist = Math.hypot(px - c.x, py - c.y);
+        if (dist < 48){
+          // feed
+          const fedAmount = 0.35; // how much hunger reduced
+          c.hunger = Math.max(0, c.hunger - fedAmount);
+          c.waitTimer = 0.5;
+          score += 10 + Math.round((1-c.hunger)*10);
+          holdItem = null;
+          return;
+        }
+      }
+      // else drop it on floor at player position (so you can pick up later)
+      holdItem.x = player.x;
+      holdItem.y = player.y;
+      holdItem.w = 22; holdItem.h = 18;
+      foods.push(holdItem);
+      holdItem = null;
+      return;
+    } else {
+      // if not holding and overlapping a food on floor -> pick up nearest
+      if (foods.length){
+        // find food near player
+        for (let i=foods.length-1;i>=0;i--){
+          const f = foods[i];
+          const fx = f.x + (f.w||22)/2, fy = f.y + (f.h||18)/2;
+          if (Math.hypot(px-fx,py-fy) < 36){
+            holdItem = foods.splice(i,1)[0];
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  // Draw
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // floor grid
+    ctx.fillStyle = '#f8f3ea';
+    ctx.fillRect(0,0,W,H);
+
+    // counter
+    ctx.fillStyle = '#8e7d6b';
+    roundRect(ctx, counter.x, counter.y, counter.w, counter.h, 8, true, false);
+    ctx.fillStyle = '#c9b79a';
+    ctx.fillRect(counter.x+6, counter.y+6, counter.w-12, 10);
+
+    // draw foods (on counter or floor)
+    foods.forEach((f,i) => {
+      drawFood(f.x, f.y);
+    });
+
+    // player
+    drawPlayer(player.x, player.y, player.size, holdItem);
+
+    // cats
+    cats.forEach(c => drawCat(c));
+
+    // HUD small
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(12, H-64, 160, 56);
+    ctx.fillStyle = '#333';
+    ctx.font = '12px system-ui, Arial';
+    ctx.fillText('Tip: Feed the hungriest cats first!', 18, H-44);
+
+    // If holding item draw it above player
+    if (holdItem){
+      drawFood(player.x + player.size/2 - 11, player.y - 18);
+    }
+
+    // If game stopped, overlay
+    if (!running){
+      ctx.fillStyle = 'rgba(20,20,20,0.5)';
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#fff';
+      ctx.font = '28px system-ui, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over', W/2, H/2 - 14);
+      ctx.font = '16px system-ui, Arial';
+      ctx.fillText(`Final score: ${score}`, W/2, H/2 + 16);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function drawPlayer(x,y,size, holding){
+    // body
+    ctx.save();
+    ctx.translate(x + size/2, y + size/2);
+    ctx.fillStyle = '#2c3e50';
+    ctx.beginPath();
+    ctx.arc(0, 0, size/2, 0, Math.PI*2);
+    ctx.fill();
+    // face (eyes)
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-6, -3, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6, -3, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.arc(-6, -2, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(6, -2, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFood(x,y){
+    ctx.save();
+    ctx.translate(x, y);
+    // simple fish icon
+    ctx.beginPath();
+    ctx.ellipse(11,9,10,6,0,0,Math.PI*2);
+    ctx.fillStyle = '#ffcb6b';
+    ctx.fill();
+    ctx.fillStyle = '#e07a5f';
+    ctx.beginPath();
+    ctx.moveTo(2,9);
+    ctx.lineTo(-6,2);
+    ctx.lineTo(-2,9);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#a84f3b';
+    ctx.fillRect(6,5,2,8);
+    ctx.restore();
+  }
+
+  function drawCat(c){
+    // body
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.06)';
+    ctx.beginPath(); ctx.ellipse(0, c.size/2 + 6, c.size*0.7, 8,0,0,Math.PI*2); ctx.fill();
+    // head
+    ctx.fillStyle = '#f6c';
+    ctx.fillStyle = '#ffd6e0';
+    ctx.beginPath(); ctx.arc(0,0,c.size/2,0,Math.PI*2); ctx.fill();
+    // ears
+    ctx.fillStyle = '#ffb6d0';
+    ctx.beginPath(); ctx.moveTo(-12,-18); ctx.lineTo(-6,-30); ctx.lineTo(0,-18); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(12,-18); ctx.lineTo(6,-30); ctx.lineTo(0,-18); ctx.fill();
+    // face
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(-7,-2,3,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(7,-2,3,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#b94f73';
+    ctx.beginPath(); ctx.arc(0,6,4,0,Math.PI*2); ctx.fill();
+    // belly / plate when hungry
+    const hungerPct = c.hunger; // 0 full, 1 empty
+    const barW = 50;
+    ctx.fillStyle = '#eee';
+    roundRect(ctx, -barW/2, c.size/2 + 8, barW, 8, 6, true, false);
+    ctx.fillStyle = hungerPct > 0.7 ? '#e74c3c' : hungerPct > 0.4 ? '#f39c12' : '#2ecc71';
+    ctx.fillRect(-barW/2, c.size/2 + 8, Math.max(0, barW * (1 - hungerPct)), 8);
+
+    // small "hungry" pulse
+    if (c.hunger > 0.8 && Math.floor(performance.now()/300) % 2 === 0){
+      ctx.fillStyle = 'rgba(231,76,60,0.18)';
+      ctx.beginPath(); ctx.ellipse(0, -c.size/2 - 8, 36, 18, 0, 0, Math.PI*2); ctx.fill();
+    }
+
+    // fed animation
+    if (c.waitTimer > 0){
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('+Yum!', 0, -c.size/2 - 4);
+    }
+
+    ctx.restore();
+  }
+
+  // small helpers
+  function roundRect(ctx,x,y,w,h,r,fill,stroke){
+    if (typeof r === 'undefined') r = 5;
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  // Start/Restart handling
+  startBtn.addEventListener('click', () => { initGame(); last = performance.now(); requestAnimationFrame(loop); });
+  // init once for viewing
+  initGame();
+  last = performance.now();
+  requestAnimationFrame(loop);
+
+  // End-of-game dialog
+  function showEnd(catsStarved=false){
+    if (catsStarved) {
+      alert(`A cat starved! Final score: ${score}\nPress OK to restart.`);
+    } else {
+      alert(`Time's up! Final score: ${score}\nPress OK to restart.`);
+    }
+    initGame();
+    last = performance.now();
+    if (!running) running = true;
+    requestAnimationFrame(loop);
+  }
+
+})();
 </script>
 </body>
 </html>
